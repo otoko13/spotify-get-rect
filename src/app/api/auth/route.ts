@@ -4,7 +4,7 @@ import querystring from 'querystring';
 
 export async function GET() {
   const state = generateRandomString(16);
-  const scope = 'user-read-private user-read-email';
+  const scope = 'user-read-private user-read-email user-library-read';
 
   redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
