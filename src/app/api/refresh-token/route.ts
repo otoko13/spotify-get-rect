@@ -1,26 +1,20 @@
 import { redirect } from 'next/navigation';
-import { NextResponse, type NextRequest } from 'next/server';
+import { generateRandomString } from './utils';
+import querystring from 'querystring';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const queryParams = request.nextUrl.searchParams;
-  const error = queryParams.get('error');
+  const refreshToken = queryParams.get('refresh_token');
 
-  if (error) {
-    redirect(`/not-authorised`);
-  }
-
-  const code = queryParams.get('code') ?? undefined;
-  const state = queryParams.get('state');
-
-  if (state === null) {
-    redirect(`/not-authorised`);
+  if (!refreshToken) {
+    redirect('/api/get-auth-token');
   }
 
   const authTokenRequestPayload = {
     body: new URLSearchParams({
-      code: code ?? '',
-      redirect_uri: process.env.AUTH_REDIRECT_URI ?? '',
-      grant_type: 'authorization_code'
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
     }),
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
@@ -33,8 +27,11 @@ export async function GET(request: NextRequest) {
   const result = await fetch('https://accounts.spotify.com/api/token', authTokenRequestPayload);
   const jsonResult = await result.json();
 
+  if (result.status !== 200) {
+    redirect(`/not-authorised`);
+  } 
+
   const response = NextResponse.redirect(new URL('/', new URL(request.url).origin), {status: 302});
-  response.cookies.set('spotify-auth-token', jsonResult['access_token'])
   response.cookies.set('spotify-refresh-token', jsonResult['refresh_token'])
 
   return response;
