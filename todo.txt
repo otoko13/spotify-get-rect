@@ -1,0 +1,4 @@
+- forward back to original page
+- Potentially move login and home to parallel routes, so we can use intercepts (will this work with spotify requiring a redirect)?
+- Linting:
+  - eslint-plugin-react

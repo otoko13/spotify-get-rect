@@ -1,0 +1,7 @@
+- using middleware to get the pathname in server side components. We use this when refreshing the token,
+passing the path to the refresh token "api" page where it can then redirect directly back to that path after
+getting new auth.
+
+- for login, we can't pass the path to the redirect URI for spotify (the URL you set in the app settings need
+to exactly match). Instead we forward to a login client component where we can set the path in localstorage,
+check for this on the home page and do the forward. 
