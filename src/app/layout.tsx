@@ -2,24 +2,25 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { authorize } from './authorize';
+import classnames from 'classnames';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Spotify Get Rect',
-    description: 'Fancy Spotify recommendations',
+  title: 'Spotify Get Rect',
+  description: 'Fancy Spotify recommendations',
 };
 
 export default async function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    await authorize();
+  await authorize();
 
-    return (
-        <html lang="en">
-            <body className={inter.className}>{children}</body>
-        </html>
-    );
+  return (
+    <html lang="en">
+      <body className={classnames(inter.className, 'm-10')}>{children}</body>
+    </html>
+  );
 }

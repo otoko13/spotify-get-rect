@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { SpotifyAlbum } from '../types';
-import Link from 'next/link';
 import useGetAuthToken from '../hooks/useGetAuthToken';
 import { useCallback } from 'react';
 
@@ -29,13 +28,15 @@ const Album = ({ album }: AlbumProps) => {
   );
 
   return (
-    <div className="Album">
+    <div className="grid place-content-around">
       <button onClick={() => handleClicked(album.uri)}>
         <Image
           src={album.images[0].url}
           alt={album.name}
-          height={200}
-          width={200}
+          width={0}
+          height={0}
+          sizes="100vw"
+          style={{ width: '100%', height: 'auto' }}
         />
       </button>
     </div>
