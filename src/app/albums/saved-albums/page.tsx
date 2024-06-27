@@ -1,6 +1,6 @@
 import { SpotifyAlbum } from '../../../types';
 import { getAuthToken } from '../../../_utils/serverUtils';
-import Album from '@/_components/Album';
+import Album from '@/_components/album/Album';
 import spotifyFetch from '@/_utils/spotifyFetch';
 
 export default async function SavedAlbumsPage() {

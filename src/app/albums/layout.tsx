@@ -1,4 +1,4 @@
-import MenuTabs from '@/_components/MenuTabs';
+import MenuTabs from '@/_components/menuTabs/MenuTabs';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default async function AlbumsLayout({
         ]}
       />
 
-      {children}
+      <div className="mt-12">{children}</div>
     </div>
   );
 }
