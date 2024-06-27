@@ -3,6 +3,8 @@ import { getAuthToken } from '../../../_utils/serverUtils';
 import Album from '@/_components/Album';
 
 export default async function SavedAlbumsPage() {
+  // await new Promise((resolve) => setTimeout(resolve, 100000));
+
   const response = await fetch(
     'https://api.spotify.com/v1/me/albums?limit=50',
     {

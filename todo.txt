@@ -1,4 +1,3 @@
-- Font
 - Top menu
 - Player
 - Potentially move login and home to parallel routes, so we can use intercepts (will this work with spotify requiring a redirect)?
