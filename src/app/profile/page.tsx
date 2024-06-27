@@ -1,4 +1,4 @@
-import { getAuthToken } from '../serverUtils';
+import { getAuthToken } from '../../_utils/serverUtils';
 
 export default async function ProfilePage() {
   const response = await fetch('https://api.spotify.com/v1/me', {

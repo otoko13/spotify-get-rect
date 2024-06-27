@@ -1,8 +1,8 @@
 'use client';
 
+import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import { SpotifyAlbum } from '@/types';
 import Image from 'next/image';
-import { SpotifyAlbum } from '../types';
-import useGetAuthToken from '../hooks/useGetAuthToken';
 import { useCallback } from 'react';
 
 interface AlbumProps {

@@ -1,6 +1,6 @@
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getAuthToken } from './serverUtils';
+import { getAuthToken } from '../_utils/serverUtils';
 
 export const authorize = async () => {
   // NOTE: we need the route handlers for auth to actually be visited

@@ -10,5 +10,6 @@ export default async function AlbumsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // put menu here
   return <div>{children}</div>;
 }
