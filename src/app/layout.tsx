@@ -25,12 +25,12 @@ export default async function RootLayout({
   await authorize();
 
   return (
-    <html lang="en" className="h-full">
+    <html lang="en">
       <body
         className={classnames(
-          'h-full',
           inter.className,
           spotifyCircularFont.className,
+          'bg-transparent',
         )}
       >
         <CookiesProvider>{children}</CookiesProvider>

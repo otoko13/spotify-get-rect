@@ -14,7 +14,7 @@ export interface SpotifyTrack {
 }
 
 export interface SpotifyAlbum {
-  added_at: string;
+  added_at?: string;
   external_urls: { spotify: string };
   id: string;
   uri: string;
@@ -29,4 +29,11 @@ export interface SpotifyAlbum {
 
 export interface Album extends SpotifyAlbum {
   link_url: string;
+}
+
+export interface SpotifyPlayerTrack {
+  is_playing: true;
+  item: {
+    album: SpotifyAlbum;
+  };
 }

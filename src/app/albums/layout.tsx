@@ -1,3 +1,4 @@
+import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
 import type { Metadata } from 'next';
 
@@ -12,7 +13,7 @@ export default async function AlbumsLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="p-4 h-full">
+    <div className="p-4">
       <MenuTabs
         tabs={[
           {
@@ -27,6 +28,7 @@ export default async function AlbumsLayout({
       />
 
       <div className="mt-12">{children}</div>
+      <CurrentlyPlaying />
     </div>
   );
 }

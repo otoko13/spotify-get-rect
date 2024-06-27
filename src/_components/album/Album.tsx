@@ -1,7 +1,7 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import spotifyFetch from '@/_utils/spotifyFetch';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyAlbum } from '@/types';
 import Image from 'next/image';
 import { useCallback } from 'react';
@@ -15,7 +15,7 @@ const Album = ({ album }: AlbumProps) => {
 
   const handleClicked = useCallback(
     async (spotifyId: string) => {
-      return await spotifyFetch('me/player/play', {
+      return await clientSpotifyFetch('me/player/play', {
         method: 'PUT',
         body: JSON.stringify({
           context_uri: spotifyId,

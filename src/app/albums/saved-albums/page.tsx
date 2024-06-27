@@ -1,12 +1,12 @@
-import { SpotifyAlbum } from '../../../types';
-import { getAuthToken } from '../../../_utils/serverUtils';
 import Album from '@/_components/album/Album';
-import spotifyFetch from '@/_utils/spotifyFetch';
+import { serverSpotifyFetch } from '@/_utils/serverUtils';
+import { getAuthToken } from '@/_utils/serverUtils';
+import { SpotifyAlbum } from '@/types';
 
 export default async function SavedAlbumsPage() {
   // await new Promise((resolve) => setTimeout(resolve, 100000));
 
-  const response = await spotifyFetch('me/albums?limit=50', {
+  const response = await serverSpotifyFetch('me/albums?limit=50', {
     headers: {
       Authorization: getAuthToken(),
     },

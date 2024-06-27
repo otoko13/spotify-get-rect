@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation';
 import { generateRandomString } from './utils';
 import querystring from 'querystring';
-import { NextRequest } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const state = generateRandomString(16);
   const scope =
-    'user-read-private user-read-email user-library-read user-modify-playback-state';
+    'user-read-private user-read-email user-library-read user-modify-playback-state user-read-playback-state';
 
   // no way to pass the path to the redirect URI right now, they won't allow wildcards or query params
 

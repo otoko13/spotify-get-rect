@@ -52,7 +52,7 @@ export default function MenuTabs({ tabs }: MenuTabsProps) {
           <a
             key={tab.label}
             role="tab"
-            className={classNames('tab', {
+            className={classNames('tab text-current', {
               'tab-active': path === tab.path,
             })}
             onClick={() => router.push(tab.path)}
