@@ -1,6 +1,8 @@
-- Top menu
+- Dynamic background
+- Avatar
 - Player
-- Potentially move login and home to parallel routes, so we can use intercepts (will this work with spotify requiring a redirect)?
 - Linting:
   - eslint-plugin-react
-- Loading UI
+- WebGL
+- Refresh token
+- add toPlay to localStorage when refreshing

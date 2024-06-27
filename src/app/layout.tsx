@@ -4,6 +4,7 @@ import './globals.css';
 import { authorize } from './authorize';
 import classnames from 'classnames';
 import localFont from 'next/font/local';
+import { CookiesProvider } from 'next-client-cookies/server';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,7 +33,7 @@ export default async function RootLayout({
           spotifyCircularFont.className,
         )}
       >
-        {children}
+        <CookiesProvider>{children}</CookiesProvider>
       </body>
     </html>
   );

@@ -17,10 +17,7 @@ export default function MenuTabs({ tabs }: MenuTabsProps) {
   const router = useRouter();
 
   return (
-    <div
-      role="tablist"
-      className="tabs tabs-bordered tabs-lg mb-10 flex flex-shrink"
-    >
+    <div role="tablist" className="mb-20 tabs tabs-bordered tabs-lg">
       {tabs.map((tab) => (
         <a
           key={tab.label}

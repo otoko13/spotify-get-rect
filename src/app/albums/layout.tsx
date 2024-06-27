@@ -1,7 +1,5 @@
 import MenuTabs from '@/_components/MenuTabs';
-import classNames from 'classnames';
 import type { Metadata } from 'next';
-import { redirect, usePathname } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Spotify Get Rect',
