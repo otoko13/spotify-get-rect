@@ -32,7 +32,7 @@ export default function MenuTabs({ tabs }: MenuTabsProps) {
   }, []);
 
   return (
-    <div className="flex flex-col flex-shrink fixed top-0 w-full">
+    <div className="flex flex-col flex-shrink fixed top-0 left-0 w-full">
       <div
         className={classNames(
           'absolute top-0 left-0 w-full h-full',

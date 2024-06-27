@@ -25,7 +25,7 @@ export default async function RootLayout({
   await authorize();
 
   return (
-    <html lang="en">
+    <html className="bg-transparent" lang="en">
       <body
         className={classnames(
           inter.className,

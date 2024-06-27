@@ -32,6 +32,9 @@ export interface Album extends SpotifyAlbum {
 }
 
 export interface SpotifyPlayerTrack {
+  actions: {
+    pausing: boolean;
+  };
   is_playing: true;
   item: {
     album: SpotifyAlbum;

@@ -20,8 +20,12 @@ const CurrentlyPlaying = () => {
 
       const data: SpotifyPlayerTrack = await response.json();
 
+      console.log(data.is_playing);
+
       if (response.status === 200 && data.is_playing) {
         setTrack(data);
+      } else {
+        setTrack(undefined);
       }
     }, 2000);
 
@@ -31,7 +35,7 @@ const CurrentlyPlaying = () => {
   return track ? (
     <Image
       alt="currently playing album art blurred"
-      className="fixed top-0 left-0 blur-3xl opacity-60 -z-10"
+      className="fixed top-0 left-0 blur-3xl opacity-67 -z-10"
       src={track.item.album.images[0].url}
       width={0}
       height={0}

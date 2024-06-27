@@ -1,8 +1,12 @@
-- Dynamic background
-- Avatar
-- Player
+- Spotify logo in menu bar
+- Menu indicator
+- Avatar + player intercept
+
+
+- Player UI
 - Linting:
   - eslint-plugin-react
 - WebGL
+- load next page of albums
 - Refresh token
 - add toPlay to localStorage when refreshing
