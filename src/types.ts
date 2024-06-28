@@ -10,8 +10,10 @@ export interface SpotifyAlbumArtist {
 }
 
 export interface SpotifyTrack {
+  artists: SpotifyAlbumArtist[];
   album: SpotifyAlbum;
   id: string;
+  name: string;
   uri: string;
 }
 
@@ -39,9 +41,7 @@ export interface SpotifyPlayerTrack {
     pausing: boolean;
   };
   is_playing: true;
-  item: {
-    album: SpotifyAlbum;
-  };
+  item: SpotifyTrack;
 }
 
 export interface SpotifyUser {

@@ -1,10 +1,9 @@
-- Profile page
-
-- Player UI
+- - Player UI
 - Linting:
   - eslint-plugin-react
 - WebGL
 
 - Refresh token
 - add toPlay to localStorage when refreshing
+
 - remember last used device id

@@ -5,13 +5,25 @@ import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import styles from './currentlyPlaying.module.scss';
+import playButton from '@/_images/play.svg';
+import pauseButton from '@/_images/pause.svg';
 
 const CurrentlyPlaying = () => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
+
+  const handlePlayToggled = useCallback(async () => {
+    await clientSpotifyFetch('/me/player/pause', {
+      headers: {
+        Authorization: authToken,
+      },
+      method: 'PUT',
+    });
+  }, [authToken]);
 
   useEffect(() => {
     const getPlayData = async () => {
@@ -39,7 +51,7 @@ const CurrentlyPlaying = () => {
 
     const interval = setInterval(async () => {
       getPlayData();
-    }, 2000);
+    }, 2500);
 
     getPlayData();
 
@@ -78,6 +90,44 @@ const CurrentlyPlaying = () => {
           { 'opacity-100': trackStopped },
         )}
       />
+      <div
+        className={classNames(
+          'border-solid border-t-1 border-gray-600',
+          styles['now-playing-bar'],
+          {
+            [styles.visible]: !!track,
+          },
+        )}
+      >
+        <div className="flex">
+          <div>
+            {track && (
+              <Image
+                alt="currently playing album art blurred"
+                key={track.item.album.images[0].url}
+                src={track.item.album.images[0].url}
+                width={64}
+                height={64}
+              />
+            )}
+          </div>
+          <div className="flex flex-col ml-4 justify-center">
+            <div className="text-2xl">{track?.item.name}</div>
+            <div className="text-md text-slate-300">
+              {track?.item.artists.map((artist) => artist.name).join(', ')}
+            </div>
+          </div>
+        </div>
+        <div className="controls flex items-center">
+          <button onClick={handlePlayToggled}>
+            {trackStopped ? (
+              <Image alt="play" src={playButton} width={48} height={48} />
+            ) : (
+              <Image alt="pause" src={pauseButton} width={48} height={48} />
+            )}
+          </button>
+        </div>
+      </div>
     </>
   );
 };
