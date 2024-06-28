@@ -32,6 +32,7 @@ const Album = ({ album }: AlbumProps) => {
     <div className="grid place-content-around">
       <button onClick={() => handleClicked(album.uri)}>
         <Image
+          className="shadow-lg"
           src={album.images[0].url}
           alt={album.name}
           width={0}

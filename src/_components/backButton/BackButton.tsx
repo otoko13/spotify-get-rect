@@ -10,11 +10,12 @@ const BackButton = ({ label }: BackButtonProps) => {
   const router = useRouter();
 
   return (
-    <form method="dialog">
-      <button className="btn" onClick={() => router.back()}>
-        {label ?? 'Back'}
-      </button>
-    </form>
+    <button
+      onClick={() => router.back()}
+      className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+    >
+      {label}
+    </button>
   );
 };
 
