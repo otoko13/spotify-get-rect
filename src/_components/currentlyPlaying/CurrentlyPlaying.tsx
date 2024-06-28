@@ -16,39 +16,52 @@ const CurrentlyPlaying = () => {
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
 
-  const handlePlayToggled = useCallback(async () => {
-    await clientSpotifyFetch('/me/player/pause', {
+  const getPlayData = useCallback(async () => {
+    const response = await clientSpotifyFetch('me/player', {
+      headers: {
+        Authorization: authToken,
+      },
+    });
+
+    const data: SpotifyPlayerTrack = await response?.json();
+
+    if (response.status === 200 && data.is_playing) {
+      setTrackStopped(false);
+
+      // keep the last track so we can fade out its image
+      if (track && track?.item.album.id !== data.item.album.id) {
+        setLastTrack(track);
+      }
+
+      setTrack(data);
+    } else {
+      setTrackStopped(true);
+    }
+  }, [authToken, track]);
+
+  const handlePlay = useCallback(async () => {
+    await clientSpotifyFetch('me/player/play', {
       headers: {
         Authorization: authToken,
       },
       method: 'PUT',
     });
-  }, [authToken]);
+
+    getPlayData();
+  }, [authToken, getPlayData]);
+
+  const handlePause = useCallback(async () => {
+    await clientSpotifyFetch('me/player/pause', {
+      headers: {
+        Authorization: authToken,
+      },
+      method: 'PUT',
+    });
+
+    getPlayData();
+  }, [authToken, getPlayData]);
 
   useEffect(() => {
-    const getPlayData = async () => {
-      const response = await clientSpotifyFetch('me/player', {
-        headers: {
-          Authorization: authToken,
-        },
-      });
-
-      const data: SpotifyPlayerTrack = await response?.json();
-
-      if (response.status === 200 && data.is_playing) {
-        setTrackStopped(false);
-
-        // keep the last track so we can fade out its image
-        if (track && track?.item.album.id !== data.item.album.id) {
-          setLastTrack(track);
-        }
-
-        setTrack(data);
-      } else {
-        setTrackStopped(true);
-      }
-    };
-
     const interval = setInterval(async () => {
       getPlayData();
     }, 2500);
@@ -56,7 +69,7 @@ const CurrentlyPlaying = () => {
     getPlayData();
 
     return () => clearInterval(interval);
-  }, [authToken, track]);
+  }, [getPlayData]);
 
   return (
     <>
@@ -119,13 +132,15 @@ const CurrentlyPlaying = () => {
           </div>
         </div>
         <div className="controls flex items-center">
-          <button onClick={handlePlayToggled}>
-            {trackStopped ? (
+          {trackStopped ? (
+            <button onClick={handlePlay}>
               <Image alt="play" src={playButton} width={48} height={48} />
-            ) : (
+            </button>
+          ) : (
+            <button onClick={handlePause}>
               <Image alt="pause" src={pauseButton} width={48} height={48} />
-            )}
-          </button>
+            </button>
+          )}
         </div>
       </div>
     </>
