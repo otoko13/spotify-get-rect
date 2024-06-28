@@ -1,5 +1,7 @@
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
+import { getAuthToken } from '@/_utils/serverUtils';
+import { SpotifyUser } from '@/types';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -12,9 +14,19 @@ export default async function AlbumsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const response = await fetch('https://api.spotify.com/v1/me', {
+    headers: {
+      Authorization: getAuthToken(),
+    },
+  });
+
+  const data: SpotifyUser = await response.json();
+  const avatarUrl = data.images[0].url;
+
   return (
     <div className="p-4">
       <MenuTabs
+        avatarUrl={avatarUrl}
         tabs={[
           {
             label: 'Saved albums',

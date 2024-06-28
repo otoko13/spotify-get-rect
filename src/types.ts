@@ -1,4 +1,4 @@
-export interface SpotifyAlbumImage {
+export interface SpotifyImage {
   url: string;
   width: number;
   height: number;
@@ -19,7 +19,7 @@ export interface SpotifyAlbum {
   id: string;
   uri: string;
   album_type: 'single' | 'album' | 'compilation';
-  images: SpotifyAlbumImage[];
+  images: SpotifyImage[];
   name: string;
   artists: SpotifyAlbumArtist[];
   tracks: {
@@ -39,4 +39,8 @@ export interface SpotifyPlayerTrack {
   item: {
     album: SpotifyAlbum;
   };
+}
+
+export interface SpotifyUser {
+  images: SpotifyImage[];
 }

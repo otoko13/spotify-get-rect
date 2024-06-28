@@ -35,7 +35,7 @@ const CurrentlyPlaying = () => {
   return track ? (
     <Image
       alt="currently playing album art blurred"
-      className="fixed top-0 left-0 blur-3xl opacity-67 -z-10"
+      className="fixed top-0 left-0 blur-3xl opacity-67 -z-20"
       src={track.item.album.images[0].url}
       width={0}
       height={0}
