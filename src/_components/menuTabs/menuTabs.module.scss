@@ -9,3 +9,25 @@
     box-shadow: 0 2px 15px rgba(218, 212, 212, 0.2);
   }
 }
+
+.custom-tab {
+  position: relative;
+  overflow: hidden;
+  & .show-indicator {
+    content: '';
+    position: absolute;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    width: 80%;
+    left: -180%;
+    height: 2px;
+    background: #1ed760;
+    overflow: hidden;
+    transition: left 400ms ease-out;
+
+    &.display {
+      left: 10%;
+    }
+  }
+}

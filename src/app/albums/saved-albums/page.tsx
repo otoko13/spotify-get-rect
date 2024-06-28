@@ -1,4 +1,3 @@
-import AlbumsDisplay from '@/_components/albumsDisplay/AlbumsDisplay';
 import LoadMoreAlbums from '@/_components/loadMoreAlbums/LoadMoreAlbums';
 import { serverSpotifyFetch } from '@/_utils/serverUtils';
 import { getAuthToken } from '@/_utils/serverUtils';

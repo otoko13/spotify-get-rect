@@ -60,11 +60,14 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
             <a
               key={tab.label}
               role="tab"
-              className={classNames('tab text-current', {
-                'tab-active': path === tab.path,
-              })}
+              className={classNames('tab text-current', styles['custom-tab'])}
               onClick={() => router.push(tab.path)}
             >
+              <div
+                className={classNames([styles['show-indicator']], {
+                  [styles.display]: path === tab.path,
+                })}
+              />
               {tab.label}
             </a>
           ))}

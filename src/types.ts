@@ -10,6 +10,8 @@ export interface SpotifyAlbumArtist {
 }
 
 export interface SpotifyTrack {
+  album: SpotifyAlbum;
+  id: string;
   uri: string;
 }
 
@@ -25,6 +27,7 @@ export interface SpotifyAlbum {
   tracks: {
     items: SpotifyTrack[];
   };
+  genres: string[];
 }
 
 export interface Album extends SpotifyAlbum {

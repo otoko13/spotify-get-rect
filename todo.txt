@@ -1,6 +1,5 @@
 - Menu indicator
-- Avatar + profile intercept
-- bg gradient
+- Profile page
 
 - Player UI
 - Linting:
@@ -9,3 +8,4 @@
 
 - Refresh token
 - add toPlay to localStorage when refreshing
+- remember last used device id

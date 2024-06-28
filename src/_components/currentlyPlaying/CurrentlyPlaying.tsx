@@ -74,7 +74,7 @@ const CurrentlyPlaying = () => {
       )}
       <div
         className={classNames(
-          'fixed top-0 left-0 w-full h-full bg-black opacity-0 transition-opacity duration-1000 -z-20',
+          'fixed top-0 left-0 w-full h-full bg-gradient-to-br from-black to-slate-800 opacity-0 transition-opacity duration-1000 -z-20',
           { 'opacity-100': trackStopped },
         )}
       />
