@@ -65,7 +65,7 @@ export default function LoadMoreAlbums({
 
       if (
         target.scrollTop >=
-          (target.scrollHeight - target.clientHeight) * 0.85 &&
+          (target.scrollHeight - target.clientHeight) * 0.95 &&
         fetchUrl &&
         !urlsFetched.includes(fetchUrl)
       ) {
