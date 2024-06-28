@@ -11,7 +11,7 @@ const CurrentlyPlaying = () => {
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const getPlayData = async () => {
       const response = await clientSpotifyFetch('me/player', {
         headers: {
           Authorization: authToken,
@@ -25,7 +25,13 @@ const CurrentlyPlaying = () => {
       } else {
         setTrack(undefined);
       }
+    };
+
+    const interval = setInterval(async () => {
+      getPlayData();
     }, 2000);
+
+    getPlayData();
 
     return () => clearInterval(interval);
   }, [authToken]);
