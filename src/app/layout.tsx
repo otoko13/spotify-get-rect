@@ -30,7 +30,7 @@ export default async function RootLayout({
         className={classnames(
           inter.className,
           spotifyCircularFont.className,
-          'bg-transparent',
+          'bg-none',
         )}
       >
         <CookiesProvider>{children}</CookiesProvider>

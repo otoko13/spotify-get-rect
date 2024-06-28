@@ -18,9 +18,7 @@ const CurrentlyPlaying = () => {
         },
       });
 
-      const data: SpotifyPlayerTrack = await response.json();
-
-      console.log(data.is_playing);
+      const data: SpotifyPlayerTrack = await response?.json();
 
       if (response.status === 200 && data.is_playing) {
         setTrack(data);

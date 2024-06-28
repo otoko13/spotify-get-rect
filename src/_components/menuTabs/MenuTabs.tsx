@@ -6,6 +6,7 @@ import styles from './menuTabs.module.scss';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import logoPic from '/src/_images/Spotify_Primary_Logo_RGB_Green.png';
+import Link from 'next/link';
 
 interface MenuTab {
   label: string;
@@ -69,14 +70,16 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
           ))}
         </div>
         <div className="avatar mr-4 self-center">
-          <div className="w-12 h-12 rounded-full">
+          <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
             {avatarUrl && (
-              <Image
-                alt="avatar image"
-                src={avatarUrl}
-                width={48}
-                height={48}
-              />
+              <Link href="/profile">
+                <Image
+                  alt="avatar image"
+                  src={avatarUrl}
+                  width={48}
+                  height={48}
+                />
+              </Link>
             )}
           </div>
         </div>

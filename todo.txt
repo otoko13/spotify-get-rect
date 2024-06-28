@@ -1,12 +1,13 @@
-- Spotify logo in menu bar
+- load next page of albums
+- bg gradient
 - Menu indicator
-- Avatar + player intercept
+- Avatar + profile intercept
 
 
 - Player UI
 - Linting:
   - eslint-plugin-react
 - WebGL
-- load next page of albums
+
 - Refresh token
 - add toPlay to localStorage when refreshing

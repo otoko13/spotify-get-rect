@@ -11,8 +11,10 @@ export const metadata: Metadata = {
 
 export default async function AlbumsLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   const response = await fetch('https://api.spotify.com/v1/me', {
     headers: {
@@ -24,23 +26,26 @@ export default async function AlbumsLayout({
   const avatarUrl = data.images[0].url;
 
   return (
-    <div className="p-4">
-      <MenuTabs
-        avatarUrl={avatarUrl}
-        tabs={[
-          {
-            label: 'Saved albums',
-            path: '/albums/saved-albums',
-          },
-          {
-            label: 'Recommendations',
-            path: '/albums/recommendations',
-          },
-        ]}
-      />
+    <>
+      <div className="p-4">
+        <MenuTabs
+          avatarUrl={avatarUrl}
+          tabs={[
+            {
+              label: 'Saved albums',
+              path: '/albums/saved-albums',
+            },
+            {
+              label: 'Recommendations',
+              path: '/albums/recommendations',
+            },
+          ]}
+        />
 
-      <div className="mt-12">{children}</div>
-      <CurrentlyPlaying />
-    </div>
+        <div className="mt-12">{children}</div>
+        <CurrentlyPlaying />
+      </div>
+      {modal}
+    </>
   );
 }
