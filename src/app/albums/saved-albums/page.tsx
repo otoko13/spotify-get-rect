@@ -1,4 +1,5 @@
 import AlbumsDisplay from '@/_components/albumsDisplay/AlbumsDisplay';
+import LoadMoreAlbums from '@/_components/loadMoreAlbums/LoadMoreAlbums';
 import { serverSpotifyFetch } from '@/_utils/serverUtils';
 import { getAuthToken } from '@/_utils/serverUtils';
 import { SpotifyAlbum } from '@/types';
@@ -12,8 +13,6 @@ export default async function SavedAlbumsPage({}: {}) {
 
   const data = await response.json();
 
-  console.log(data);
-
   const sortedAlbums: SpotifyAlbum[] = data.items
     .sort(
       (
@@ -24,5 +23,5 @@ export default async function SavedAlbumsPage({}: {}) {
     .map((d: { album: SpotifyAlbum }) => d.album)
     .filter((a: SpotifyAlbum) => a.album_type !== 'single');
 
-  return <AlbumsDisplay albums={sortedAlbums} />;
+  return <LoadMoreAlbums initialAlbums={sortedAlbums} nextUrl={data.next} />;
 }

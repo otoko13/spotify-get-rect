@@ -1,8 +1,6 @@
-- load next page of albums
-- bg gradient
 - Menu indicator
 - Avatar + profile intercept
-
+- bg gradient
 
 - Player UI
 - Linting:
