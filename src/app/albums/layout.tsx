@@ -39,10 +39,14 @@ export default async function AlbumsLayout({
               label: 'Recommendations',
               path: '/albums/recommendations',
             },
+            {
+              label: 'New releases',
+              path: '/albums/new-releases',
+            },
           ]}
         />
 
-        <div className="mt-12">{children}</div>
+        <div className="mt-16">{children}</div>
         <CurrentlyPlaying />
       </div>
       {modal}
