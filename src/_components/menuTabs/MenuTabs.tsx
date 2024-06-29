@@ -48,7 +48,9 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
       />
       <div className="flex align-middle">
         <div className="flex-shrink pl-4 self-center">
-          <Image alt="spotify logo" src={logoPic} width={48} height={48} />
+          <Link href="/">
+            <Image alt="spotify logo" src={logoPic} width={48} height={48} />
+          </Link>
         </div>
         <div
           role="tablist"

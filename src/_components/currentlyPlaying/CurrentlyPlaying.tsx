@@ -23,9 +23,14 @@ const CurrentlyPlaying = () => {
       },
     });
 
+    if (response.status !== 200) {
+      setTrackStopped(true);
+      return;
+    }
+
     const data: SpotifyPlayerTrack = await response?.json();
 
-    if (response.status === 200 && data.is_playing) {
+    if (data.is_playing) {
       setTrackStopped(false);
 
       // keep the last track so we can fade out its image
