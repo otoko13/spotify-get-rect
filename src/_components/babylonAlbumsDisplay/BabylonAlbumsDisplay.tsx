@@ -9,15 +9,23 @@ import {
   StandardMaterial,
   Texture,
   Vector4,
+  DirectionalLight,
+  SpotLight,
+  EventState,
+  PointerInfo,
+  PointerEventTypes,
+  ActionManager,
+  ExecuteCodeAction,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
+import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
+import useGetAuthToken from '@/_hooks/useGetAuthToken';
 
 interface BabylonAlbumsDisplayProps {
   albums: SpotifyAlbum[];
 }
-
-let box: Mesh;
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -35,9 +43,9 @@ const createScene = (scene: Scene) => {
   // This creates and positions a free camera (non-mesh)
   const camera = new ArcRotateCamera(
     'camera1',
+    -200,
     0,
     0,
-    1,
     new Vector3(0, 0, -15),
     scene,
   );
@@ -52,51 +60,99 @@ const createScene = (scene: Scene) => {
 
   // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
   // const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
-  const light = new PointLight('pl', new Vector3(-2, 10, -10), scene);
-  const light2 = new PointLight('pl', new Vector3(-2, 0, 3), scene);
+  const dLight = new DirectionalLight('dl', new Vector3(0, 0, 3), scene);
+  // const light = new SpotLight(
+  //   'spotLight',
+  //   new Vector3(0, 30, -10),
+  //   new Vector3(0, -1, 0),
+  //   Math.PI / 3,
+  //   2,
+  //   scene,
+  // );
 
   // Default intensity is 1. Let's dim the light a small amount
-  light.intensity = 1;
-  light2.intensity = 0.5;
-};
-
-const addAlbums = (scene: Scene, albums: SpotifyAlbum[]) => {
-  const faceUV: Vector4[] = new Array(6);
-
-  for (var i = 0; i < 6; i++) {
-    if (i === 1) {
-      faceUV[i] = new Vector4(0, 0, 1, 1);
-    } else if (i === 0) {
-      faceUV[i] = new Vector4(0, 1, 1, 0);
-    } else {
-      faceUV[i] = new Vector4(0, 0, 0, 0);
-    }
-  }
-
-  albums.forEach((album, i) => {
-    // Our built-in 'box' shape.
-    box = MeshBuilder.CreateBox(
-      'box',
-      { width: 3, height: 3, depth: 0.1, faceUV },
-      scene,
-    );
-
-    // Move the box upward 1/2 its height
-    box.position.y = 3;
-    box.position.x = i * 4.5;
-
-    const material = new StandardMaterial('material', scene);
-    const texture = new Texture(album.images[1].url, scene);
-    material.diffuseTexture = texture;
-    box.material = material;
-  });
+  dLight.intensity = 0.5;
 };
 
 export default function BabylonAlbumsDisplay({
   albums,
 }: BabylonAlbumsDisplayProps) {
+  const sceneRef = useRef<Scene>();
+  const getActiveDevice = useGetActiveDevice();
+  const authToken = useGetAuthToken();
+
+  const playAlbum = useCallback(
+    async (spotifyId: string) => {
+      const { id: deviceId } = await getActiveDevice();
+
+      return clientSpotifyFetch(
+        `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            context_uri: spotifyId,
+          }),
+          headers: {
+            Authorization: authToken,
+          },
+        },
+      );
+    },
+    [authToken, getActiveDevice],
+  );
+
+  const addAlbums = useCallback(
+    (scene: Scene, albums: SpotifyAlbum[]) => {
+      const faceUV: Vector4[] = new Array(6);
+
+      for (var i = 0; i < 6; i++) {
+        if (i === 1) {
+          faceUV[i] = new Vector4(0, 0, 1, 1);
+        } else if (i === 0) {
+          faceUV[i] = new Vector4(0, 1, 1, 0);
+        } else {
+          faceUV[i] = new Vector4(0, 0, 0, 0);
+        }
+      }
+
+      albums.forEach((album, i) => {
+        // Our built-in 'box' shape.
+        const box = MeshBuilder.CreateBox(
+          album.uri, // name property
+          { width: 3, height: 3, depth: 0.1, faceUV },
+          scene,
+        );
+
+        // position the box
+        box.position.y = 3;
+        box.position.x = i * 4.5;
+
+        // add click action
+        box.actionManager = new ActionManager(scene);
+        box.actionManager.registerAction(
+          new ExecuteCodeAction(
+            {
+              trigger: ActionManager.OnLeftPickTrigger,
+            },
+            async function () {
+              await playAlbum(box.name);
+            },
+          ),
+        );
+
+        const material = new StandardMaterial('material', scene);
+        const texture = new Texture(album.images[1].url, scene);
+        material.diffuseTexture = texture;
+        box.material = material;
+      });
+    },
+    [playAlbum],
+  );
+
   const onSceneReady = useCallback(
     (scene: Scene) => {
+      sceneRef.current = scene;
+
       createScene(scene);
 
       addAlbums(scene, albums);
@@ -104,7 +160,7 @@ export default function BabylonAlbumsDisplay({
       // TODO - change this to water and reflect.
       // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
     },
-    [albums],
+    [albums, addAlbums],
   );
 
   return (

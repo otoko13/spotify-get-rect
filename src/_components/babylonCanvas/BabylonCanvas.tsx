@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import {
-  Color3,
   Color4,
   Engine,
   EngineOptions,
+  EventState,
+  PointerInfo,
   Scene,
   SceneOptions,
 } from '@babylonjs/core';
 import { Dimensions } from '@/types';
-import { Container } from 'postcss';
 
 interface BabylonCanvasProps extends Record<string, any> {
   antialias?: boolean;
@@ -19,6 +19,10 @@ interface BabylonCanvasProps extends Record<string, any> {
   sceneOptions?: SceneOptions;
   onRender: (scene: Scene) => void;
   onSceneReady: (scene: Scene) => void;
+  onPointerObservable?: (
+    eventInfo: PointerInfo,
+    eventState: EventState,
+  ) => void;
 }
 
 export default function BabylonCanvas({
@@ -28,6 +32,7 @@ export default function BabylonCanvas({
   sceneOptions = {},
   onRender,
   onSceneReady,
+  onPointerObservable,
   ...rest
 }: BabylonCanvasProps) {
   const reactCanvas = useRef(null);
@@ -52,6 +57,10 @@ export default function BabylonCanvas({
     const scene = new Scene(engine, sceneOptions);
     scene.clearColor = new Color4(0, 0, 0, 0);
 
+    if (onPointerObservable) {
+      scene.onPointerObservable.add(onPointerObservable);
+    }
+
     if (scene.isReady()) {
       onSceneReady(scene);
     } else {
@@ -69,6 +78,7 @@ export default function BabylonCanvas({
     sceneOptions,
     onRender,
     onSceneReady,
+    onPointerObservable,
   ]);
 
   useEffect(() => {

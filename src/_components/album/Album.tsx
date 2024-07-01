@@ -32,7 +32,7 @@ const Album = ({ album }: AlbumProps) => {
         },
       );
     },
-    [authToken],
+    [authToken, getActiveDevice],
   );
 
   return (

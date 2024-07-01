@@ -1,13 +1,14 @@
-1 - Player UI
-  - mute/volume
-
 2 - Linting:
   - eslint-plugin-react
 
-3 - WebGL
+3 - Babylon JS
+  - floor
+  - move light with camera
+  - interactivity
+  - fix issue when playing (scene resets)
+  - fix lighting (especially on reverse)
+  - add spot light for each album
+  - adjust start position
 
-4 - remember last used device id or get devices and list
-
-- Refresh token
-- add toPlay to localStorage when refreshing
+4 - add music visualiser using album colors
 
