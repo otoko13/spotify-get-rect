@@ -74,24 +74,18 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
             </a>
           ))}
         </div>
-        <div className="flex-grow flex justify-end items-center">
-          <div className="text-slate-300 text-sm mr-4 flex items-center">
-            <p className="mr-4">Go 3D!</p>
-            <input type="checkbox" className="toggle toggle-primary" />
-          </div>
-          <div className="avatar mr-4">
-            <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
-              {avatarUrl && (
-                <Link href="/profile">
-                  <Image
-                    alt="avatar image"
-                    src={avatarUrl}
-                    width={48}
-                    height={48}
-                  />
-                </Link>
-              )}
-            </div>
+        <div className="avatar mr-4 flex-grow justify-end">
+          <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
+            {avatarUrl && (
+              <Link href="/profile">
+                <Image
+                  alt="avatar image"
+                  src={avatarUrl}
+                  width={48}
+                  height={48}
+                />
+              </Link>
+            )}
           </div>
         </div>
       </div>
