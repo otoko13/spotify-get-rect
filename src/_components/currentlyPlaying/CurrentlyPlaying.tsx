@@ -2,19 +2,38 @@
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyPlayerTrack } from '@/types';
+import { SpotifyDevice, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import styles from './currentlyPlaying.module.scss';
 import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
+import { useCookies } from 'next-client-cookies';
 
-const CurrentlyPlaying = () => {
+interface CurrentlyPlayingProps {
+  devices: SpotifyDevice[];
+}
+
+const CurrentlyPlaying = ({ devices }: CurrentlyPlayingProps) => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
+
+  const cookies = useCookies();
+
+  useEffect(() => {
+    if (devices.length) {
+      let activeDevice = devices.find((d) => d.is_active);
+      if (!activeDevice) {
+        activeDevice = devices[0];
+      }
+
+      cookies.set('active-device-id', activeDevice.id);
+      cookies.set('active-device-name', activeDevice.name);
+    }
+  }, [devices]);
 
   const getPlayData = useCallback(async () => {
     const response = await clientSpotifyFetch('me/player', {

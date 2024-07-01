@@ -1,7 +1,7 @@
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
-import { getAuthToken } from '@/_utils/serverUtils';
-import { SpotifyUser } from '@/types';
+import { getAuthToken, serverSpotifyFetch } from '@/_utils/serverUtils';
+import { SpotifyDevice, SpotifyUser } from '@/types';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -16,14 +16,25 @@ export default async function AlbumsLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }>) {
-  const response = await fetch('https://api.spotify.com/v1/me', {
+  const authToken = getAuthToken();
+
+  const userResponse = await serverSpotifyFetch('me', {
     headers: {
-      Authorization: getAuthToken(),
+      Authorization: authToken,
     },
   });
 
-  const data: SpotifyUser = await response.json();
-  const avatarUrl = data.images[0].url;
+  const devicesResponse = await serverSpotifyFetch('me/player/devices', {
+    headers: {
+      Authorization: authToken,
+    },
+  });
+
+  const userData: SpotifyUser = await userResponse.json();
+  const avatarUrl = userData.images[0].url;
+
+  const devicesData = await devicesResponse.json();
+  const { devices }: { devices: SpotifyDevice[] } = devicesData;
 
   return (
     <>
@@ -47,7 +58,7 @@ export default async function AlbumsLayout({
         />
 
         <div className="mt-16">{children}</div>
-        <CurrentlyPlaying />
+        <CurrentlyPlaying devices={devices} />
       </div>
       {modal}
     </>
