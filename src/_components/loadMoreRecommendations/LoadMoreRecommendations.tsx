@@ -3,9 +3,10 @@
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyAlbum, SpotifyTrack } from '@/types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import AlbumsDisplay from '../albumsDisplay/AlbumsDisplay';
 import AlbumsLoading from '../albumsLoading/AlbumsLoading';
+import useAlbumDisplayScrollHandler from '@/_hooks/useAlbumDisplayScrollHandler';
 
 interface LoadMoreAlbumsProps {
   initialAlbums: SpotifyAlbum[];
@@ -23,8 +24,8 @@ export default function LoadMoreAlbums({
 
   const authToken = useGetAuthToken();
 
-  useEffect(() => {
-    const fetchMoreAlbums = async (url: string) => {
+  const fetchMoreAlbums = useCallback(
+    async (url: string) => {
       setLoading(true);
       setUrlsFetched((fetchedUrls) => [...fetchedUrls, url]);
       const response = await fetch(url, {
@@ -65,27 +66,15 @@ export default function LoadMoreAlbums({
 
       setLoading(false);
       setAlbums((albums) => [...albums, ...recommendations]);
-    };
+    },
+    [authToken],
+  );
 
-    const handleScroll = (event: any) => {
-      const target = event.target.scrollingElement as HTMLElement;
-
-      if (
-        target.scrollTop >=
-          (target.scrollHeight - target.clientHeight) * 0.95 &&
-        fetchUrl &&
-        !urlsFetched.includes(fetchUrl)
-      ) {
-        fetchMoreAlbums(fetchUrl);
-      }
-    };
-
-    document.addEventListener('scroll', handleScroll);
-
-    return () => {
-      document.removeEventListener('scroll', handleScroll);
-    };
-  }, [authToken, fetchUrl, loading, urlsFetched]);
+  useAlbumDisplayScrollHandler({
+    fetchUrl,
+    urlsFetched,
+    onBottom: fetchMoreAlbums,
+  });
 
   return (
     <>

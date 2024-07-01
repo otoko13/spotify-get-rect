@@ -3,8 +3,7 @@
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyAlbum, SpotifyDevice } from '@/types';
-import { useCookies } from 'next-client-cookies';
+import { SpotifyAlbum } from '@/types';
 import Image from 'next/image';
 import { useCallback } from 'react';
 
@@ -14,7 +13,6 @@ interface AlbumProps {
 
 const Album = ({ album }: AlbumProps) => {
   const authToken = useGetAuthToken();
-  const cookies = useCookies();
   const getActiveDevice = useGetActiveDevice();
 
   const handleClicked = useCallback(
@@ -46,6 +44,7 @@ const Album = ({ album }: AlbumProps) => {
           alt={album.name}
           width={0}
           height={0}
+          priority
           sizes="100vw"
           style={{ width: '100%', height: 'auto' }}
         />
