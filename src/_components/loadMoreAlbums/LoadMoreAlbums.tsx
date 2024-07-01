@@ -2,10 +2,11 @@
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { SpotifyAlbum } from '@/types';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import AlbumsDisplay from '../albumsDisplay/AlbumsDisplay';
 import AlbumsLoading from '../albumsLoading/AlbumsLoading';
 import useAlbumDisplayScrollHandler from '@/_hooks/useAlbumDisplayScrollHandler';
+import Toggle from '../toggle/Toggle';
 
 export interface LoadMoreAlbumsProps {
   initialAlbums: SpotifyAlbum[];
@@ -20,6 +21,7 @@ export default function LoadMoreAlbums({
   const [loading, setLoading] = useState(false);
   const [urlsFetched, setUrlsFetched] = useState<string[]>([]);
   const [albums, setAlbums] = useState<SpotifyAlbum[]>(initialAlbums);
+  const [use3D, setUse3D] = useState(false);
 
   const authToken = useGetAuthToken();
 
@@ -63,13 +65,36 @@ export default function LoadMoreAlbums({
   );
 
   useAlbumDisplayScrollHandler({
+    disabled: use3D,
     fetchUrl,
     urlsFetched,
     onBottom: fetchMoreAlbums,
   });
 
+  // NOTE!!
+  // the placement of Toggle here is very dodgy. From a UI perspective,
+  // it breaks the information hierarchy on the page, as the menu bar (which
+  // is where we're trying to badly place it using fixed positioning) is applicable
+  // to all the albums routes, not just saved-albums, which is the only place it currently works.
+  // Once it's applicable to every page, what we really need to do
+  // is put it directly in MenuTabs, but then we would need to make layout (and
+  // everything below it) client components since the toggle needs state.
+  // There's also no way of passing the state info from layout down to page
+  // without using context. Some advice suggests we would need to just put the
+  // menu on every page, but then we lose the animation on the tabs selection.
+
+  // If it's not applicable to every page, we need to put the setting only in the
+  // area for the saved-albums page, but there's not currently a clean place to do this.
+  // For now, I'll leave it here and sort it out later.
+
   return (
     <>
+      <Toggle
+        label="Go 3D!"
+        on={use3D}
+        onChange={setUse3D}
+        className="fixed top-4 right-16"
+      ></Toggle>
       <AlbumsDisplay albums={albums} />
       {loading && <AlbumsLoading />}
     </>

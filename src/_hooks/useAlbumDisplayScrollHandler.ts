@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 
 interface UseAlbumDisplayScrollHandlerArgs {
+  disabled?: boolean;
   fetchUrl?: string;
   urlsFetched: string[];
   onBottom: (url: string) => void;
 }
 
 const useAlbumDisplayScrollHandler = ({
+  disabled,
   fetchUrl,
   urlsFetched,
   onBottom,
@@ -16,6 +18,7 @@ const useAlbumDisplayScrollHandler = ({
       const target = event.target.scrollingElement as HTMLElement;
 
       if (
+        !disabled &&
         target.scrollTop >=
           (target.scrollHeight - target.clientHeight) * 0.95 &&
         fetchUrl &&
@@ -30,7 +33,7 @@ const useAlbumDisplayScrollHandler = ({
     return () => {
       document.removeEventListener('scroll', handleScroll);
     };
-  }, [fetchUrl, urlsFetched, onBottom]);
+  }, [fetchUrl, urlsFetched, onBottom, disabled]);
 };
 
 export default useAlbumDisplayScrollHandler;
