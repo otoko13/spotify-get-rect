@@ -1,12 +1,13 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { SpotifyAlbum } from '@/types';
-import { useCallback, useState } from 'react';
+import { Dimensions, SpotifyAlbum } from '@/types';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import AlbumsDisplay from '../albumsDisplay/AlbumsDisplay';
 import AlbumsLoading from '../albumsLoading/AlbumsLoading';
 import useAlbumDisplayScrollHandler from '@/_hooks/useAlbumDisplayScrollHandler';
 import Toggle from '../toggle/Toggle';
+import BabylonAlbumsDisplay from '../babylonAlbumsDisplay/BabylonAlbumsDisplay';
 
 export interface LoadMoreAlbumsProps {
   initialAlbums: SpotifyAlbum[];
@@ -21,7 +22,9 @@ export default function LoadMoreAlbums({
   const [loading, setLoading] = useState(false);
   const [urlsFetched, setUrlsFetched] = useState<string[]>([]);
   const [albums, setAlbums] = useState<SpotifyAlbum[]>(initialAlbums);
-  const [use3D, setUse3D] = useState(false);
+  const [use3D, setUse3D] = useState(true);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const authToken = useGetAuthToken();
 
@@ -88,15 +91,19 @@ export default function LoadMoreAlbums({
   // For now, I'll leave it here and sort it out later.
 
   return (
-    <>
+    <div ref={containerRef}>
       <Toggle
         label="Go 3D!"
         on={use3D}
         onChange={setUse3D}
         className="fixed top-4 right-16"
       ></Toggle>
-      <AlbumsDisplay albums={albums} />
+      {use3D ? (
+        <BabylonAlbumsDisplay albums={albums} />
+      ) : (
+        <AlbumsDisplay albums={albums} />
+      )}
       {loading && <AlbumsLoading />}
-    </>
+    </div>
   );
 }

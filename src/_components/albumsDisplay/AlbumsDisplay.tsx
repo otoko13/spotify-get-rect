@@ -2,7 +2,6 @@
 
 import { SpotifyAlbum } from '@/types';
 import Album from '../album/Album';
-import { useEffect, useState } from 'react';
 
 interface AlbumsDisplayProps {
   albums: SpotifyAlbum[];

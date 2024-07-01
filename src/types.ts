@@ -58,3 +58,8 @@ export interface SpotifyDevice {
   volume_percent: number;
   supports_volume: boolean;
 }
+
+export interface Dimensions {
+  width: number;
+  height: number;
+}
