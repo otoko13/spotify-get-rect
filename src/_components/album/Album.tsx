@@ -1,5 +1,6 @@
 'use client';
 
+import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyAlbum, SpotifyDevice } from '@/types';
@@ -14,32 +15,14 @@ interface AlbumProps {
 const Album = ({ album }: AlbumProps) => {
   const authToken = useGetAuthToken();
   const cookies = useCookies();
+  const getActiveDevice = useGetActiveDevice();
 
   const handleClicked = useCallback(
     async (spotifyId: string) => {
-      const devicesResponse = await clientSpotifyFetch('me/player/devices', {
-        headers: {
-          Authorization: authToken,
-        },
-      });
-
-      const devicesData = await devicesResponse.json();
-      const { devices }: { devices: SpotifyDevice[] } = devicesData;
-
-      let deviceIdToUse: string | undefined;
-
-      if (devices.length) {
-        deviceIdToUse = devices.find((d) => d.is_active)?.id;
-        if (!deviceIdToUse) {
-          deviceIdToUse = devices[0].id;
-        }
-        if (!deviceIdToUse) {
-          deviceIdToUse = cookies.get('active-device-id');
-        }
-      }
+      const { id: deviceId } = await getActiveDevice();
 
       return await clientSpotifyFetch(
-        `me/player/play${deviceIdToUse ? `?device_id=${deviceIdToUse}` : ''}`,
+        `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
         {
           method: 'PUT',
           body: JSON.stringify({

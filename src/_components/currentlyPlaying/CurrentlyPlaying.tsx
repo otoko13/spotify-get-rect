@@ -11,21 +11,24 @@ import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 
+interface SpotifyDeviceSimple {
+  id: string;
+  name: string;
+}
+
 const CurrentlyPlaying = () => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
-  const [deviceId, setDeviceId] = useState<string>();
-  const [deviceName, setDeviceName] = useState<string>();
+  const [device, setDevice] = useState<SpotifyDeviceSimple>();
 
   const getActiveDevice = useGetActiveDevice();
 
   const getPlayData = useCallback(async () => {
     const { id, name } = await getActiveDevice();
-    if (id) {
-      setDeviceId(id);
-      setDeviceName(name);
+    if (id && name) {
+      setDevice({ id, name });
     }
 
     const response = await clientSpotifyFetch('me/player', {
@@ -34,7 +37,12 @@ const CurrentlyPlaying = () => {
       },
     });
 
-    if (response.status !== 200) {
+    // ignore too many requests responses
+    if (response.status === 429) {
+      return;
+    }
+
+    if (response.status !== 200 && response.status !== 429) {
       setTrackStopped(true);
       return;
     }
@@ -61,12 +69,11 @@ const CurrentlyPlaying = () => {
 
   const handlePlay = useCallback(async () => {
     const { id, name } = await getActiveDevice();
-    if (id) {
-      setDeviceId(id);
-      setDeviceName(name);
+    if (id && name) {
+      setDevice({ id, name });
     }
 
-    const deviceToUse = id ?? deviceId;
+    const deviceToUse = id ?? device?.id;
 
     await clientSpotifyFetch(
       `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
@@ -79,7 +86,7 @@ const CurrentlyPlaying = () => {
     );
 
     getPlayData();
-  }, [authToken, deviceId, getActiveDevice, getPlayData]);
+  }, [authToken, getActiveDevice, getPlayData]);
 
   const handlePause = useCallback(async () => {
     await clientSpotifyFetch('me/player/pause', {
@@ -163,9 +170,9 @@ const CurrentlyPlaying = () => {
           </div>
         </div>
         <div className="controls flex items-center">
-          {deviceName && (
+          {device?.name && (
             <div className="text-sm text-slate-300 mr-4">
-              Playing on {deviceName}
+              Playing on {device?.name}
             </div>
           )}
           {trackStopped ? (

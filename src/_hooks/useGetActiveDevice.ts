@@ -18,24 +18,19 @@ const useGetActiveDevice = () => {
     const devicesData = await devicesResponse.json();
     const { devices }: { devices: SpotifyDevice[] } = devicesData;
 
-    let activeDevice: SpotifyDevice | undefined;
-
-    if (devices?.length) {
-      activeDevice = devices.find((d) => d.is_active);
-      if (!activeDevice) {
-        activeDevice = devices[0];
-      }
+    if (!devices?.length) {
+      return {
+        name: cookies.get('active-device-name'),
+        id: cookies.get('active-device-id'),
+      };
     }
 
-    if (activeDevice) {
-      cookies.set('active-device-id', activeDevice.id);
-      cookies.set('active-device-name', activeDevice.name);
-      return activeDevice;
-    }
-
+    const activeDevice = devices.find((d) => d.is_active) ?? devices[0];
+    cookies.set('active-device-id', activeDevice.id);
+    cookies.set('active-device-name', activeDevice.name);
     return {
-      name: cookies.get('active-device-name'),
-      id: cookies.get('active-device-id'),
+      name: activeDevice.name,
+      id: activeDevice.id,
     };
   }, [authToken, cookies]);
 
