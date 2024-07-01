@@ -26,6 +26,22 @@ const config: Config = {
       },
     },
   },
+  daisyui: {
+    themes: [
+      {
+        light: {
+          ...require('daisyui/src/theming/themes')['light'],
+          primary: '#1ed760',
+        },
+      },
+      {
+        dark: {
+          ...require('daisyui/src/theming/themes')['dark'],
+          primary: '#1ed760',
+        },
+      },
+    ],
+  },
   plugins: [daisyui],
 };
 export default config;

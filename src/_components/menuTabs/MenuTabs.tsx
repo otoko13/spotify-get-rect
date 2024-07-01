@@ -46,15 +46,15 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
           },
         )}
       />
-      <div className="flex align-middle">
-        <div className="flex-shrink pl-4 self-center">
+      <div className="flex items-center justify-between w-full">
+        <div className="flex-shrink pl-4">
           <Link href="/">
             <Image alt="spotify logo" src={logoPic} width={48} height={48} />
           </Link>
         </div>
         <div
           role="tablist"
-          className={classNames('tabs tabs-lg flex flex-shrink py-2 w-full', {
+          className={classNames('tabs tabs-lg flex flex-shrink py-2', {
             [styles.tabs]: scrolled,
           })}
         >
@@ -74,18 +74,24 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
             </a>
           ))}
         </div>
-        <div className="avatar mr-4 self-center">
-          <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
-            {avatarUrl && (
-              <Link href="/profile">
-                <Image
-                  alt="avatar image"
-                  src={avatarUrl}
-                  width={48}
-                  height={48}
-                />
-              </Link>
-            )}
+        <div className="flex-grow flex justify-end items-center">
+          <div className="text-slate-300 text-sm mr-4 flex items-center">
+            <p className="mr-4">Go 3D!</p>
+            <input type="checkbox" className="toggle toggle-primary" />
+          </div>
+          <div className="avatar mr-4">
+            <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
+              {avatarUrl && (
+                <Link href="/profile">
+                  <Image
+                    alt="avatar image"
+                    src={avatarUrl}
+                    width={48}
+                    height={48}
+                  />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
