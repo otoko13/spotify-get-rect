@@ -24,17 +24,8 @@ export default async function AlbumsLayout({
     },
   });
 
-  const devicesResponse = await serverSpotifyFetch('me/player/devices', {
-    headers: {
-      Authorization: authToken,
-    },
-  });
-
   const userData: SpotifyUser = await userResponse.json();
   const avatarUrl = userData.images[0].url;
-
-  const devicesData = await devicesResponse.json();
-  const { devices }: { devices: SpotifyDevice[] } = devicesData;
 
   return (
     <>
@@ -58,7 +49,7 @@ export default async function AlbumsLayout({
         />
 
         <div className="mt-16">{children}</div>
-        <CurrentlyPlaying devices={devices} />
+        <CurrentlyPlaying />
       </div>
       {modal}
     </>

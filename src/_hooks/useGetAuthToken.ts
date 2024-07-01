@@ -1,9 +1,12 @@
 import { useCookies } from 'next-client-cookies';
+import { useMemo } from 'react';
 
 const useGetAuthToken = () => {
   const cookies = useCookies();
 
-  return `Bearer ${cookies.get('spotify-auth-token')}`;
+  const cookieValue = cookies.get('spotify-auth-token');
+
+  return useMemo(() => `Bearer ${cookieValue}`, [cookieValue]);
 };
 
 export default useGetAuthToken;

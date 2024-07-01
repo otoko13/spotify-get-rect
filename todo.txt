@@ -1,9 +1,13 @@
-- - Player UI
-- Linting:
+1 - Player UI
+  - mute/volume
+
+2 - Linting:
   - eslint-plugin-react
-- WebGL
+
+3 - WebGL
+
+4 - remember last used device id or get devices and list
 
 - Refresh token
 - add toPlay to localStorage when refreshing
 
-- remember last used device id

@@ -9,33 +9,25 @@ import { useCallback, useEffect, useState } from 'react';
 import styles from './currentlyPlaying.module.scss';
 import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
-import { useCookies } from 'next-client-cookies';
+import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 
-interface CurrentlyPlayingProps {
-  devices: SpotifyDevice[];
-}
-
-const CurrentlyPlaying = ({ devices }: CurrentlyPlayingProps) => {
+const CurrentlyPlaying = () => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
+  const [deviceId, setDeviceId] = useState<string>();
+  const [deviceName, setDeviceName] = useState<string>();
 
-  const cookies = useCookies();
-
-  useEffect(() => {
-    if (devices.length) {
-      let activeDevice = devices.find((d) => d.is_active);
-      if (!activeDevice) {
-        activeDevice = devices[0];
-      }
-
-      cookies.set('active-device-id', activeDevice.id);
-      cookies.set('active-device-name', activeDevice.name);
-    }
-  }, [devices]);
+  const getActiveDevice = useGetActiveDevice();
 
   const getPlayData = useCallback(async () => {
+    const { id, name } = await getActiveDevice();
+    if (id) {
+      setDeviceId(id);
+      setDeviceName(name);
+    }
+
     const response = await clientSpotifyFetch('me/player', {
       headers: {
         Authorization: authToken,
@@ -52,27 +44,42 @@ const CurrentlyPlaying = ({ devices }: CurrentlyPlayingProps) => {
     if (data.is_playing) {
       setTrackStopped(false);
 
+      if (!track) {
+        setTrack(data);
+        return;
+      }
+
       // keep the last track so we can fade out its image
       if (track && track?.item.album.id !== data.item.album.id) {
         setLastTrack(track);
+        setTrack(data);
       }
-
-      setTrack(data);
     } else {
       setTrackStopped(true);
     }
-  }, [authToken, track]);
+  }, [authToken, getActiveDevice, track]);
 
   const handlePlay = useCallback(async () => {
-    await clientSpotifyFetch('me/player/play', {
-      headers: {
-        Authorization: authToken,
+    const { id, name } = await getActiveDevice();
+    if (id) {
+      setDeviceId(id);
+      setDeviceName(name);
+    }
+
+    const deviceToUse = id ?? deviceId;
+
+    await clientSpotifyFetch(
+      `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
+      {
+        headers: {
+          Authorization: authToken,
+        },
+        method: 'PUT',
       },
-      method: 'PUT',
-    });
+    );
 
     getPlayData();
-  }, [authToken, getPlayData]);
+  }, [authToken, deviceId, getActiveDevice, getPlayData]);
 
   const handlePause = useCallback(async () => {
     await clientSpotifyFetch('me/player/pause', {
@@ -149,13 +156,18 @@ const CurrentlyPlaying = ({ devices }: CurrentlyPlayingProps) => {
             )}
           </div>
           <div className="flex flex-col ml-4 justify-center">
-            <div className="text-2xl">{track?.item.name}</div>
-            <div className="text-md text-slate-300">
+            <div className="text-xl">{track?.item.name}</div>
+            <div className="text-sm text-slate-300">
               {track?.item.artists.map((artist) => artist.name).join(', ')}
             </div>
           </div>
         </div>
         <div className="controls flex items-center">
+          {deviceName && (
+            <div className="text-sm text-slate-300 mr-4">
+              Playing on {deviceName}
+            </div>
+          )}
           {trackStopped ? (
             <button onClick={handlePlay}>
               <Image alt="play" src={playButton} width={48} height={48} />
