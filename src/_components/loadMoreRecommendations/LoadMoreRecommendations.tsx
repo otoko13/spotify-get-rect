@@ -3,10 +3,9 @@
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyAlbum, SpotifyTrack } from '@/types';
-import { useCallback, useEffect, useState } from 'react';
-import AlbumsDisplay from '../albumsDisplay/AlbumsDisplay';
-import AlbumsLoading from '../albumsLoading/AlbumsLoading';
+import { useCallback, useState } from 'react';
 import useAlbumDisplayScrollHandler from '@/_hooks/useAlbumDisplayScrollHandler';
+import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDisplay';
 
 interface LoadMoreAlbumsProps {
   initialAlbums: SpotifyAlbum[];
@@ -76,10 +75,17 @@ export default function LoadMoreAlbums({
     onBottom: fetchMoreAlbums,
   });
 
+  const fetchMoreForCanvas = useCallback(() => {
+    if (fetchUrl) {
+      fetchMoreAlbums(fetchUrl);
+    }
+  }, []);
+
   return (
-    <>
-      <AlbumsDisplay albums={albums} />
-      {loading && <AlbumsLoading />}
-    </>
+    <DualModeAlbumsDisplay
+      albums={albums}
+      loading={loading}
+      fetchMoreForCanvas={fetchMoreForCanvas}
+    />
   );
 }

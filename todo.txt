@@ -3,9 +3,6 @@
 
 3 - Babylon JS
   - floor
-  - fix lighting (especially on reverse)
-  - add spot light for each album
-  - adjust start position
-  - load more
+  - adjust start position (pan on start)
 
 4 - add music visualiser using album colors

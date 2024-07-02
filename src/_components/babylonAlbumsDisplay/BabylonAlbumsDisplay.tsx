@@ -1,10 +1,9 @@
-import { Album, SpotifyAlbum } from '@/types';
+import { Album, SpotifyAlbum, SpotifyPlayerTrack } from '@/types';
 import {
   Vector3,
   MeshBuilder,
   Scene,
   ArcRotateCamera,
-  PointLight,
   StandardMaterial,
   Texture,
   Vector4,
@@ -13,21 +12,28 @@ import {
   ActionManager,
   ExecuteCodeAction,
   Color3,
+  MirrorTexture,
+  Plane,
+  Tags,
+  Color4,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useState } from 'react';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { Cookies, useCookies } from 'next-client-cookies';
-
-import { Inspector } from '@babylonjs/inspector';
+import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
 
 interface BabylonAlbumsDisplayProps {
   albums: SpotifyAlbum[];
+  loading?: boolean;
+  onLoadMoreButtonClicked: () => void;
 }
 
 const BOX_SIZE = 3;
 const BOX_GAP = 1.5;
+const BOX_WIDTH = BOX_SIZE + BOX_GAP;
+const BOX_TAG = 'album-art';
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -42,7 +48,6 @@ const onRender = (scene: Scene) => {
 };
 
 const createScene = (scene: Scene) => {
-  // This creates and positions a free camera (non-mesh)
   const camera = new ArcRotateCamera(
     'camera1',
     0,
@@ -53,6 +58,7 @@ const createScene = (scene: Scene) => {
   );
 
   camera.setTarget(Vector3.Zero());
+  // camera.wheelDeltaPercentage = 0.5;
 
   const canvas = scene.getEngine().getRenderingCanvas();
 
@@ -63,9 +69,23 @@ const createScene = (scene: Scene) => {
   // const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
   const frontLight = new DirectionalLight('dl', new Vector3(0, -3.5, 8), scene);
   const backLight = new DirectionalLight('dl', new Vector3(0, -3, -7), scene);
+  // Default intensity is 1. Let's dim the light a small amount
+  frontLight.intensity = 0.9;
+  backLight.intensity = 0.3;
+};
+
+const shineSpotlight = (scene: Scene, albumIndex: number) => {
+  const existingLight = scene.getLightByName('spot');
+
+  if (existingLight) {
+    scene.removeLight(existingLight);
+    existingLight.dispose();
+  }
+
+  // // add spot light
   const spotLight = new SpotLight(
     'spot',
-    new Vector3(0, 10, -9),
+    new Vector3(albumIndex * BOX_WIDTH, 10, -9),
     new Vector3(0, -1, 1),
     Math.PI / 10,
     200,
@@ -77,16 +97,14 @@ const createScene = (scene: Scene) => {
   spotLight.specular = spotLightColor;
   spotLight.diffuse = spotLightColor;
   spotLight.intensity = 0.1;
-
-  // Default intensity is 1. Let's dim the light a small amount
-  frontLight.intensity = 0.9;
-  backLight.intensity = 0.3;
 };
 
 const playAlbum = async (
   spotifyId: string,
   authToken: string,
   cookies: Cookies,
+  albumIndex: number,
+  scene: Scene,
 ) => {
   // this line is causing massive rerenders of the canvas and no idea why just yet, so using
   // cookies which are updated every poll of currently playing
@@ -106,7 +124,7 @@ const playAlbum = async (
     },
   );
 
-  // add spot light
+  shineSpotlight(scene, albumIndex);
 };
 
 const addAlbums = (
@@ -134,10 +152,15 @@ const addAlbums = (
       { width: 3, height: 3, depth: 0.1, faceUV },
       scene,
     );
+    Tags.EnableFor(box);
+    Tags.AddTagsTo(box, 'album-art');
+
+    const row = Math.floor(i / 48);
 
     // position the box
-    box.position.y = BOX_SIZE / 2;
-    box.position.x = i * (BOX_SIZE + BOX_GAP);
+    box.position.y = BOX_SIZE / 2 + row * 4;
+    box.position.z = row * 8;
+    box.position.x = (i % 48) * BOX_WIDTH + row * 2;
 
     // add click action
     box.actionManager = new ActionManager(scene);
@@ -146,7 +169,7 @@ const addAlbums = (
         {
           trigger: ActionManager.OnLeftPickTrigger,
         },
-        async () => await playAlbum(box.name, authToken, cookies),
+        async () => await playAlbum(box.name, authToken, cookies, i, scene),
       ),
     );
 
@@ -155,6 +178,80 @@ const addAlbums = (
     material.diffuseTexture = texture;
     box.material = material;
   });
+};
+
+const triggerSpotlight = async (
+  scene: Scene,
+  albums: SpotifyAlbum[],
+  authToken: string,
+) => {
+  const response = await clientSpotifyFetch('me/player', {
+    headers: {
+      Authorization: authToken,
+    },
+  });
+
+  // ignore too many requests responses
+  if (response.status === 429) {
+    return;
+  }
+
+  if (response.status !== 200 && response.status !== 429) {
+    return;
+  }
+
+  const data: SpotifyPlayerTrack = await response?.json();
+
+  if (!data.is_playing) {
+    return;
+  }
+
+  const albumId = data.item.album.id;
+  const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
+  shineSpotlight(scene, indexOfPlaying);
+};
+
+const createFloor = (scene: Scene, albumCount: number) => {
+  // TODO - change this to water and reflect.
+  // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
+
+  const floorWidthBuffer = 20;
+
+  const mirror = MeshBuilder.CreatePlane(
+    'floor', // name property
+    { width: albumCount * BOX_WIDTH + floorWidthBuffer, height: 10 },
+    scene,
+  );
+  mirror.rotation = new Vector3(Math.PI / 2, 0, 0);
+  mirror.position = new Vector3(
+    0.5 * (albumCount * BOX_WIDTH) - 0.5 * BOX_SIZE,
+    0,
+    0,
+  );
+
+  const material = new StandardMaterial('mirrorMaterial', scene);
+  material.reflectionTexture = new MirrorTexture(
+    'mirrorTexture',
+    512,
+    scene,
+    true,
+  );
+
+  material.diffuseTexture = new Texture('', scene);
+  material.diffuseTexture.hasAlpha = true;
+  material.useAlphaFromDiffuseTexture = true;
+  material.useSpecularOverAlpha = true;
+
+  // material.reflectionTexture.mirrorPlane =
+  //   Plane.FromPositionAndNormal(
+  //     mirror.position,
+  //     mirror.getFacetNormal(0).scale(-1),
+  //   );
+  // material.diffuseColor = new Color4(0, 0, 0, 0);
+
+  const allBoxes = scene.getMeshesByTags(BOX_TAG);
+  (material.reflectionTexture as any).renderList = allBoxes;
+  mirror.material = material;
 };
 
 const onSceneReady = (
@@ -167,14 +264,15 @@ const onSceneReady = (
 
   addAlbums(scene, albums, authToken, cookies);
 
-  // Inspector.Show(scene, {});
+  triggerSpotlight(scene, albums, authToken);
 
-  // TODO - change this to water and reflect.
-  // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
+  createFloor(scene, albums.length);
 };
 
 export default function BabylonAlbumsDisplay({
   albums,
+  loading,
+  onLoadMoreButtonClicked,
 }: BabylonAlbumsDisplayProps) {
   const authToken = useGetAuthToken();
   const cookies = useCookies();
@@ -190,7 +288,7 @@ export default function BabylonAlbumsDisplay({
 
   return (
     <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>
-      {!ready && (
+      {(!ready || loading) && (
         <div className="fixed flex w-screen h-screen justify-center items-center overflow-hidden">
           <div className="loading loading-bars loading-lg text-primary absolute" />
         </div>
@@ -200,6 +298,10 @@ export default function BabylonAlbumsDisplay({
         onSceneReady={handleSceneReady}
         onRender={onRender}
         id="my-canvas"
+      />
+      <CanvasLoadMoreButton
+        onClick={onLoadMoreButtonClicked}
+        disabled={loading || !ready}
       />
     </div>
   );
