@@ -24,6 +24,7 @@ import useGetActiveDevice, {
   GetActiveDevice,
 } from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import { Cookies, useCookies } from 'next-client-cookies';
 
 interface BabylonAlbumsDisplayProps {
   albums: SpotifyAlbum[];
@@ -78,11 +79,13 @@ const createScene = (scene: Scene) => {
 
 const playAlbum = async (
   spotifyId: string,
-  getActiveDevice: GetActiveDevice,
   authToken: string,
+  cookies: Cookies,
 ) => {
+  // this line is causing massive rerenders of the canvas and no idea why just yet, so using
+  // cookies which are updated every poll of currently playing
   // const { id: deviceId } = await getActiveDevice();
-  let deviceId;
+  const deviceId = cookies.get('active-device-id');
 
   await clientSpotifyFetch(
     `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
@@ -101,8 +104,8 @@ const playAlbum = async (
 const addAlbums = (
   scene: Scene,
   albums: SpotifyAlbum[],
-  getActiveDevice: GetActiveDevice,
   authToken: string,
+  cookies: Cookies,
 ) => {
   const faceUV: Vector4[] = new Array(6);
 
@@ -135,7 +138,7 @@ const addAlbums = (
         {
           trigger: ActionManager.OnLeftPickTrigger,
         },
-        async () => await playAlbum(box.name, getActiveDevice, authToken),
+        async () => await playAlbum(box.name, authToken, cookies),
       ),
     );
 
@@ -149,12 +152,12 @@ const addAlbums = (
 const onSceneReady = (
   scene: Scene,
   albums: SpotifyAlbum[],
-  getActiveDevice: GetActiveDevice,
   authToken: string,
+  cookies: Cookies,
 ) => {
   createScene(scene);
 
-  addAlbums(scene, albums, getActiveDevice, authToken);
+  addAlbums(scene, albums, authToken, cookies);
 
   // TODO - change this to water and reflect.
   // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
@@ -163,16 +166,25 @@ const onSceneReady = (
 export default function BabylonAlbumsDisplay({
   albums,
 }: BabylonAlbumsDisplayProps) {
-  const getActiveDevice = useGetActiveDevice();
   const authToken = useGetAuthToken();
+  const cookies = useCookies();
+  const [ready, setReady] = useState(false);
 
   const handleSceneReady = useCallback(
-    (scene: Scene) => onSceneReady(scene, albums, getActiveDevice, authToken),
-    [albums, authToken, getActiveDevice],
+    (scene: Scene) => {
+      setReady(true);
+      onSceneReady(scene, albums, authToken, cookies);
+    },
+    [albums, authToken, cookies],
   );
 
   return (
     <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>
+      {!ready && (
+        <div className="fixed flex w-screen h-screen justify-center items-center overflow-hidden">
+          <div className="loading loading-bars loading-lg text-primary absolute" />
+        </div>
+      )}
       <BabylonCanvas
         antialias
         onSceneReady={handleSceneReady}

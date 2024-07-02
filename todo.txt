@@ -2,11 +2,8 @@
   - eslint-plugin-react
 
 3 - Babylon JS
-  - loading spinner
   - floor
-  - move light with camera
   - interactivity
-  - fix issue when playing (scene resets)
   - fix lighting (especially on reverse)
   - add spot light for each album
   - adjust start position
