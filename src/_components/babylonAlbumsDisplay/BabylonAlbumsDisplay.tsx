@@ -16,6 +16,7 @@ import {
   Plane,
   Tags,
   Color4,
+  Matrix,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useState } from 'react';
@@ -64,6 +65,12 @@ const createScene = (scene: Scene) => {
 
   // This attaches the camera to the canvas
   camera.attachControl(canvas, true);
+
+  var m = new Matrix();
+  camera.absoluteRotation.toRotationMatrix(m);
+  const right = new Vector3(m.m[0], m.m[1], m.m[2]);
+  camera.target.addInPlace(right);
+  camera.position.addInPlace(right);
 
   // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
   // const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
@@ -174,7 +181,7 @@ const addAlbums = (
     );
 
     const material = new StandardMaterial('material', scene);
-    const texture = new Texture(album.images[1].url, scene);
+    const texture = new Texture(album.images[0].url, scene);
     material.diffuseTexture = texture;
     box.material = material;
   });

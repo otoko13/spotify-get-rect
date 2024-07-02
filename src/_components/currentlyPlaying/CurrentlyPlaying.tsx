@@ -60,8 +60,8 @@ const CurrentlyPlaying = () => {
       // keep the last track so we can fade out its image
       if (track && track?.item.album.id !== data.item.album.id) {
         setLastTrack(track);
-        setTrack(data);
       }
+      setTrack(data);
     } else {
       setTrackStopped(true);
     }

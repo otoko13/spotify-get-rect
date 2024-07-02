@@ -49,7 +49,7 @@ export default function LoadMoreAlbums({
       const seedTrackIds = topData.items.map((t: SpotifyTrack) => t.id);
 
       const response2 = await clientSpotifyFetch(
-        `recommendations?limit=50&seed_tracks=${seedTrackIds.join(',')}`,
+        `recommendations?limit=48&seed_tracks=${seedTrackIds.join(',')}`,
         {
           headers: {
             Authorization: authToken,
