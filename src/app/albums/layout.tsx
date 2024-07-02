@@ -29,7 +29,7 @@ export default async function AlbumsLayout({
 
   return (
     <>
-      <div className="p-4">
+      <div>
         <MenuTabs
           avatarUrl={avatarUrl}
           tabs={[

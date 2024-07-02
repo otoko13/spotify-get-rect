@@ -3,7 +3,6 @@ import {
   Vector3,
   MeshBuilder,
   Scene,
-  Mesh,
   ArcRotateCamera,
   PointLight,
   StandardMaterial,
@@ -11,24 +10,24 @@ import {
   Vector4,
   DirectionalLight,
   SpotLight,
-  EventState,
-  PointerInfo,
-  PointerEventTypes,
   ActionManager,
   ExecuteCodeAction,
+  Color3,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import useGetActiveDevice, {
-  GetActiveDevice,
-} from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { Cookies, useCookies } from 'next-client-cookies';
+
+import { Inspector } from '@babylonjs/inspector';
 
 interface BabylonAlbumsDisplayProps {
   albums: SpotifyAlbum[];
 }
+
+const BOX_SIZE = 3;
+const BOX_GAP = 1.5;
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -46,14 +45,13 @@ const createScene = (scene: Scene) => {
   // This creates and positions a free camera (non-mesh)
   const camera = new ArcRotateCamera(
     'camera1',
-    -200,
     0,
+    0.01,
     0,
     new Vector3(0, 0, -15),
     scene,
   );
 
-  // This targets the camera to scene origin
   camera.setTarget(Vector3.Zero());
 
   const canvas = scene.getEngine().getRenderingCanvas();
@@ -63,18 +61,26 @@ const createScene = (scene: Scene) => {
 
   // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
   // const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
-  const dLight = new DirectionalLight('dl', new Vector3(0, 0, 3), scene);
-  // const light = new SpotLight(
-  //   'spotLight',
-  //   new Vector3(0, 30, -10),
-  //   new Vector3(0, -1, 0),
-  //   Math.PI / 3,
-  //   2,
-  //   scene,
-  // );
+  const frontLight = new DirectionalLight('dl', new Vector3(0, -3.5, 8), scene);
+  const backLight = new DirectionalLight('dl', new Vector3(0, -3, -7), scene);
+  const spotLight = new SpotLight(
+    'spot',
+    new Vector3(0, 10, -9),
+    new Vector3(0, -1, 1),
+    Math.PI / 10,
+    200,
+    scene,
+  );
+
+  const spotLightColor = new Color3(30, 215, 96);
+
+  spotLight.specular = spotLightColor;
+  spotLight.diffuse = spotLightColor;
+  spotLight.intensity = 0.1;
 
   // Default intensity is 1. Let's dim the light a small amount
-  dLight.intensity = 0.5;
+  frontLight.intensity = 0.9;
+  backLight.intensity = 0.3;
 };
 
 const playAlbum = async (
@@ -99,6 +105,8 @@ const playAlbum = async (
       },
     },
   );
+
+  // add spot light
 };
 
 const addAlbums = (
@@ -109,7 +117,7 @@ const addAlbums = (
 ) => {
   const faceUV: Vector4[] = new Array(6);
 
-  for (var i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) {
     if (i === 1) {
       faceUV[i] = new Vector4(0, 0, 1, 1);
     } else if (i === 0) {
@@ -128,8 +136,8 @@ const addAlbums = (
     );
 
     // position the box
-    box.position.y = 3;
-    box.position.x = i * 4.5;
+    box.position.y = BOX_SIZE / 2;
+    box.position.x = i * (BOX_SIZE + BOX_GAP);
 
     // add click action
     box.actionManager = new ActionManager(scene);
@@ -158,6 +166,8 @@ const onSceneReady = (
   createScene(scene);
 
   addAlbums(scene, albums, authToken, cookies);
+
+  // Inspector.Show(scene, {});
 
   // TODO - change this to water and reflect.
   // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);

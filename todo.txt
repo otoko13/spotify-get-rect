@@ -3,11 +3,9 @@
 
 3 - Babylon JS
   - floor
-  - interactivity
   - fix lighting (especially on reverse)
   - add spot light for each album
   - adjust start position
+  - load more
 
 4 - add music visualiser using album colors
-
-5 - vercel
