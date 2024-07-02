@@ -1,14 +1,19 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import useGetAuthToken from './useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyDevice } from '@/types';
 import { useCookies } from 'next-client-cookies';
 
+export type GetActiveDevice = () => Promise<{
+  name: string | undefined;
+  id: string | undefined;
+}>;
+
 const useGetActiveDevice = () => {
   const authToken = useGetAuthToken();
   const cookies = useCookies();
 
-  const getActiveDevice = useCallback(async () => {
+  const getActiveDevice: GetActiveDevice = useCallback(async () => {
     const devicesResponse = await clientSpotifyFetch('me/player/devices', {
       headers: {
         Authorization: authToken,

@@ -18,9 +18,11 @@ import {
   ExecuteCodeAction,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
+import useGetActiveDevice, {
+  GetActiveDevice,
+} from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 
 interface BabylonAlbumsDisplayProps {
@@ -74,103 +76,108 @@ const createScene = (scene: Scene) => {
   dLight.intensity = 0.5;
 };
 
+const playAlbum = async (
+  spotifyId: string,
+  getActiveDevice: GetActiveDevice,
+  authToken: string,
+) => {
+  // const { id: deviceId } = await getActiveDevice();
+  let deviceId;
+
+  await clientSpotifyFetch(
+    `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        context_uri: spotifyId,
+      }),
+      headers: {
+        Authorization: authToken,
+      },
+    },
+  );
+};
+
+const addAlbums = (
+  scene: Scene,
+  albums: SpotifyAlbum[],
+  getActiveDevice: GetActiveDevice,
+  authToken: string,
+) => {
+  const faceUV: Vector4[] = new Array(6);
+
+  for (var i = 0; i < 6; i++) {
+    if (i === 1) {
+      faceUV[i] = new Vector4(0, 0, 1, 1);
+    } else if (i === 0) {
+      faceUV[i] = new Vector4(0, 1, 1, 0);
+    } else {
+      faceUV[i] = new Vector4(0, 0, 0, 0);
+    }
+  }
+
+  albums.forEach((album, i) => {
+    // Our built-in 'box' shape.
+    const box = MeshBuilder.CreateBox(
+      album.uri, // name property
+      { width: 3, height: 3, depth: 0.1, faceUV },
+      scene,
+    );
+
+    // position the box
+    box.position.y = 3;
+    box.position.x = i * 4.5;
+
+    // add click action
+    box.actionManager = new ActionManager(scene);
+    box.actionManager.registerAction(
+      new ExecuteCodeAction(
+        {
+          trigger: ActionManager.OnLeftPickTrigger,
+        },
+        async () => await playAlbum(box.name, getActiveDevice, authToken),
+      ),
+    );
+
+    const material = new StandardMaterial('material', scene);
+    const texture = new Texture(album.images[1].url, scene);
+    material.diffuseTexture = texture;
+    box.material = material;
+  });
+};
+
+const onSceneReady = (
+  scene: Scene,
+  albums: SpotifyAlbum[],
+  getActiveDevice: GetActiveDevice,
+  authToken: string,
+) => {
+  createScene(scene);
+
+  addAlbums(scene, albums, getActiveDevice, authToken);
+
+  // TODO - change this to water and reflect.
+  // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
+};
+
 export default function BabylonAlbumsDisplay({
   albums,
 }: BabylonAlbumsDisplayProps) {
-  const sceneRef = useRef<Scene>();
   const getActiveDevice = useGetActiveDevice();
   const authToken = useGetAuthToken();
 
-  const playAlbum = useCallback(
-    async (spotifyId: string) => {
-      const { id: deviceId } = await getActiveDevice();
-
-      return clientSpotifyFetch(
-        `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            context_uri: spotifyId,
-          }),
-          headers: {
-            Authorization: authToken,
-          },
-        },
-      );
-    },
-    [authToken, getActiveDevice],
-  );
-
-  const addAlbums = useCallback(
-    (scene: Scene, albums: SpotifyAlbum[]) => {
-      const faceUV: Vector4[] = new Array(6);
-
-      for (var i = 0; i < 6; i++) {
-        if (i === 1) {
-          faceUV[i] = new Vector4(0, 0, 1, 1);
-        } else if (i === 0) {
-          faceUV[i] = new Vector4(0, 1, 1, 0);
-        } else {
-          faceUV[i] = new Vector4(0, 0, 0, 0);
-        }
-      }
-
-      albums.forEach((album, i) => {
-        // Our built-in 'box' shape.
-        const box = MeshBuilder.CreateBox(
-          album.uri, // name property
-          { width: 3, height: 3, depth: 0.1, faceUV },
-          scene,
-        );
-
-        // position the box
-        box.position.y = 3;
-        box.position.x = i * 4.5;
-
-        // add click action
-        box.actionManager = new ActionManager(scene);
-        box.actionManager.registerAction(
-          new ExecuteCodeAction(
-            {
-              trigger: ActionManager.OnLeftPickTrigger,
-            },
-            async function () {
-              await playAlbum(box.name);
-            },
-          ),
-        );
-
-        const material = new StandardMaterial('material', scene);
-        const texture = new Texture(album.images[1].url, scene);
-        material.diffuseTexture = texture;
-        box.material = material;
-      });
-    },
-    [playAlbum],
-  );
-
-  const onSceneReady = useCallback(
-    (scene: Scene) => {
-      sceneRef.current = scene;
-
-      createScene(scene);
-
-      addAlbums(scene, albums);
-
-      // TODO - change this to water and reflect.
-      // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
-    },
-    [albums, addAlbums],
+  const handleSceneReady = useCallback(
+    (scene: Scene) => onSceneReady(scene, albums, getActiveDevice, authToken),
+    [albums, authToken, getActiveDevice],
   );
 
   return (
     <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>
       <BabylonCanvas
         antialias
-        onSceneReady={onSceneReady}
+        onSceneReady={handleSceneReady}
         onRender={onRender}
         id="my-canvas"
-        engineOptions={{}}
       />
     </div>
   );

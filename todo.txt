@@ -2,6 +2,7 @@
   - eslint-plugin-react
 
 3 - Babylon JS
+  - loading spinner
   - floor
   - move light with camera
   - interactivity
@@ -12,3 +13,4 @@
 
 4 - add music visualiser using album colors
 
+5 - vercel

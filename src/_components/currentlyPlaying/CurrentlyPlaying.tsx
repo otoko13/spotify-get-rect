@@ -2,7 +2,7 @@
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyDevice, SpotifyPlayerTrack } from '@/types';
+import { SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
@@ -86,7 +86,7 @@ const CurrentlyPlaying = () => {
     );
 
     getPlayData();
-  }, [authToken, getActiveDevice, getPlayData]);
+  }, [authToken, device?.id, getActiveDevice, getPlayData]);
 
   const handlePause = useCallback(async () => {
     await clientSpotifyFetch('me/player/pause', {
