@@ -102,7 +102,7 @@ const CurrentlyPlaying = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       getPlayData();
-    }, 2500);
+    }, 3500);
 
     getPlayData();
 
