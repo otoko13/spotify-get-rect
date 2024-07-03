@@ -64,7 +64,8 @@ const createScene = (scene: Scene) => {
     0,
     0.01,
     0,
-    new Vector3(0, 0, -15),
+    // new Vector3(0, 0, -15),
+    new Vector3(-10, 2, -15),
     scene,
   );
 
@@ -75,21 +76,14 @@ const createScene = (scene: Scene) => {
 
   const canvas = scene.getEngine().getRenderingCanvas();
 
-  // This attaches the camera to the canvas
-  camera.attachControl(canvas, true);
+  camera.attachControl(canvas, true, true);
 
-  var m = new Matrix();
-  camera.absoluteRotation.toRotationMatrix(m);
-  const right = new Vector3(m.m[0], m.m[1], m.m[2]);
-  camera.target.addInPlace(right);
-  camera.position.addInPlace(right);
+  camera.target.addInPlace(new Vector3(8, 1.5, -3));
+  camera.position.addInPlace(new Vector3(8, 1.5, -3));
 
-  // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-  // const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
   const frontLight = new DirectionalLight('dl', new Vector3(0, -3.5, 8), scene);
   const backLight = new DirectionalLight('dl', new Vector3(0, -3, -7), scene);
   const topLight = new DirectionalLight('dl', new Vector3(0, -1, 0.01), scene);
-  // Default intensity is 1. Let's dim the light a small amount
   frontLight.intensity = 0.9;
   backLight.intensity = 0.3;
   topLight.intensity = 0.4;
@@ -107,13 +101,19 @@ const shineSpotlight = (
     existingLight.dispose();
   }
 
+  const row = Math.floor(albumIndex / ALBUMS_PER_ROW);
+
   // // add spot light
   const spotLight = new SpotLight(
     'spot',
-    new Vector3(albumIndex * BOX_WIDTH, 12.6, -12),
+    new Vector3(
+      (albumIndex % ALBUMS_PER_ROW) * BOX_WIDTH + row * 2,
+      row * ROW_Y_SPACING + 12.6,
+      row * ROW_Z_SPACING - 12,
+    ),
     new Vector3(0, -1, 1),
     Math.PI / 15,
-    0.03,
+    0.0003,
     scene,
   );
 
@@ -154,7 +154,7 @@ const shineSpotlight = (
   );
   reflectionTexture.mirrorPlane = new Plane(0, -1.0, -1, 0);
   reflectionTexture.renderList = [box];
-  reflectionTexture.adaptiveBlurKernel = 32;
+  reflectionTexture.adaptiveBlurKernel = 30;
   reflectionTexture.level = 1;
 
   mirrorMaterial.diffuseColor = new Color3(0, 0, 0);
@@ -225,9 +225,9 @@ const addAlbums = (
     Tags.AddTagsTo(box, `${BOX_TAG}-row${row}`);
 
     // position the box
+    box.position.x = (i % ALBUMS_PER_ROW) * BOX_WIDTH + row * 2;
     box.position.y = BOX_SIZE / 2 + row * ROW_Y_SPACING;
     box.position.z = row * ROW_Z_SPACING;
-    box.position.x = (i % ALBUMS_PER_ROW) * BOX_WIDTH + row * 2;
 
     // add click action
     box.actionManager = new ActionManager(scene);
@@ -243,7 +243,7 @@ const addAlbums = (
     const material = new StandardMaterial('material', scene);
     const texture = new Texture(album.images[0].url, scene);
     material.diffuseTexture = texture;
-    material.specularColor = new Color3(0.0429, 0.307, 0.137);
+    // material.specularColor = new Color3(0.0429, 0.307, 0.137);
     box.material = material;
 
     // create album reflection
