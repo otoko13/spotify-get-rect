@@ -12,3 +12,5 @@
 - remove texture background (make transparent)
 - adjust blur
 - make the reflection straight
+
+- try terrain method for mirror plane

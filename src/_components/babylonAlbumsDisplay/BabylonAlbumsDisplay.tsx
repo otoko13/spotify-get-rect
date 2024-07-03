@@ -19,6 +19,8 @@ import {
   Matrix,
   Mesh,
   ReflectionProbe,
+  DynamicTexture,
+  Material,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useState } from 'react';
@@ -243,7 +245,7 @@ const createFloor = (scene: Scene, albumCount: number) => {
     'floor', // name property
     {
       width: albumCount * BOX_WIDTH + floorWidthBuffer,
-      height: 0.1,
+      height: 0.001,
       depth: rows * (10 + ROW_SPACING),
     },
     scene,
@@ -257,6 +259,8 @@ const createFloor = (scene: Scene, albumCount: number) => {
   );
 
   const material = new StandardMaterial('mirror', scene);
+
+  // taking care of reflective texture
   material.reflectionTexture = new MirrorTexture('mirror', 1024, scene, true);
   const mirrorMaterialReflectionTexture =
     material.reflectionTexture as MirrorTexture;
@@ -275,9 +279,20 @@ const createFloor = (scene: Scene, albumCount: number) => {
 
   material.useAlphaFromDiffuseTexture = true;
   material.useSpecularOverAlpha = true;
+  material.indexOfRefraction = 0.52;
+  material.alpha = 0.2;
+  material.useReflectionOverAlpha = true;
 
   const probe = new ReflectionProbe('probe', 512, scene);
   allBoxes.forEach((mesh) => probe.renderList?.push(mesh));
+
+  // making material transparent
+  // const transparentTexture = new DynamicTexture('dynamic texture', scene);
+  // material.diffuseTexture = transparentTexture;
+  // material.diffuseTexture.hasAlpha = true;
+  // material.opacityTexture = material.diffuseTexture;
+  // material.transparencyMode = Material.MATERIAL_ALPHABLEND;
+  // material.alpha = 1;
 
   mirror.material = material;
 };
