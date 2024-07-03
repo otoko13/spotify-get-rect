@@ -17,6 +17,8 @@ import {
   Tags,
   Color4,
   Matrix,
+  Mesh,
+  ReflectionProbe,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useState } from 'react';
@@ -35,6 +37,8 @@ const BOX_SIZE = 3;
 const BOX_GAP = 1.5;
 const BOX_WIDTH = BOX_SIZE + BOX_GAP;
 const BOX_TAG = 'album-art';
+const ALBUMS_PER_ROW = 48;
+const ROW_SPACING = 8;
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -50,10 +54,10 @@ const onRender = (scene: Scene) => {
 
 const createScene = (scene: Scene) => {
   scene.fogMode = Scene.FOGMODE_LINEAR;
-  scene.fogDensity = 0.1;
-  scene.fogStart = 100;
-  scene.fogEnd = 200;
-  scene.fogColor = new Color3(0.03, 0.215, 0.096);
+  scene.fogDensity = 1;
+  scene.fogStart = 200;
+  scene.fogEnd = 300;
+  scene.fogColor = new Color3(0.03, 0.115, 0.096);
 
   const camera = new ArcRotateCamera(
     'camera1',
@@ -65,6 +69,8 @@ const createScene = (scene: Scene) => {
   );
 
   camera.setTarget(Vector3.Zero());
+  camera.upperBetaLimit = (2 * Math.PI) / 3;
+  camera.lowerRadiusLimit = 4;
   // camera.wheelDeltaPercentage = 0.5;
 
   const canvas = scene.getEngine().getRenderingCanvas();
@@ -168,12 +174,12 @@ const addAlbums = (
     Tags.EnableFor(box);
     Tags.AddTagsTo(box, 'album-art');
 
-    const row = Math.floor(i / 48);
+    const row = Math.floor(i / ALBUMS_PER_ROW);
 
     // position the box
     box.position.y = BOX_SIZE / 2 + row * 4;
-    box.position.z = row * 8;
-    box.position.x = (i % 48) * BOX_WIDTH + row * 2;
+    box.position.z = row * ROW_SPACING;
+    box.position.x = (i % ALBUMS_PER_ROW) * BOX_WIDTH + row * 2;
 
     // add click action
     box.actionManager = new ActionManager(scene);
@@ -221,35 +227,45 @@ const triggerSpotlight = async (
 
   const albumId = data.item.album.id;
   const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
-  shineSpotlight(scene, indexOfPlaying);
+  if (indexOfPlaying > -1) {
+    shineSpotlight(scene, indexOfPlaying);
+  }
 };
 
 const createFloor = (scene: Scene, albumCount: number) => {
   const floorWidthBuffer = 20;
 
-  const mirror = MeshBuilder.CreatePlane(
+  const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
+
+  const mirror = MeshBuilder.CreateBox(
     'floor', // name property
-    { width: albumCount * BOX_WIDTH + floorWidthBuffer, height: 10 },
+    {
+      width: albumCount * BOX_WIDTH + floorWidthBuffer,
+      height: 0.1,
+      depth: rows * (10 + ROW_SPACING),
+    },
     scene,
   );
-  mirror.rotation = new Vector3(Math.PI / 2, 0, 0);
+
+  // mirror.rotation = new Vector3(Math.PI / 2, 0, 0);
   mirror.position = new Vector3(
     0.5 * (albumCount * BOX_WIDTH) - 0.5 * BOX_SIZE,
-    0,
+    -2,
     0,
   );
 
   const material = new StandardMaterial('mirrorMaterial', scene);
-  material.reflectionTexture = new MirrorTexture(
-    'mirrorTexture',
-    512,
-    scene,
-    true,
-  );
+  material.diffuseColor = new Color3(0, 0, 0);
+
+  // material.reflectionTexture = new MirrorTexture(
+  //   'mirrorTexture',
+  //   512,
+  //   scene,
+  //   true,
+  // );
 
   // try merging all the meshes and applying it to the plane
 
-  // material.diffuseTexture = new Texture('', scene);
   // material.diffuseTexture.hasAlpha = false;
   // material.useAlphaFromDiffuseTexture = false;
   // material.useSpecularOverAlpha = false;
@@ -262,7 +278,12 @@ const createFloor = (scene: Scene, albumCount: number) => {
   // material.diffuseColor = new Color4(0, 0, 0, 0);
 
   const allBoxes = scene.getMeshesByTags(BOX_TAG);
-  (material.reflectionTexture as any).renderList = allBoxes;
+  // (material.reflectionTexture as any).renderList = allBoxes;
+
+  const probe = new ReflectionProbe('probe', 512, scene);
+  allBoxes.forEach((mesh) => probe.renderList?.push(mesh));
+  material.reflectionTexture = probe.cubeTexture;
+
   mirror.material = material;
 };
 
