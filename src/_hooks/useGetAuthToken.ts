@@ -1,5 +1,5 @@
 import { useCookies } from 'next-client-cookies';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 const useGetAuthToken = () => {
   const cookies = useCookies();
