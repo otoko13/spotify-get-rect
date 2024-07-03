@@ -17,7 +17,7 @@ export async function GET() {
         response_type: 'code',
         client_id: process.env.SPOTIFY_CLIENT_ID,
         scope,
-        redirect_uri: process.env.AUTH_REDIRECT_URI,
+        redirect_uri: `${process.env.HOST}${process.env.AUTH_REDIRECT_URI}`,
         state,
       }),
   );
