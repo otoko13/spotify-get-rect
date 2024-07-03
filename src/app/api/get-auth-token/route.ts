@@ -9,8 +9,6 @@ export async function GET() {
 
   // no way to pass the path to the redirect URI right now, they won't allow wildcards or query params
 
-  console.info('THIS PAGE IS DEFINITELY HERE');
-
   redirect(
     'https://accounts.spotify.com/authorize?' +
       querystring.stringify({

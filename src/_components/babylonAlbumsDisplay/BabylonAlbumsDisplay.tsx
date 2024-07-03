@@ -38,6 +38,7 @@ const BOX_TAG = 'album-art';
 const ALBUMS_PER_ROW = 24;
 const ROW_Z_SPACING = 6;
 const ROW_Y_SPACING = 4;
+const SPOTIFY_COLOR = new Color3(30, 215, 96);
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -87,12 +88,18 @@ const createScene = (scene: Scene) => {
   // const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
   const frontLight = new DirectionalLight('dl', new Vector3(0, -3.5, 8), scene);
   const backLight = new DirectionalLight('dl', new Vector3(0, -3, -7), scene);
+  const topLight = new DirectionalLight('dl', new Vector3(0, -1, 0.01), scene);
   // Default intensity is 1. Let's dim the light a small amount
   frontLight.intensity = 0.9;
   backLight.intensity = 0.3;
+  topLight.intensity = 0.4;
 };
 
-const shineSpotlight = (scene: Scene, albumIndex: number) => {
+const shineSpotlight = (
+  scene: Scene,
+  albumIndex: number,
+  spotifyId: string,
+) => {
   const existingLight = scene.getLightByName('spot');
 
   if (existingLight) {
@@ -103,47 +110,20 @@ const shineSpotlight = (scene: Scene, albumIndex: number) => {
   // // add spot light
   const spotLight = new SpotLight(
     'spot',
-    new Vector3(albumIndex * BOX_WIDTH, 10, -9),
+    new Vector3(albumIndex * BOX_WIDTH, 12.6, -12),
     new Vector3(0, -1, 1),
-    Math.PI / 10,
-    200,
+    Math.PI / 15,
+    0.03,
     scene,
   );
 
-  const spotLightColor = new Color3(30, 215, 96);
+  const spotLightColor = SPOTIFY_COLOR;
 
   spotLight.specular = spotLightColor;
   spotLight.diffuse = spotLightColor;
-  spotLight.intensity = 0.1;
-};
+  spotLight.intensity = 1;
 
-const playAlbum = async (
-  spotifyId: string,
-  authToken: string,
-  cookies: Cookies,
-  albumIndex: number,
-  scene: Scene,
-) => {
-  // this line is causing massive rerenders of the canvas and no idea why just yet, so using
-  // cookies which are updated every poll of currently playing
-  // const { id: deviceId } = await getActiveDevice();
-  const deviceId = cookies.get('active-device-id');
-
-  await clientSpotifyFetch(
-    `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify({
-        context_uri: spotifyId,
-      }),
-      headers: {
-        Authorization: authToken,
-      },
-    },
-  );
-
-  shineSpotlight(scene, albumIndex);
-
+  // show mirror mesh
   const existing = scene.getMeshByName('mirrorMesh');
   if (existing) {
     scene.removeMesh(existing);
@@ -185,6 +165,34 @@ const playAlbum = async (
   mirrorMaterial.useReflectionOverAlpha = true;
   mirrorMaterial.reflectionTexture = reflectionTexture;
   mirrorMesh.material = mirrorMaterial;
+};
+
+const playAlbum = async (
+  spotifyId: string,
+  authToken: string,
+  cookies: Cookies,
+  albumIndex: number,
+  scene: Scene,
+) => {
+  // this line is causing massive rerenders of the canvas and no idea why just yet, so using
+  // cookies which are updated every poll of currently playing
+  // const { id: deviceId } = await getActiveDevice();
+  const deviceId = cookies.get('active-device-id');
+
+  await clientSpotifyFetch(
+    `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        context_uri: spotifyId,
+      }),
+      headers: {
+        Authorization: authToken,
+      },
+    },
+  );
+
+  shineSpotlight(scene, albumIndex, spotifyId);
 };
 
 const addAlbums = (
@@ -235,6 +243,7 @@ const addAlbums = (
     const material = new StandardMaterial('material', scene);
     const texture = new Texture(album.images[0].url, scene);
     material.diffuseTexture = texture;
+    material.specularColor = new Color3(0.0429, 0.307, 0.137);
     box.material = material;
 
     // create album reflection
@@ -304,7 +313,7 @@ const triggerSpotlight = async (
   const albumId = data.item.album.id;
   const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
   if (indexOfPlaying > -1) {
-    shineSpotlight(scene, indexOfPlaying);
+    shineSpotlight(scene, indexOfPlaying, data.item.album.uri);
   }
 };
 
@@ -347,7 +356,7 @@ const createFloor = (scene: Scene, albumCount: number) => {
     mirrorMaterialReflectionTexture.level = 0.6;
 
     material.diffuseColor = new Color3(0, 0, 0);
-    material.specularColor = new Color3(0.15, 1.075, 0.48);
+    material.specularColor = SPOTIFY_COLOR;
 
     material.useAlphaFromDiffuseTexture = true;
     material.useSpecularOverAlpha = true;

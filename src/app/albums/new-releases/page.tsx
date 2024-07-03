@@ -16,8 +16,6 @@ export default async function NewReleasesPage({}: {}) {
     (a: SpotifyAlbum) => a.album_type !== 'single',
   );
 
-  console.log(sortedAlbums);
-
   return (
     <LoadMoreNewReleases
       initialAlbums={sortedAlbums ?? []}

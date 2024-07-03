@@ -22,7 +22,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.info('CHECKING LOGGING');
   await authorize();
 
   return (
