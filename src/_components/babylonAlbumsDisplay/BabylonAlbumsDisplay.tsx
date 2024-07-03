@@ -237,6 +237,8 @@ const createFloor = (scene: Scene, albumCount: number) => {
 
   const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
 
+  const allBoxes = scene.getMeshesByTags(BOX_TAG);
+
   const mirror = MeshBuilder.CreateBox(
     'floor', // name property
     {
@@ -250,39 +252,32 @@ const createFloor = (scene: Scene, albumCount: number) => {
   // mirror.rotation = new Vector3(Math.PI / 2, 0, 0);
   mirror.position = new Vector3(
     0.5 * (albumCount * BOX_WIDTH) - 0.5 * BOX_SIZE,
-    -2,
+    0,
     0,
   );
 
-  const material = new StandardMaterial('mirrorMaterial', scene);
+  const material = new StandardMaterial('mirror', scene);
+  material.reflectionTexture = new MirrorTexture('mirror', 1024, scene, true);
+  const mirrorMaterialReflectionTexture =
+    material.reflectionTexture as MirrorTexture;
+  mirrorMaterialReflectionTexture.mirrorPlane = new Plane(
+    0,
+    -1.0,
+    -Math.PI / 4,
+    -0,
+  );
+  mirrorMaterialReflectionTexture.renderList = [...allBoxes];
+  mirrorMaterialReflectionTexture.adaptiveBlurKernel = 32;
+  mirrorMaterialReflectionTexture.level = 0.5;
+
   material.diffuseColor = new Color3(0, 0, 0);
+  material.specularColor = new Color3(0.15, 1.075, 0.48);
 
-  // material.reflectionTexture = new MirrorTexture(
-  //   'mirrorTexture',
-  //   512,
-  //   scene,
-  //   true,
-  // );
-
-  // try merging all the meshes and applying it to the plane
-
-  // material.diffuseTexture.hasAlpha = false;
-  // material.useAlphaFromDiffuseTexture = false;
-  // material.useSpecularOverAlpha = false;
-
-  // material.reflectionTexture.mirrorPlane =
-  //   Plane.FromPositionAndNormal(
-  //     mirror.position,
-  //     mirror.getFacetNormal(0).scale(-1),
-  //   );
-  // material.diffuseColor = new Color4(0, 0, 0, 0);
-
-  const allBoxes = scene.getMeshesByTags(BOX_TAG);
-  // (material.reflectionTexture as any).renderList = allBoxes;
+  material.useAlphaFromDiffuseTexture = true;
+  material.useSpecularOverAlpha = true;
 
   const probe = new ReflectionProbe('probe', 512, scene);
   allBoxes.forEach((mesh) => probe.renderList?.push(mesh));
-  material.reflectionTexture = probe.cubeTexture;
 
   mirror.material = material;
 };

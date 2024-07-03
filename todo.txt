@@ -6,3 +6,9 @@
   - adjust start position (pan on start)
 
 4 - add music visualiser using album colors
+
+
+- adjust spotlight to shine in front
+- remove texture background (make transparent)
+- adjust blur
+- make the reflection straight
