@@ -49,6 +49,12 @@ const onRender = (scene: Scene) => {
 };
 
 const createScene = (scene: Scene) => {
+  scene.fogMode = Scene.FOGMODE_LINEAR;
+  scene.fogDensity = 0.1;
+  scene.fogStart = 100;
+  scene.fogEnd = 200;
+  scene.fogColor = new Color3(0.03, 0.215, 0.096);
+
   const camera = new ArcRotateCamera(
     'camera1',
     0,
@@ -219,9 +225,6 @@ const triggerSpotlight = async (
 };
 
 const createFloor = (scene: Scene, albumCount: number) => {
-  // TODO - change this to water and reflect.
-  // MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
-
   const floorWidthBuffer = 20;
 
   const mirror = MeshBuilder.CreatePlane(
@@ -244,10 +247,12 @@ const createFloor = (scene: Scene, albumCount: number) => {
     true,
   );
 
-  material.diffuseTexture = new Texture('', scene);
-  material.diffuseTexture.hasAlpha = true;
-  material.useAlphaFromDiffuseTexture = true;
-  material.useSpecularOverAlpha = true;
+  // try merging all the meshes and applying it to the plane
+
+  // material.diffuseTexture = new Texture('', scene);
+  // material.diffuseTexture.hasAlpha = false;
+  // material.useAlphaFromDiffuseTexture = false;
+  // material.useSpecularOverAlpha = false;
 
   // material.reflectionTexture.mirrorPlane =
   //   Plane.FromPositionAndNormal(

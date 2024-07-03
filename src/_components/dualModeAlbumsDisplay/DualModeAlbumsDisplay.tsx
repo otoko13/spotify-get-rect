@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Toggle from '../toggle/Toggle';
 import BabylonAlbumsDisplay from '../babylonAlbumsDisplay/BabylonAlbumsDisplay';
 import AlbumsDisplay from '../albumsDisplay/AlbumsDisplay';
 import AlbumsLoading from '../albumsLoading/AlbumsLoading';
 import { SpotifyAlbum } from '@/types';
+import { useCookies } from 'next-client-cookies';
 
 interface DualModeAlbumsDisplayProps {
   albums: SpotifyAlbum[];
@@ -18,13 +19,24 @@ export default function DualModeAlbumsDisplay({
   fetchMoreForCanvas,
   loading,
 }: DualModeAlbumsDisplayProps) {
-  const [use3D, setUse3D] = useState(false);
+  const cookies = useCookies();
+  const [use3D, setUse3D] = useState(Boolean(cookies.get('use-3d')));
+
+  const handleToggle = useCallback((val: boolean) => {
+    setUse3D(val);
+    if (val) {
+      cookies.set('use-3d', 'true');
+    } else {
+      cookies.remove('use-3d');
+    }
+  }, []);
+
   return (
     <div>
       <Toggle
         label="Go 3D!"
         on={use3D}
-        onChange={setUse3D}
+        onChange={handleToggle}
         className="fixed top-4 right-16"
       />
       {use3D ? (
