@@ -61,7 +61,11 @@ const CurrentlyPlaying = () => {
       if (track && track?.item.album.id !== data.item.album.id) {
         setLastTrack(track);
       }
-      setTrack(data);
+      // only set the track if it has changed, otherwise we trigger
+      // rerenders with the state change
+      if (track.item.id !== data.item.id) {
+        setTrack(data);
+      }
     } else {
       setTrackStopped(true);
     }

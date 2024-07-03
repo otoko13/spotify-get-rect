@@ -25,7 +25,7 @@ export default async function AlbumsLayout({
   });
 
   const userData: SpotifyUser = await userResponse.json();
-  const avatarUrl = userData.images[0].url;
+  const avatarUrl = userData.images?.[0]?.url;
 
   return (
     <>

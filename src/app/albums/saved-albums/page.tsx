@@ -12,6 +12,16 @@ export default async function SavedAlbumsPage({}: {}) {
 
   const data = await response.json();
 
+  if (!data.items) {
+    console.error('No items', data);
+    return (
+      <LoadMoreAlbums
+        initialAlbums={[]}
+        nextUrl="https://api.spotify.com/v1/me/albums?limit=50"
+      />
+    );
+  }
+
   const sortedAlbums: SpotifyAlbum[] = data.items
     .sort(
       (
