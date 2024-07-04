@@ -1,16 +1,18 @@
+1 - element disappears when zooming
+
+1 - try to refactor so play method comes from outside the babylon component, 
+but this might cause a rerender when you play albums like before
+
+2 - sdk
+
+6 - alert when no device
+
 2 - Linting:
   - eslint-plugin-react
 
-3 - Babylon JS
-  - floor
-  - adjust start position (pan on start)
+7 - use SDK 
 
-4 - add music visualiser using album colors
+8 - mobile friendly
 
-
-- adjust spotlight to shine in front
-- remove texture background (make transparent)
-- adjust blur
-- make the reflection straight
-
-- try terrain method for mirror plane
+- handle audiobooks
+- extra tabs - random albums, audibooks, playlists

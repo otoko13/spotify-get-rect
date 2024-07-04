@@ -17,6 +17,7 @@ import {
   Tags,
   Matrix,
   Mesh,
+  FramingBehavior,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useState } from 'react';
@@ -72,7 +73,12 @@ const createScene = (scene: Scene) => {
   camera.setTarget(Vector3.Zero());
   camera.upperRadiusLimit = 50;
   camera.upperBetaLimit = (2 * Math.PI) / 3;
-  // camera.wheelDeltaPercentage = 0.5;
+  camera.wheelPrecision = 80;
+  camera.minZ = 0.1;
+  camera.maxZ = 1000;
+  camera.useFramingBehavior = true;
+  (camera.framingBehavior as FramingBehavior).mode =
+    FramingBehavior.IgnoreBoundsSizeMode;
 
   const canvas = scene.getEngine().getRenderingCanvas();
 
@@ -167,156 +173,6 @@ const shineSpotlight = (
   mirrorMesh.material = mirrorMaterial;
 };
 
-const playAlbum = async (
-  spotifyId: string,
-  authToken: string,
-  cookies: Cookies,
-  albumIndex: number,
-  scene: Scene,
-) => {
-  // this line is causing massive rerenders of the canvas and no idea why just yet, so using
-  // cookies which are updated every poll of currently playing
-  // const { id: deviceId } = await getActiveDevice();
-  const deviceId = cookies.get('active-device-id');
-
-  await clientSpotifyFetch(
-    `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify({
-        context_uri: spotifyId,
-      }),
-      headers: {
-        Authorization: authToken,
-      },
-    },
-  );
-
-  shineSpotlight(scene, albumIndex, spotifyId);
-};
-
-const addAlbums = (
-  scene: Scene,
-  albums: SpotifyAlbum[],
-  authToken: string,
-  cookies: Cookies,
-) => {
-  const faceUV: Vector4[] = new Array(6);
-
-  for (let i = 0; i < 6; i++) {
-    if (i === 1) {
-      faceUV[i] = new Vector4(0, 0, 1, 1);
-    } else if (i === 0) {
-      faceUV[i] = new Vector4(0, 1, 1, 0);
-    } else {
-      faceUV[i] = new Vector4(0, 0, 0, 0);
-    }
-  }
-
-  albums.forEach((album, i) => {
-    // Our built-in 'box' shape.
-    const box = MeshBuilder.CreateBox(
-      album.uri, // name property
-      { width: 3, height: 3, depth: 0.1, faceUV },
-      scene,
-    );
-    const row = Math.floor(i / ALBUMS_PER_ROW);
-    Tags.EnableFor(box);
-    Tags.AddTagsTo(box, `${BOX_TAG}-row${row}`);
-
-    // position the box
-    box.position.x = (i % ALBUMS_PER_ROW) * BOX_WIDTH + row * 2;
-    box.position.y = BOX_SIZE / 2 + row * ROW_Y_SPACING;
-    box.position.z = row * ROW_Z_SPACING;
-
-    // add click action
-    box.actionManager = new ActionManager(scene);
-    box.actionManager.registerAction(
-      new ExecuteCodeAction(
-        {
-          trigger: ActionManager.OnLeftPickTrigger,
-        },
-        async () => await playAlbum(box.name, authToken, cookies, i, scene),
-      ),
-    );
-
-    const material = new StandardMaterial('material', scene);
-    const texture = new Texture(album.images[0].url, scene);
-    material.diffuseTexture = texture;
-    // material.specularColor = new Color3(0.0429, 0.307, 0.137);
-    box.material = material;
-
-    // create album reflection
-    // NOTE - this works but it might be slower than a single mirror mesh
-
-    // const mirrorMesh = MeshBuilder.CreateBox(
-    //   `mirrorMesh-${album.uri}`,
-    //   { width: BOX_SIZE, height: 0.01, depth: BOX_SIZE },
-    //   scene,
-    // );
-    // mirrorMesh.position = new Vector3(
-    //   box.position.x,
-    //   box.position.y - BOX_SIZE / 2,
-    //   box.position.z - BOX_SIZE / 2,
-    // );
-    // mirrorMesh.rotation = new Vector3(0, Math.PI, 0);
-    // const mirrorMaterial = new StandardMaterial('mirrorMaterial', scene);
-    // const reflectionTexture = new MirrorTexture(
-    //   `mirrorTexture-${album.uri}`,
-    //   { ratio: 0.5 },
-    //   scene,
-    //   true,
-    // );
-    // reflectionTexture.mirrorPlane = new Plane(0, -1.0, -1, 0);
-    // reflectionTexture.renderList = [box];
-    // reflectionTexture.adaptiveBlurKernel = 32;
-    // reflectionTexture.level = 1;
-
-    // mirrorMaterial.diffuseColor = new Color3(0, 0, 0);
-    // mirrorMaterial.specularColor = new Color3(0.15, 1.075, 0.48);
-    // material.useAlphaFromDiffuseTexture = true;
-    // mirrorMaterial.useSpecularOverAlpha = true;
-    // mirrorMaterial.indexOfRefraction = 0.52;
-    // mirrorMaterial.alpha = 0.01;
-    // mirrorMaterial.useReflectionOverAlpha = true;
-    // mirrorMaterial.reflectionTexture = reflectionTexture;
-    // mirrorMesh.material = mirrorMaterial;
-  });
-};
-
-const triggerSpotlight = async (
-  scene: Scene,
-  albums: SpotifyAlbum[],
-  authToken: string,
-) => {
-  const response = await clientSpotifyFetch('me/player', {
-    headers: {
-      Authorization: authToken,
-    },
-  });
-
-  // ignore too many requests responses
-  if (response.status === 429) {
-    return;
-  }
-
-  if (response.status !== 200 && response.status !== 429) {
-    return;
-  }
-
-  const data: SpotifyPlayerTrack = await response?.json();
-
-  if (!data.is_playing) {
-    return;
-  }
-
-  const albumId = data.item.album.id;
-  const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
-  if (indexOfPlaying > -1) {
-    shineSpotlight(scene, indexOfPlaying, data.item.album.uri);
-  }
-};
-
 const createFloor = (scene: Scene, albumCount: number) => {
   const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
 
@@ -369,21 +225,6 @@ const createFloor = (scene: Scene, albumCount: number) => {
   });
 };
 
-const onSceneReady = (
-  scene: Scene,
-  albums: SpotifyAlbum[],
-  authToken: string,
-  cookies: Cookies,
-) => {
-  createScene(scene);
-
-  addAlbums(scene, albums, authToken, cookies);
-
-  triggerSpotlight(scene, albums, authToken);
-
-  // createFloor(scene, albums.length);
-};
-
 export default function BabylonAlbumsDisplay({
   albums,
   loading,
@@ -392,14 +233,170 @@ export default function BabylonAlbumsDisplay({
   const authToken = useGetAuthToken();
   const cookies = useCookies();
   const [ready, setReady] = useState(false);
+  const [showNoDeviceToast, setShowNoDeviceToast] = useState(false);
 
-  const handleSceneReady = useCallback(
-    (scene: Scene) => {
-      setReady(true);
-      onSceneReady(scene, albums, authToken, cookies);
+  const playAlbum = useCallback(
+    async (spotifyId: string, albumIndex: number, scene: Scene) => {
+      // this line is causing massive rerenders of the canvas and no idea why just yet, so using
+      // cookies which are updated every poll of currently playing:
+      // const { id: deviceId } = await getActiveDevice();
+
+      const deviceId = cookies.get('active-device-id');
+
+      const response = await clientSpotifyFetch(
+        `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            context_uri: spotifyId,
+          }),
+          headers: {
+            Authorization: authToken,
+          },
+        },
+      );
+
+      if (response.status === 404) {
+        alert('start play somewhere');
+      }
+
+      shineSpotlight(scene, albumIndex, spotifyId);
     },
-    [albums, authToken, cookies],
+    [cookies],
   );
+
+  const addAlbums = useCallback(
+    (scene: Scene) => {
+      if (!scene) {
+        return;
+      }
+
+      const faceUV: Vector4[] = new Array(6);
+
+      for (let i = 0; i < 6; i++) {
+        if (i === 1) {
+          faceUV[i] = new Vector4(0, 0, 1, 1);
+        } else if (i === 0) {
+          faceUV[i] = new Vector4(0, 1, 1, 0);
+        } else {
+          faceUV[i] = new Vector4(0, 0, 0, 0);
+        }
+      }
+
+      albums.forEach((album, i) => {
+        // Our built-in 'box' shape.
+        const box = MeshBuilder.CreateBox(
+          album.uri, // name property
+          { width: 3, height: 3, depth: 0.1, faceUV },
+          scene,
+        );
+        const row = Math.floor(i / ALBUMS_PER_ROW);
+        Tags.EnableFor(box);
+        Tags.AddTagsTo(box, `${BOX_TAG}-row${row}`);
+
+        // position the box
+        box.position.x = (i % ALBUMS_PER_ROW) * BOX_WIDTH + row * 2;
+        box.position.y = BOX_SIZE / 2 + row * ROW_Y_SPACING;
+        box.position.z = row * ROW_Z_SPACING;
+        box.alwaysSelectAsActiveMesh = true;
+
+        // add click action
+        box.actionManager = new ActionManager(scene);
+        box.actionManager.registerAction(
+          new ExecuteCodeAction(
+            {
+              trigger: ActionManager.OnPickTrigger,
+            },
+            async () => await playAlbum(box.name, i, scene),
+          ),
+        );
+
+        const material = new StandardMaterial('material', scene);
+        const texture = new Texture(album.images[0].url, scene);
+        material.diffuseTexture = texture;
+        material.backFaceCulling = true;
+        // material.specularColor = new Color3(0.0429, 0.307, 0.137);
+        box.material = material;
+
+        // create album reflection
+        // NOTE - this works but it might be slower than a single mirror mesh
+
+        // const mirrorMesh = MeshBuilder.CreateBox(
+        //   `mirrorMesh-${album.uri}`,
+        //   { width: BOX_SIZE, height: 0.01, depth: BOX_SIZE },
+        //   scene,
+        // );
+        // mirrorMesh.position = new Vector3(
+        //   box.position.x,
+        //   box.position.y - BOX_SIZE / 2,
+        //   box.position.z - BOX_SIZE / 2,
+        // );
+        // mirrorMesh.rotation = new Vector3(0, Math.PI, 0);
+        // const mirrorMaterial = new StandardMaterial('mirrorMaterial', scene);
+        // const reflectionTexture = new MirrorTexture(
+        //   `mirrorTexture-${album.uri}`,
+        //   { ratio: 0.5 },
+        //   scene,
+        //   true,
+        // );
+        // reflectionTexture.mirrorPlane = new Plane(0, -1.0, -1, 0);
+        // reflectionTexture.renderList = [box];
+        // reflectionTexture.adaptiveBlurKernel = 32;
+        // reflectionTexture.level = 1;
+
+        // mirrorMaterial.diffuseColor = new Color3(0, 0, 0);
+        // mirrorMaterial.specularColor = new Color3(0.15, 1.075, 0.48);
+        // material.useAlphaFromDiffuseTexture = true;
+        // mirrorMaterial.useSpecularOverAlpha = true;
+        // mirrorMaterial.indexOfRefraction = 0.52;
+        // mirrorMaterial.alpha = 0.01;
+        // mirrorMaterial.useReflectionOverAlpha = true;
+        // mirrorMaterial.reflectionTexture = reflectionTexture;
+        // mirrorMesh.material = mirrorMaterial;
+      });
+    },
+    [albums],
+  );
+
+  const triggerSpotlight = useCallback(
+    async (scene: Scene) => {
+      const response = await clientSpotifyFetch('me/player', {
+        headers: {
+          Authorization: authToken,
+        },
+      });
+
+      // ignore too many requests responses
+      if (response.status === 429) {
+        return;
+      }
+
+      if (response.status !== 200 && response.status !== 429) {
+        return;
+      }
+
+      const data: SpotifyPlayerTrack = await response?.json();
+
+      if (!data.is_playing) {
+        return;
+      }
+
+      const albumId = data.item.album.id;
+      const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
+      if (indexOfPlaying > -1) {
+        shineSpotlight(scene, indexOfPlaying, data.item.album.uri);
+      }
+    },
+    [albums, authToken],
+  );
+
+  const handleSceneReady = useCallback((scene: Scene) => {
+    setReady(true);
+    createScene(scene);
+    addAlbums(scene);
+    triggerSpotlight(scene);
+    // createFloor(scene, albums.length);
+  }, []);
 
   return (
     <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>

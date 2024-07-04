@@ -31,6 +31,8 @@ export default function DualModeAlbumsDisplay({
     }
   }, []);
 
+  const playAlbum = (spotifyId) => {};
+
   return (
     <div>
       <Toggle
