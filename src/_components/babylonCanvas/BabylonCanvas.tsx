@@ -11,10 +11,12 @@ import {
   SceneOptions,
 } from '@babylonjs/core';
 import { Dimensions } from '@/types';
+import classNames from 'classnames';
 
 interface BabylonCanvasProps extends Record<string, any> {
   antialias?: boolean;
   adaptToDeviceRatio?: boolean;
+  hideCanvas?: boolean;
   engineOptions?: EngineOptions;
   sceneOptions?: SceneOptions;
   onRender: (scene: Scene) => void;
@@ -28,8 +30,9 @@ interface BabylonCanvasProps extends Record<string, any> {
 export default function BabylonCanvas({
   antialias,
   engineOptions = {},
-  adaptToDeviceRatio,
+  adaptToDeviceRatio = true,
   sceneOptions = {},
+  hideCanvas,
   onRender,
   onSceneReady,
   onPointerObservable,
@@ -100,7 +103,7 @@ export default function BabylonCanvas({
 
   return (
     <canvas
-      className="outline-none"
+      className={classNames('outline-none', { 'opacity-0': hideCanvas })}
       width={dimensions.width}
       height={dimensions.height}
       ref={reactCanvas}

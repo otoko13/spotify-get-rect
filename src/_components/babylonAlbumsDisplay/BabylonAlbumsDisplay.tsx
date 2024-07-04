@@ -448,6 +448,7 @@ export default function BabylonAlbumsDisplay({
         </div>
       )}
       <BabylonCanvas
+        hideCanvas={loading}
         onSceneReady={handleSceneReady}
         onRender={onRender}
         id="my-canvas"
