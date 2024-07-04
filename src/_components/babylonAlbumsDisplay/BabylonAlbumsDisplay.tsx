@@ -20,15 +20,16 @@ import {
   FramingBehavior,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { Cookies, useCookies } from 'next-client-cookies';
 import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
 
 interface BabylonAlbumsDisplayProps {
-  albums: SpotifyAlbum[];
+  albums?: SpotifyAlbum[];
   loading?: boolean;
+  noMoreAlbums?: boolean;
   onLoadMoreButtonClicked: () => void;
 }
 
@@ -40,6 +41,8 @@ const ALBUMS_PER_ROW = 24;
 const ROW_Z_SPACING = 6;
 const ROW_Y_SPACING = 4;
 const SPOTIFY_COLOR = new Color3(30, 215, 96);
+
+let scene: Scene;
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -73,8 +76,8 @@ const createScene = (scene: Scene) => {
   camera.setTarget(Vector3.Zero());
   // camera.upperRadiusLimit = 50;
   // camera.upperBetaLimit = (2 * Math.PI) / 3;
-  camera.wheelPrecision = 80;
-  camera.minZ = 0.1;
+  camera.wheelPrecision = 60;
+  camera.minZ = 0.001;
   camera.maxZ = 1000;
   camera.useFramingBehavior = true;
   (camera.framingBehavior as FramingBehavior).mode =
@@ -95,11 +98,12 @@ const createScene = (scene: Scene) => {
   topLight.intensity = 0.4;
 };
 
-const shineSpotlight = (
-  scene: Scene,
-  albumIndex: number,
-  spotifyId: string,
-) => {
+interface ShineSpotlightArgs {
+  albumIndex: number;
+  spotifyId: string;
+}
+
+const shineSpotlight = ({ albumIndex, spotifyId }: ShineSpotlightArgs) => {
   const existingLight = scene.getLightByName('spot');
 
   if (existingLight) {
@@ -230,14 +234,12 @@ interface PlayAlbumsArgs {
   cookies: Cookies;
   spotifyId: string;
   albumIndex: number;
-  scene: Scene;
 }
 
 const playAlbum = async ({
   authToken,
   spotifyId,
   albumIndex,
-  scene,
   cookies,
 }: PlayAlbumsArgs) => {
   // this line is causing massive rerenders of the canvas and no idea why just yet, so using
@@ -263,17 +265,16 @@ const playAlbum = async ({
     alert('start play somewhere');
   }
 
-  shineSpotlight(scene, albumIndex, spotifyId);
+  shineSpotlight({ albumIndex, spotifyId });
 };
 
 interface AddAlbumsArgs {
   cookies: Cookies;
   authToken: string;
   albums: SpotifyAlbum[];
-  scene: Scene;
 }
 
-const addAlbums = ({ scene, albums, authToken, cookies }: AddAlbumsArgs) => {
+const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
   if (!scene) {
     return;
   }
@@ -319,7 +320,6 @@ const addAlbums = ({ scene, albums, authToken, cookies }: AddAlbumsArgs) => {
             spotifyId: box.name,
             albumIndex: i,
             cookies,
-            scene,
             authToken,
           }),
       ),
@@ -372,13 +372,11 @@ const addAlbums = ({ scene, albums, authToken, cookies }: AddAlbumsArgs) => {
 
 interface TriggerSpotlightArgs {
   albums: SpotifyAlbum[];
-  scene: Scene;
   authToken: string;
 }
 
 const triggerSpotlight = async ({
   albums,
-  scene,
   authToken,
 }: TriggerSpotlightArgs) => {
   const response = await clientSpotifyFetch('me/player', {
@@ -405,15 +403,19 @@ const triggerSpotlight = async ({
   const albumId = data.item.album.id;
   const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
   if (indexOfPlaying > -1) {
-    shineSpotlight(scene, indexOfPlaying, data.item.album.uri);
+    shineSpotlight({
+      albumIndex: indexOfPlaying,
+      spotifyId: data.item.album.uri,
+    });
   }
 };
 
-let scene: Scene;
+let displayedAlbums: SpotifyAlbum[] = [];
 
 export default function BabylonAlbumsDisplay({
-  albums,
+  albums = [],
   loading,
+  noMoreAlbums,
   onLoadMoreButtonClicked,
 }: BabylonAlbumsDisplayProps) {
   const authToken = useGetAuthToken();
@@ -425,12 +427,18 @@ export default function BabylonAlbumsDisplay({
       setReady(true);
       scene = newScene;
       createScene(scene);
-      addAlbums({ scene, albums, authToken, cookies });
-      triggerSpotlight({ scene, albums, authToken });
+      addAlbums({ albums, authToken, cookies });
+      triggerSpotlight({ albums, authToken });
+      displayedAlbums = albums;
       // createFloor(scene, albums.length);
     },
     [albums],
   );
+
+  useEffect(() => {
+    const newAlbums = albums.splice(displayedAlbums.length);
+    addAlbums({ albums: newAlbums, authToken, cookies });
+  }, [albums]);
 
   return (
     <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>
@@ -439,17 +447,14 @@ export default function BabylonAlbumsDisplay({
           <div className="loading loading-bars loading-lg text-primary absolute" />
         </div>
       )}
-      {!loading && (
-        <BabylonCanvas
-          antialias
-          onSceneReady={handleSceneReady}
-          onRender={onRender}
-          id="my-canvas"
-        />
-      )}
+      <BabylonCanvas
+        onSceneReady={handleSceneReady}
+        onRender={onRender}
+        id="my-canvas"
+      />
       <CanvasLoadMoreButton
         onClick={onLoadMoreButtonClicked}
-        disabled={loading || !ready}
+        disabled={loading || !ready || noMoreAlbums}
       />
     </div>
   );

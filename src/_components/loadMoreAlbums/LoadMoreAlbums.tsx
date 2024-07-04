@@ -24,6 +24,9 @@ export default function LoadMoreAlbums({
 
   const fetchMoreAlbums = useCallback(
     async (url: string) => {
+      if (urlsFetched.includes(url)) {
+        return;
+      }
       setLoading(true);
       setUrlsFetched((fetchedUrls) => [...fetchedUrls, url]);
       const response = await fetch(url, {
@@ -43,7 +46,7 @@ export default function LoadMoreAlbums({
         return;
       }
 
-      setFetchUrl(data.next);
+      setFetchUrl(data.next !== url ? data.next : undefined);
 
       const sortedAlbums: SpotifyAlbum[] = data.items
         .sort(
@@ -93,6 +96,7 @@ export default function LoadMoreAlbums({
     <DualModeAlbumsDisplay
       albums={albums}
       loading={loading}
+      noMoreAlbums={!fetchUrl}
       fetchMoreForCanvas={fetchMoreForCanvas}
     />
   );

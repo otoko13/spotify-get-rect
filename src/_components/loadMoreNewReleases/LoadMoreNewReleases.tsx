@@ -15,12 +15,14 @@ export default function LoadMoreNewReleases({
   const [loading, setLoading] = useState(false);
   const [urlsFetched, setUrlsFetched] = useState<string[]>([]);
   const [albums, setAlbums] = useState<SpotifyAlbum[]>(initialAlbums);
-  const [use3D, setUse3D] = useState(true);
 
   const authToken = useGetAuthToken();
 
   const fetchMoreAlbums = useCallback(
     async (url: string) => {
+      if (urlsFetched.includes(url)) {
+        return;
+      }
       setLoading(true);
       setUrlsFetched((fetchedUrls) => [...fetchedUrls, url]);
       const response = await fetch(url, {
@@ -40,7 +42,7 @@ export default function LoadMoreNewReleases({
         return;
       }
 
-      setFetchUrl(data.next);
+      setFetchUrl(data.next !== url ? data.next : undefined);
 
       const sortedAlbums: SpotifyAlbum[] = data.albums.items.filter(
         (a: SpotifyAlbum) => a.album_type !== 'single',
@@ -68,6 +70,7 @@ export default function LoadMoreNewReleases({
     <DualModeAlbumsDisplay
       albums={albums}
       loading={loading}
+      noMoreAlbums={!fetchUrl}
       fetchMoreForCanvas={fetchMoreForCanvas}
     />
   );

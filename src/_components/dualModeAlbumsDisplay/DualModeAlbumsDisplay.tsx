@@ -12,12 +12,14 @@ interface DualModeAlbumsDisplayProps {
   albums: SpotifyAlbum[];
   fetchMoreForCanvas: () => void;
   loading: boolean;
+  noMoreAlbums?: boolean;
 }
 
 export default function DualModeAlbumsDisplay({
   albums,
   fetchMoreForCanvas,
   loading,
+  noMoreAlbums,
 }: DualModeAlbumsDisplayProps) {
   const cookies = useCookies();
   const [use3D, setUse3D] = useState(Boolean(cookies.get('use-3d')));
@@ -45,6 +47,7 @@ export default function DualModeAlbumsDisplay({
         <BabylonAlbumsDisplay
           albums={albums}
           loading={loading}
+          noMoreAlbums={!!noMoreAlbums}
           onLoadMoreButtonClicked={fetchMoreForCanvas}
         />
       ) : (
