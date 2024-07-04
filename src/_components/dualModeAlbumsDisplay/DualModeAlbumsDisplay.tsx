@@ -31,7 +31,7 @@ export default function DualModeAlbumsDisplay({
     }
   }, []);
 
-  const playAlbum = (spotifyId) => {};
+  // const playAlbum = useCallback((spotifyId: string) => {}, []);
 
   return (
     <div>

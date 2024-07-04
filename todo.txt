@@ -1,5 +1,7 @@
 1 - element disappears when zooming
 
+load more broken
+
 1 - try to refactor so play method comes from outside the babylon component, 
 but this might cause a rerender when you play albums like before
 
