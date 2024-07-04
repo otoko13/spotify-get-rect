@@ -1,16 +1,13 @@
-1 - element disappears when zooming
+SDK:
+  - remove listener
+  - add device id cookie
+  - change play code
 
 1 - try to refactor so play method comes from outside the babylon component, 
 but this might cause a rerender when you play albums like before
 
-2 - sdk
-
-6 - alert when no device
-
 2 - Linting:
   - eslint-plugin-react
-
-7 - use SDK 
 
 8 - mobile friendly
 

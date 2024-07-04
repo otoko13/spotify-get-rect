@@ -10,6 +10,7 @@ import styles from './currentlyPlaying.module.scss';
 import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
+import { useCookies } from 'next-client-cookies';
 
 interface SpotifyDeviceSimple {
   id: string;
@@ -22,6 +23,8 @@ const CurrentlyPlaying = () => {
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
   const [device, setDevice] = useState<SpotifyDeviceSimple>();
+
+  const cookies = useCookies();
 
   const getActiveDevice = useGetActiveDevice();
 
@@ -112,6 +115,27 @@ const CurrentlyPlaying = () => {
 
     return () => clearInterval(interval);
   }, [getPlayData]);
+
+  useEffect(() => {
+    (window as any).onSpotifyWebPlaybackSDKReady = () => {
+      const player = new Spotify.Player({
+        name: 'Get Rect Player',
+        getOAuthToken: (cb: any) => {
+          cb(cookies.get('spotify-auth-token'));
+        },
+        volume: 0.5,
+      });
+
+      player.addListener('ready', ({ device_id }: { device_id: string }) => {
+        console.log('Ready with Device ID', device_id);
+      });
+
+      player.connect();
+
+      // once connected put this device_id in a cookie, and use it whenever we play and there
+      // is no other device id!
+    };
+  }, []);
 
   return (
     <>

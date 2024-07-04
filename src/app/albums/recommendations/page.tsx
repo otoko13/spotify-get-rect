@@ -3,7 +3,7 @@ import { serverSpotifyFetch } from '@/_utils/serverUtils';
 import { getAuthToken } from '@/_utils/serverUtils';
 import { SpotifyAlbum, SpotifyTrack } from '@/types';
 
-export default async function RecommendedAlbumsPage({}: {}) {
+export default async function RecommendationsPage({}: {}) {
   const randomOffset = Math.floor(Math.random() * 100);
 
   const response = await serverSpotifyFetch(

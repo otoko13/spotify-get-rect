@@ -5,6 +5,7 @@ import { authorize } from './authorize';
 import classnames from 'classnames';
 import localFont from 'next/font/local';
 import { CookiesProvider } from 'next-client-cookies/server';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -33,7 +34,12 @@ export default async function RootLayout({
           'bg-none',
         )}
       >
-        <CookiesProvider>{children}</CookiesProvider>
+        <CookiesProvider>
+          <>
+            {children}
+            <Script src="https://sdk.scdn.co/spotify-player.js" />
+          </>
+        </CookiesProvider>
       </body>
     </html>
   );
