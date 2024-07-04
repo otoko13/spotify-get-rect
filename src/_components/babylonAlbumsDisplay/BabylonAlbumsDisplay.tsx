@@ -18,6 +18,10 @@ import {
   Matrix,
   Mesh,
   FramingBehavior,
+  Viewport,
+  AbstractMesh,
+  ScenePerformancePriority,
+  Camera,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useEffect, useState } from 'react';
@@ -43,6 +47,7 @@ const ROW_Y_SPACING = 4;
 const SPOTIFY_COLOR = new Color3(30, 215, 96);
 
 let scene: Scene;
+let camera: ArcRotateCamera;
 
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
@@ -56,14 +61,20 @@ const onRender = (scene: Scene) => {
   // box.rotation.y += (rpm / 60) * Math.PI * 2 * (deltaTimeInMillis / 1000);
 };
 
-const createScene = (scene: Scene) => {
+const setCameraTarget = (albumCount: number) => {
+  const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
+  const depth = rows * ROW_Z_SPACING;
+  camera.setTarget(new Vector3(0, 0, depth));
+};
+
+const createScene = (scene: Scene, albumCount: number) => {
   // scene.fogMode = Scene.FOGMODE_LINEAR;
   // scene.fogDensity = 1;
   // scene.fogStart = 200;
   // scene.fogEnd = 300;
   // scene.fogColor = new Color3(0.03, 0.115, 0.096);
 
-  const camera = new ArcRotateCamera(
+  camera = new ArcRotateCamera(
     'camera1',
     0,
     0.01,
@@ -72,16 +83,14 @@ const createScene = (scene: Scene) => {
     new Vector3(-10, 2, -15),
     scene,
   );
+  setCameraTarget(albumCount);
 
-  camera.setTarget(Vector3.Zero());
-  // camera.upperRadiusLimit = 50;
+  camera.upperRadiusLimit = 100;
   // camera.upperBetaLimit = (2 * Math.PI) / 3;
-  camera.wheelPrecision = 60;
+  camera.wheelDeltaPercentage = 0.01;
   camera.minZ = 0.001;
   camera.maxZ = 1000;
-  camera.useFramingBehavior = true;
-  (camera.framingBehavior as FramingBehavior).mode =
-    FramingBehavior.IgnoreBoundsSizeMode;
+  camera.panningSensibility = 500;
 
   const canvas = scene.getEngine().getRenderingCanvas();
 
@@ -324,6 +333,7 @@ const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
           }),
       ),
     );
+    box.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_OPTIMISTIC_INCLUSION;
 
     const material = new StandardMaterial('material', scene);
     const texture = new Texture(album.images[0].url, scene);
@@ -426,7 +436,7 @@ export default function BabylonAlbumsDisplay({
     (newScene: Scene) => {
       setReady(true);
       scene = newScene;
-      createScene(scene);
+      createScene(scene, albums.length);
       addAlbums({ albums, authToken, cookies });
       triggerSpotlight({ albums, authToken });
       displayedAlbums = albums;
@@ -438,6 +448,7 @@ export default function BabylonAlbumsDisplay({
   useEffect(() => {
     const newAlbums = albums.splice(displayedAlbums.length);
     addAlbums({ albums: newAlbums, authToken, cookies });
+    // setCameraTarget(albums.length);
   }, [albums]);
 
   return (
