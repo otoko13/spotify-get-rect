@@ -69,7 +69,7 @@ export default function LoadMoreAlbums({
       setLoading(false);
       setAlbums((albums) => [...albums, ...recommendations]);
     },
-    [authToken],
+    [authToken, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({
@@ -82,7 +82,7 @@ export default function LoadMoreAlbums({
     if (fetchUrl) {
       fetchMoreAlbums(fetchUrl);
     }
-  }, []);
+  }, [fetchMoreAlbums, fetchUrl]);
 
   return (
     <DualModeAlbumsDisplay

@@ -51,7 +51,7 @@ export default function LoadMoreNewReleases({
       setLoading(false);
       setAlbums((albums) => [...albums, ...sortedAlbums]);
     },
-    [authToken],
+    [authToken, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({
@@ -64,7 +64,7 @@ export default function LoadMoreNewReleases({
     if (fetchUrl) {
       fetchMoreAlbums(fetchUrl);
     }
-  }, []);
+  }, [fetchMoreAlbums, fetchUrl]);
 
   return (
     <DualModeAlbumsDisplay

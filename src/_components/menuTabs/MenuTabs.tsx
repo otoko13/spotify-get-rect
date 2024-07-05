@@ -7,8 +7,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import logoPic from '/src/_images/Spotify_Primary_Logo_RGB_Green.png';
 import Link from 'next/link';
+import DesktopLinks from './DesktopLinks';
+import MobileLinks from './MobileLinks';
 
-interface MenuTab {
+export interface MenuTab {
   label: string;
   path: string;
 }
@@ -20,8 +22,6 @@ interface MenuTabsProps {
 
 export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
   const [scrolled, setScrolled] = useState(false);
-  const path = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = (event: Event) => {
@@ -58,21 +58,8 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
             [styles.tabs]: scrolled,
           })}
         >
-          {tabs.map((tab) => (
-            <a
-              key={tab.label}
-              role="tab"
-              className={classNames('tab text-current', styles['custom-tab'])}
-              onClick={() => router.push(tab.path)}
-            >
-              <div
-                className={classNames([styles['show-indicator']], {
-                  [styles.display]: path === tab.path,
-                })}
-              />
-              {tab.label}
-            </a>
-          ))}
+          <DesktopLinks className="max-lg:hidden visible" tabs={tabs} />
+          <MobileLinks className="md:visible lg:hidden" tabs={tabs} />
         </div>
         <div className="avatar mr-4 flex-grow justify-end">
           <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">

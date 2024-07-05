@@ -253,7 +253,7 @@ const CurrentlyPlaying = () => {
             )}
           </div>
           <div className="flex flex-col ml-4 justify-center">
-            <div className="text-xl">{track?.item.name}</div>
+            <div className="lg:text-xl md:text-lg">{track?.item.name}</div>
             <div className="text-sm text-slate-300">
               {track?.item.artists.map((artist) => artist.name).join(', ')}
             </div>
@@ -262,8 +262,9 @@ const CurrentlyPlaying = () => {
         <div className="controls flex items-center">
           {device?.name !== THIS_DEVICE_PLAYER_NAME && (
             <TransferPlaybackDropdown>
-              <div className="text-sm text-primary mr-4">
-                Playing on {device?.name}
+              <div className="text-sm text-primary mr-4 ">
+                <span className="max-lg:hidden visible">Playing on </span>
+                {device?.name}
               </div>
             </TransferPlaybackDropdown>
           )}

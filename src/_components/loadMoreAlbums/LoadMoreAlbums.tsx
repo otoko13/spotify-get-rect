@@ -61,7 +61,7 @@ export default function LoadMoreAlbums({
       setLoading(false);
       setAlbums((albums) => [...albums, ...sortedAlbums]);
     },
-    [authToken],
+    [authToken, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({

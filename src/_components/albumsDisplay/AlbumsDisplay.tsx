@@ -9,7 +9,7 @@ interface AlbumsDisplayProps {
 
 export default function AlbumsDisplay({ albums }: AlbumsDisplayProps) {
   return (
-    <div className="grid grid-cols-6 gap-10 mb-10 p-4">
+    <div className="grid max-md:grid-cols-2 grid-cols-6 max-md:gap-4 gap-10 mb-10 p-4">
       {albums.map((album) => (
         <Album key={album.id} album={album} />
       ))}

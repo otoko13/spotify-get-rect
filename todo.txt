@@ -1,17 +1,9 @@
-
-1 - try to refactor so play method comes from outside the babylon component, 
-but this might cause a rerender when you play albums like before
+- extra tabs - random albums, audibooks, playlists
+- handle audiobooks
 
 2 - Linting:
   - eslint-plugin-react
 
-8 - mobile friendly
-
-- extra tabs - random albums, audibooks, playlists
-- handle audiobooks
-
 - too many requests error page
 
 - visualiser
-
-- title metadata
