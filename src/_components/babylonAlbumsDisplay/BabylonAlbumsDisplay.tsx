@@ -255,7 +255,8 @@ const playAlbum = async ({
   // cookies which are updated every poll of currently playing:
   // const { id: deviceId } = await getActiveDevice();
 
-  const deviceId = cookies.get('active-device-id');
+  const deviceId =
+    cookies.get('active-device-id') ?? cookies.get('this-device-id');
 
   const response = await clientSpotifyFetch(
     `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
@@ -269,10 +270,6 @@ const playAlbum = async ({
       },
     },
   );
-
-  if (response.status === 404) {
-    alert('start play somewhere');
-  }
 
   shineSpotlight({ albumIndex, spotifyId });
 };
@@ -442,14 +439,14 @@ export default function BabylonAlbumsDisplay({
       displayedAlbums = albums;
       // createFloor(scene, albums.length);
     },
-    [albums],
+    [albums, authToken, cookies],
   );
 
   useEffect(() => {
     const newAlbums = albums.splice(displayedAlbums.length);
     addAlbums({ albums: newAlbums, authToken, cookies });
     // setCameraTarget(albums.length);
-  }, [albums]);
+  }, [albums, authToken, cookies]);
 
   return (
     <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>

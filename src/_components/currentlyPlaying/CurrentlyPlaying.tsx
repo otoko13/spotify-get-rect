@@ -2,7 +2,7 @@
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyPlayerTrack } from '@/types';
+import { SpotifyPlayerTrack, SpotifyTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
@@ -11,11 +11,30 @@ import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 import { useCookies } from 'next-client-cookies';
+import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
+
+const THIS_DEVICE_PLAYER_NAME = 'Spotify Get Rect';
 
 interface SpotifyDeviceSimple {
   id: string;
   name: string;
 }
+
+const convertSdkTrackToApiTrack = (
+  sdkTrack: Spotify.Track,
+): SpotifyPlayerTrack =>
+  ({
+    item: {
+      album: sdkTrack.album,
+      artists: sdkTrack.artists.map((sdkArtist) => ({
+        uri: sdkArtist.uri,
+        name: sdkArtist.name,
+      })),
+      id: sdkTrack.id,
+      name: sdkTrack.name,
+      uri: sdkTrack.uri,
+    },
+  } as SpotifyPlayerTrack);
 
 const CurrentlyPlaying = () => {
   const authToken = useGetAuthToken();
@@ -28,16 +47,32 @@ const CurrentlyPlaying = () => {
 
   const getActiveDevice = useGetActiveDevice();
 
-  const getPlayData = useCallback(async () => {
-    const { id, name } = await getActiveDevice();
-    if (id && name) {
-      setDevice({ id, name });
-    }
+  const updateTracks = useCallback(
+    (newTrack: SpotifyPlayerTrack) => {
+      if (!track) {
+        setTrack(newTrack);
+        return;
+      }
 
+      // keep the last track so we can fade out its image
+      if (track && track?.item.album.id !== newTrack.item.album.id) {
+        setLastTrack(track);
+      }
+      // only set the track if it has changed, otherwise we trigger
+      // rerenders with the state change
+      if (track.item.id !== newTrack.item.id) {
+        setTrack(newTrack);
+      }
+    },
+    [track],
+  );
+
+  const getPlayData = useCallback(async () => {
     const response = await clientSpotifyFetch('me/player', {
       headers: {
         Authorization: authToken,
       },
+      method: 'GET',
     });
 
     // ignore too many requests responses
@@ -45,40 +80,40 @@ const CurrentlyPlaying = () => {
       return;
     }
 
-    if (response.status !== 200 && response.status !== 429) {
+    if (response.status !== 200) {
       setTrackStopped(true);
       return;
     }
 
+    const thisDeviceId = cookies.get('this-device-id');
+
     const data: SpotifyPlayerTrack = await response?.json();
+
+    if (data.device) {
+      if (device?.id !== data.device.id) {
+        setDevice({
+          id: data.device.id,
+          name: data.device.name,
+        });
+      }
+
+      if (data.device.id === thisDeviceId) {
+        // rely on the web playback sdk to change track data and playback status instead
+        return;
+      }
+    }
 
     if (data.is_playing) {
       setTrackStopped(false);
 
-      if (!track) {
-        setTrack(data);
-        return;
-      }
-
-      // keep the last track so we can fade out its image
-      if (track && track?.item.album.id !== data.item.album.id) {
-        setLastTrack(track);
-      }
-      // only set the track if it has changed, otherwise we trigger
-      // rerenders with the state change
-      if (track.item.id !== data.item.id) {
-        setTrack(data);
-      }
+      updateTracks(data);
     } else {
       setTrackStopped(true);
     }
-  }, [authToken, getActiveDevice, track]);
+  }, [authToken, cookies, device?.id, updateTracks]);
 
   const handlePlay = useCallback(async () => {
-    const { id, name } = await getActiveDevice();
-    if (id && name) {
-      setDevice({ id, name });
-    }
+    const { id } = await getActiveDevice();
 
     const deviceToUse = id ?? device?.id;
 
@@ -119,7 +154,7 @@ const CurrentlyPlaying = () => {
   useEffect(() => {
     (window as any).onSpotifyWebPlaybackSDKReady = () => {
       const player = new Spotify.Player({
-        name: 'Get Rect Player',
+        name: THIS_DEVICE_PLAYER_NAME,
         getOAuthToken: (cb: any) => {
           cb(cookies.get('spotify-auth-token'));
         },
@@ -127,15 +162,34 @@ const CurrentlyPlaying = () => {
       });
 
       player.addListener('ready', ({ device_id }: { device_id: string }) => {
-        console.log('Ready with Device ID', device_id);
+        console.log(
+          'Spotify Web Playback SDK ready with Device ID ',
+          device_id,
+        );
+        cookies.set('this-device-id', device_id);
       });
+
+      player.addListener(
+        'player_state_changed',
+        ({ paused, track_window: { current_track } }) => {
+          setTrackStopped(!!paused);
+
+          const convertedTrack = convertSdkTrackToApiTrack(current_track);
+
+          updateTracks(convertedTrack);
+        },
+      );
 
       player.connect();
 
-      // once connected put this device_id in a cookie, and use it whenever we play and there
-      // is no other device id!
+      return () => {
+        cookies.remove('this-device-id');
+        player.removeListener('ready');
+        player.removeListener('player_state_changed');
+        player.disconnect();
+      };
     };
-  }, []);
+  }, [cookies, updateTracks]);
 
   return (
     <>
@@ -198,10 +252,12 @@ const CurrentlyPlaying = () => {
           </div>
         </div>
         <div className="controls flex items-center">
-          {device?.name && (
-            <div className="text-sm text-slate-300 mr-4">
-              Playing on {device?.name}
-            </div>
+          {device?.name !== THIS_DEVICE_PLAYER_NAME && (
+            <TransferPlaybackDropdown>
+              <div className="text-sm text-primary mr-4">
+                Playing on {device?.name}
+              </div>
+            </TransferPlaybackDropdown>
           )}
           {trackStopped ? (
             <button onClick={handlePlay}>

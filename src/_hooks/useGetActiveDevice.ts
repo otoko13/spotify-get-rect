@@ -23,19 +23,32 @@ const useGetActiveDevice = () => {
     const devicesData = await devicesResponse.json();
     const { devices }: { devices: SpotifyDevice[] } = devicesData;
 
-    if (!devices?.length) {
+    // if no devices returned, check if we have an id for this device
+    if (!devices?.length && cookies.get('this-device-id')) {
       return {
-        name: cookies.get('active-device-name'),
-        id: cookies.get('active-device-id'),
+        name: cookies.get('this-device-name'),
+        id: cookies.get('this-device-id'),
       };
     }
 
-    const activeDevice = devices.find((d) => d.is_active) ?? devices[0];
-    cookies.set('active-device-id', activeDevice.id);
-    cookies.set('active-device-name', activeDevice.name);
+    // if we do have an active device, use that
+    const activeDevice = devices.find((d) => d.is_active);
+    if (activeDevice) {
+      cookies.set('active-device-id', activeDevice.id);
+      cookies.set('active-device-name', activeDevice.name);
+      return {
+        name: activeDevice.name,
+        id: activeDevice.id,
+      };
+    } else {
+      cookies.remove('active-device-id');
+      cookies.remove('active-device-name');
+    }
+
+    // if no active devices elsewhere, return this device, which might be empty
     return {
-      name: activeDevice.name,
-      id: activeDevice.id,
+      id: cookies.get('this-device-id'),
+      name: cookies.get('this-device-id'),
     };
   }, [authToken, cookies]);
 
