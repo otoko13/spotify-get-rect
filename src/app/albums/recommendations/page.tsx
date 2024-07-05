@@ -2,6 +2,12 @@ import LoadMoreRecommendations from '@/_components/loadMoreRecommendations/LoadM
 import { serverSpotifyFetch } from '@/_utils/serverUtils';
 import { getAuthToken } from '@/_utils/serverUtils';
 import { SpotifyAlbum, SpotifyTrack } from '@/types';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Recommendations',
+  description: 'Recommendations for you from Spotify',
+};
 
 export default async function RecommendationsPage({}: {}) {
   const randomOffset = Math.floor(Math.random() * 100);

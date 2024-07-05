@@ -2,6 +2,12 @@ import LoadMoreAlbums from '@/_components/loadMoreAlbums/LoadMoreAlbums';
 import { serverSpotifyFetch } from '@/_utils/serverUtils';
 import { getAuthToken } from '@/_utils/serverUtils';
 import { SpotifyAlbum } from '@/types';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Saved Albums',
+  description: 'Your latest liked albums in Spotify',
+};
 
 export default async function SavedAlbumsPage({}: {}) {
   const response = await serverSpotifyFetch('me/albums?limit=50', {

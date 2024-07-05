@@ -169,16 +169,24 @@ const CurrentlyPlaying = () => {
         cookies.set('this-device-id', device_id);
       });
 
-      player.addListener(
-        'player_state_changed',
-        ({ paused, track_window: { current_track } }) => {
-          setTrackStopped(!!paused);
+      player.addListener('player_state_changed', (response) => {
+        if (!response) {
+          return;
+        }
+
+        const {
+          paused,
+          track_window: { current_track },
+        } = response;
+        setTrackStopped(!!paused);
+        if (current_track) {
+          console.log(current_track);
 
           const convertedTrack = convertSdkTrackToApiTrack(current_track);
 
           updateTracks(convertedTrack);
-        },
-      );
+        }
+      });
 
       player.connect();
 

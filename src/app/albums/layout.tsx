@@ -2,12 +2,6 @@ import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
 import { getAuthToken, serverSpotifyFetch } from '@/_utils/serverUtils';
 import { SpotifyUser } from '@/types';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Spotify Get Rect',
-  description: 'Your albums',
-};
 
 export default async function AlbumsLayout({
   children,
