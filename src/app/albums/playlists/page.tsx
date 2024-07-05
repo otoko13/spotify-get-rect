@@ -28,18 +28,5 @@ export default async function SavedAlbumsPage({}: {}) {
     );
   }
 
-  const sortedAlbums: SpotifyAlbum[] = data.items
-    .sort((a: { added_at: string }, b: { added_at: string }) =>
-      a.added_at < b.added_at ? 1 : -1,
-    )
-    .map((d: { album: SpotifyAlbum }) => d.album)
-    .filter((a: SpotifyAlbum) => a.album_type !== 'single');
-
-  return (
-    <LoadMoreAlbums
-      initialAlbums={sortedAlbums}
-      nextUrl={data.next}
-      sortAlbumsByDate
-    />
-  );
+  return <LoadMoreAlbums initialAlbums={data.items} nextUrl={data.next} />;
 }

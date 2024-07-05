@@ -9,15 +9,13 @@ import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDispla
 export interface LoadMoreAlbumsProps {
   initialAlbums: SpotifyAlbum[];
   nextUrl?: string;
-  processAlbums?: (
-    albums: { album: SpotifyAlbum; added_at: string }[],
-  ) => SpotifyAlbum[];
+  sortAlbumsByDate?: boolean;
 }
 
 export default function LoadMoreAlbums({
   initialAlbums,
   nextUrl,
-  processAlbums = (items) => items.map((item) => item.album),
+  sortAlbumsByDate = false,
 }: LoadMoreAlbumsProps) {
   const [fetchUrl, setFetchUrl] = useState<string | undefined>(nextUrl);
   const [loading, setLoading] = useState(false);
@@ -48,12 +46,23 @@ export default function LoadMoreAlbums({
 
       setFetchUrl(data.next !== url ? data.next : undefined);
 
-      const processedAlbums = processAlbums(data.items);
+      const sorted = sortAlbumsByDate
+        ? data.items.sort(
+            (
+              a: SpotifyAlbum & { added_at: string },
+              b: SpotifyAlbum & { added_at: string },
+            ) => (a.added_at < b.added_at ? 1 : -1),
+          )
+        : data.items;
+
+      const newAlbums = sorted
+        .map((d: { album: SpotifyAlbum }) => d.album)
+        .filter((a: SpotifyAlbum) => a.album_type !== 'single');
 
       setLoading(false);
-      setAlbums((albums) => [...albums, ...processedAlbums]);
+      setAlbums((albums) => [...albums, ...newAlbums]);
     },
-    [authToken, processAlbums, urlsFetched],
+    [authToken, sortAlbumsByDate, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({

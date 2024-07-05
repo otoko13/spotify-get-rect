@@ -43,6 +43,10 @@ export default async function AlbumsLayout({
               label: 'New releases',
               path: '/albums/new-releases',
             },
+            {
+              label: 'Playlists',
+              path: '/albums/playlists',
+            },
           ]}
         />
 
