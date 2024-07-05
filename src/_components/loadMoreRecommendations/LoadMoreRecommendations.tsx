@@ -37,15 +37,11 @@ export default function LoadMoreAlbums({
       });
 
       if (response.status !== 200) {
+        setLoading(false);
         return;
       }
 
       const topData = await response.json();
-
-      if (response.status !== 200) {
-        setLoading(false);
-        return;
-      }
 
       setFetchUrl(topData.next !== url ? topData.next : undefined);
 

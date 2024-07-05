@@ -9,11 +9,15 @@ import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDispla
 export interface LoadMoreAlbumsProps {
   initialAlbums: SpotifyAlbum[];
   nextUrl?: string;
+  processAlbums?: (
+    albums: { album: SpotifyAlbum; added_at: string }[],
+  ) => SpotifyAlbum[];
 }
 
 export default function LoadMoreAlbums({
   initialAlbums,
   nextUrl,
+  processAlbums = (items) => items.map((item) => item.album),
 }: LoadMoreAlbumsProps) {
   const [fetchUrl, setFetchUrl] = useState<string | undefined>(nextUrl);
   const [loading, setLoading] = useState(false);
@@ -36,32 +40,20 @@ export default function LoadMoreAlbums({
       });
 
       if (response.status !== 200) {
+        setLoading(false);
         return;
       }
 
       const data = await response.json();
 
-      if (response.status !== 200) {
-        setLoading(false);
-        return;
-      }
-
       setFetchUrl(data.next !== url ? data.next : undefined);
 
-      const sortedAlbums: SpotifyAlbum[] = data.items
-        .sort(
-          (
-            a: SpotifyAlbum & { added_at: string },
-            b: SpotifyAlbum & { added_at: string },
-          ) => (a.added_at < b.added_at ? 1 : -1),
-        )
-        .map((d: { album: SpotifyAlbum }) => d.album)
-        .filter((a: SpotifyAlbum) => a.album_type !== 'single');
+      const processedAlbums = processAlbums(data.items);
 
       setLoading(false);
-      setAlbums((albums) => [...albums, ...sortedAlbums]);
+      setAlbums((albums) => [...albums, ...processedAlbums]);
     },
-    [authToken, urlsFetched],
+    [authToken, processAlbums, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({

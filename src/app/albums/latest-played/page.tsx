@@ -9,16 +9,6 @@ export const metadata: Metadata = {
   description: 'Your latest liked albums in Spotify',
 };
 
-const sortAlbums = (
-  items: { album: SpotifyAlbum; added_at: string }[],
-): SpotifyAlbum[] =>
-  items
-    .sort((a: { added_at: string }, b: { added_at: string }) =>
-      a.added_at < b.added_at ? 1 : -1,
-    )
-    .map((d: { album: SpotifyAlbum }) => d.album)
-    .filter((a: SpotifyAlbum) => a.album_type !== 'single');
-
 export default async function SavedAlbumsPage({}: {}) {
   const response = await serverSpotifyFetch('me/albums?limit=50', {
     headers: {
@@ -38,13 +28,7 @@ export default async function SavedAlbumsPage({}: {}) {
     );
   }
 
-  const sortedAlbums = sortAlbums(data.items);
+  const albums = data.items.map((i: { album: SpotifyAlbum }) => i.album);
 
-  return (
-    <LoadMoreAlbums
-      initialAlbums={sortedAlbums}
-      nextUrl={data.next}
-      processAlbums={sortAlbums}
-    />
-  );
+  return <LoadMoreAlbums initialAlbums={albums} nextUrl={data.next} />;
 }

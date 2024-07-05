@@ -24,16 +24,17 @@ export default function DualModeAlbumsDisplay({
   const cookies = useCookies();
   const [use3D, setUse3D] = useState(Boolean(cookies.get('use-3d')));
 
-  const handleToggle = useCallback((val: boolean) => {
-    setUse3D(val);
-    if (val) {
-      cookies.set('use-3d', 'true');
-    } else {
-      cookies.remove('use-3d');
-    }
-  }, []);
-
-  // const playAlbum = useCallback((spotifyId: string) => {}, []);
+  const handleToggle = useCallback(
+    (val: boolean) => {
+      setUse3D(val);
+      if (val) {
+        cookies.set('use-3d', 'true');
+      } else {
+        cookies.remove('use-3d');
+      }
+    },
+    [cookies],
+  );
 
   return (
     <div>

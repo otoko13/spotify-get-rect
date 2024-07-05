@@ -32,15 +32,11 @@ export default function LoadMoreNewReleases({
       });
 
       if (response.status !== 200) {
+        setLoading(false);
         return;
       }
 
       const data = await response.json();
-
-      if (response.status !== 200) {
-        setLoading(false);
-        return;
-      }
 
       setFetchUrl(data.next !== url ? data.next : undefined);
 

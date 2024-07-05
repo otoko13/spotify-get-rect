@@ -32,6 +32,10 @@ export default async function AlbumsLayout({
               path: '/albums/saved-albums',
             },
             {
+              label: 'Most played',
+              path: '/albums/latest-played',
+            },
+            {
               label: 'Recommendations',
               path: '/albums/recommendations',
             },
