@@ -1,9 +1,6 @@
-- extra tabs - random albums, audibooks, playlists
-- handle audiobooks
+- extra tabs - audibooks, playlists
 
 2 - Linting:
   - eslint-plugin-react
-
-- too many requests error page
 
 - visualiser

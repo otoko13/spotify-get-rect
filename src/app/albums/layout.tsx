@@ -47,6 +47,10 @@ export default async function AlbumsLayout({
               label: 'Playlists',
               path: '/albums/playlists',
             },
+            {
+              label: 'Audiobooks',
+              path: '/albums/audiobooks',
+            },
           ]}
         />
 
