@@ -3,21 +3,23 @@
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyAlbum } from '@/types';
 import Image from 'next/image';
 import { useCallback } from 'react';
 
 export interface BaseDisplayItem {
+  id: string;
   images: { url: string }[];
   name: string;
-  url: string;
+  uri: string;
 }
 
-interface AlbumProps {
-  album: SpotifyAlbum;
+interface DisplayItemProps<T extends BaseDisplayItem> {
+  item: T;
 }
 
-const Album = ({ album }: AlbumProps) => {
+export default function DisplayItem<T extends BaseDisplayItem>({
+  item,
+}: DisplayItemProps<T>) {
   const authToken = useGetAuthToken();
   const getActiveDevice = useGetActiveDevice();
 
@@ -43,11 +45,11 @@ const Album = ({ album }: AlbumProps) => {
 
   return (
     <div className="grid place-content-around">
-      <button onClick={() => handleClicked(album.uri)}>
+      <button onClick={() => handleClicked(item.uri)}>
         <Image
           className="shadow-lg"
-          src={album.images[0].url}
-          alt={album.name}
+          src={item.images[0].url}
+          alt={item.name}
           width={0}
           height={0}
           priority
@@ -57,6 +59,4 @@ const Album = ({ album }: AlbumProps) => {
       </button>
     </div>
   );
-};
-
-export default Album;
+}

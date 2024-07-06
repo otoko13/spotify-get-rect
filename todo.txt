@@ -1,5 +1,7 @@
 - extra tabs - audibooks, playlists
 
+- touch sensitivities and zooming on start
+
 2 - Linting:
   - eslint-plugin-react
 

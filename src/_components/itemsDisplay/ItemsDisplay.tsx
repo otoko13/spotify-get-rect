@@ -1,23 +1,24 @@
 'use client';
 
-import { SpotifyAlbum } from '@/types';
-import Album from '../album/Album';
 import { useMemo } from 'react';
+import DisplayItem, { BaseDisplayItem } from '../displayItem/DisplayItem';
 
-interface AlbumsDisplayProps {
-  albums: SpotifyAlbum[];
+interface ItemsDisplayProps<T extends BaseDisplayItem> {
+  items: T[];
   loading?: boolean;
 }
 
-export default function AlbumsDisplay({ albums }: AlbumsDisplayProps) {
+export default function ItemsDisplay<T extends BaseDisplayItem>({
+  items,
+}: ItemsDisplayProps<T>) {
   const colsToFillWhenLoading = useMemo(() => {
-    return 6 - (albums.length % 6);
-  }, [albums.length]);
+    return 6 - (items.length % 6);
+  }, [items.length]);
 
   return (
     <div className="grid max-md:grid-cols-2 grid-cols-6 max-md:gap-4 gap-10 max-md:mb-4 mb-10 px-4 pt-4">
-      {albums.map((album) => (
-        <Album key={album.id} album={album} />
+      {items.map((item) => (
+        <DisplayItem key={item.id} item={item} />
       ))}
       {Array.from(Array(colsToFillWhenLoading).keys()).map((i) => (
         <div key={i} className="skeleton aspect-square" />

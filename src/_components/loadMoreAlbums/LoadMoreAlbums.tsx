@@ -95,9 +95,9 @@ export default function LoadMoreAlbums({
 
   return (
     <DualModeAlbumsDisplay
-      albums={albums}
+      items={albums}
       loading={loading}
-      noMoreAlbums={!fetchUrl}
+      noMoreItems={!fetchUrl}
       fetchMoreForCanvas={fetchMoreForCanvas}
     />
   );
