@@ -1,8 +1,4 @@
-- sort out styling
-
 - extra tabs - audibooks, playlists
-
-error page at albums level
 
 2 - Linting:
   - eslint-plugin-react

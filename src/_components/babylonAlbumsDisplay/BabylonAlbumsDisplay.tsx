@@ -258,7 +258,7 @@ const playAlbum = async ({
   const deviceId =
     cookies.get('active-device-id') ?? cookies.get('this-device-id');
 
-  const response = await clientSpotifyFetch(
+  await clientSpotifyFetch(
     `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
     {
       method: 'PUT',
@@ -460,6 +460,8 @@ export default function BabylonAlbumsDisplay({
         onSceneReady={handleSceneReady}
         onRender={onRender}
         id="my-canvas"
+        adaptToDeviceRatio
+        antialias
       />
       <CanvasLoadMoreButton
         onClick={onLoadMoreButtonClicked}
