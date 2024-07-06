@@ -15,6 +15,8 @@ import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlayba
 
 const THIS_DEVICE_PLAYER_NAME = 'Spotify Get Rect';
 
+let player: Spotify.Player;
+
 interface SpotifyDeviceSimple {
   id: string;
   name: string;
@@ -68,6 +70,10 @@ const CurrentlyPlaying = () => {
   );
 
   const getPlayData = useCallback(async () => {
+    if (player) {
+      player.activateElement();
+    }
+
     const response = await clientSpotifyFetch('me/player', {
       headers: {
         Authorization: authToken,
@@ -153,7 +159,7 @@ const CurrentlyPlaying = () => {
 
   useEffect(() => {
     (window as any).onSpotifyWebPlaybackSDKReady = () => {
-      const player = new Spotify.Player({
+      player = new Spotify.Player({
         name: THIS_DEVICE_PLAYER_NAME,
         getOAuthToken: (cb: any) => {
           cb(cookies.get('spotify-auth-token'));

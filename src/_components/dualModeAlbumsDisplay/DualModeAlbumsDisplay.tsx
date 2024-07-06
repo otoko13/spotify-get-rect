@@ -42,7 +42,7 @@ export default function DualModeAlbumsDisplay({
         label="Go 3D!"
         on={use3D}
         onChange={handleToggle}
-        className="fixed top-4 right-16"
+        className="fixed top-6 right-16"
       />
       {use3D ? (
         <BabylonAlbumsDisplay
@@ -54,7 +54,7 @@ export default function DualModeAlbumsDisplay({
       ) : (
         <AlbumsDisplay albums={albums} />
       )}
-      {loading && !use3D && <AlbumsLoading />}
+      {true && !use3D && <AlbumsLoading />}
     </div>
   );
 }

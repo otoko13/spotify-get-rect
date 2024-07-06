@@ -29,12 +29,12 @@ export default async function RootLayout({
   await authorize();
 
   return (
-    <html className="bg-transparent" lang="en">
+    <html className="bg-transparent h-full" lang="en">
       <body
         className={classnames(
           inter.className,
           spotifyCircularFont.className,
-          'bg-none',
+          'bg-gradient-to-br from-black to-slate-800 h-full',
         )}
       >
         <CookiesProvider>

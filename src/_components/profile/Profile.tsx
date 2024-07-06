@@ -30,8 +30,11 @@ const Profile = async ({ fullWidth = true }: ProfileProps) => {
         <Image
           alt="spotify logo"
           src={logoPic}
-          height={64}
-          objectFit={'contain'}
+          style={{
+            height: '100%',
+            width: 'auto',
+            maxHeight: '80px',
+          }}
         />
         <span className="text-5xl self-center pl-4 pt-3">Get Rect</span>
       </div>
