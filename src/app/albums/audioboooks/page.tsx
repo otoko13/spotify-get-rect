@@ -5,11 +5,11 @@ import { SpotifyAlbum } from '@/types';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Playlists',
-  description: 'Your Spotify playlists',
+  title: 'Audibooks',
+  description: 'Your audibooks saved in Spotify',
 };
 
-export default async function PlaylistsPage({}: {}) {
+export default async function AudiobooksPage({}: {}) {
   const response = await serverSpotifyFetch('me/albums?limit=50', {
     headers: {
       Authorization: getAuthToken(),
