@@ -52,9 +52,9 @@ export default function DualModeAlbumsDisplay({
           onLoadMoreButtonClicked={fetchMoreForCanvas}
         />
       ) : (
-        <AlbumsDisplay albums={albums} />
+        <AlbumsDisplay albums={albums} loading={loading} />
       )}
-      {true && !use3D && <AlbumsLoading />}
+      {loading && !use3D && <AlbumsLoading />}
     </div>
   );
 }
