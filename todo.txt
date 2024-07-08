@@ -6,3 +6,28 @@
   - eslint-plugin-react
 
 - visualiser
+
+
+
+General
+
+Move padding top to section containing both loading and albums display and remove padding top from items display.
+
+
+Profile page has blank bit at bottom. 
+
+
+Rename albums to library
+
+
+To fix playback on mobile, set the player as a global property on window, and call window.player.activateElement() on the album click handler, play button and the babylon albums too. Or just try when transferring. It might just not work in which case don't worry about it. 
+
+
+Add playlists and audiobooks
+
+
+Fix the start position of camera on mobile
+
+
+Turn off polling if Window is not active
+

@@ -66,7 +66,7 @@ export default function DualModeAlbumsDisplay<T extends BaseDisplayItem>({
         label="Go 3D!"
         on={use3D}
         onChange={handleToggle}
-        className="fixed top-6 right-16"
+        className="fixed top-6 max-md:top-4 right-16"
       />
       {show3dOption && use3D ? (
         <BabylonAlbumsDisplay

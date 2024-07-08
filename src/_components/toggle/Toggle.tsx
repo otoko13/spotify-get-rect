@@ -16,8 +16,12 @@ export default function Toggle({
   onChange,
 }: ToggleProps) {
   return (
-    <div className={classNames('flex items-center mr-4', className)}>
-      <p className="text-slate-300 text-sm mr-4 pt-2">{label}</p>
+    <div
+      className={classNames('flex items-center mr-4 max-md:mr-2', className)}
+    >
+      <p className="text-slate-300 text-sm mr-4 max-md:mr-2 max-md:max-w-8 max-md:text-right">
+        {label}
+      </p>
       <input
         checked={on}
         onChange={(e) => {

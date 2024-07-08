@@ -1,9 +1,9 @@
 import { getAuthToken } from '@/_utils/serverUtils';
 import Image from 'next/image';
-import logoPic from '/src/_images/Spotify_Full_Logo_RGB_Green.png';
 import Link from 'next/link';
 import SignOut from '../signOut/SignOut';
 import classNames from 'classnames';
+import AppTitle from '../appTitle/AppTtitle';
 
 interface ProfileProps {
   fullWidth?: boolean;
@@ -22,22 +22,11 @@ const Profile = async ({ fullWidth = true }: ProfileProps) => {
   return (
     <div
       className={classNames(
-        'flex flex-col items-center text-center mx-auto my-12',
-        { 'w-6/12': !fullWidth },
+        'flex flex-col items-center text-center mx-auto py-12 max-md:w-10/12',
+        { 'lg:w-6/12': !fullWidth },
       )}
     >
-      <div className="flex justify-center">
-        <Image
-          alt="spotify logo"
-          src={logoPic}
-          style={{
-            height: '100%',
-            width: 'auto',
-            maxHeight: '80px',
-          }}
-        />
-        <span className="text-5xl self-center pl-4 pt-3">Get Rect</span>
-      </div>
+      <AppTitle />
       <div className="flex-none w-36 h-36 rounded-full border-solid border-2 border-gray-600 overflow-hidden mt-8">
         <Image
           alt="avatar image"
