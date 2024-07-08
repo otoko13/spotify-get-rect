@@ -11,12 +11,6 @@
 
 General
 
-Move padding top to section containing both loading and albums display and remove padding top from items display.
-
-
-Profile page has blank bit at bottom. 
-
-
 Rename albums to library
 
 

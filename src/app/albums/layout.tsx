@@ -54,7 +54,7 @@ export default async function AlbumsLayout({
           ]}
         />
 
-        <div className="mt-16">{children}</div>
+        <div className="mt-20">{children}</div>
         {/* This is the ideal place for CurrentlyPlaying, but we can't do this
          because it causes a rerender of the whole page when the track changes - 
          moving to individual pages instead, which is OK since it's absolutely positioned, 
