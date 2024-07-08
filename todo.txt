@@ -1,5 +1,3 @@
-To fix playback on mobile, set the player as a global property on window, and call window.player.activateElement() on the album click handler, play button and the babylon albums too. Or just try when transferring. It might just not work in which case don't worry about it. 
-
 Add audiobooks
 
 
@@ -7,3 +5,5 @@ Fix the start position of camera on mobile
 - touch sensitivities and zooming on start
 
 LINTING (eslint-plugin-react)
+
+scrollbar

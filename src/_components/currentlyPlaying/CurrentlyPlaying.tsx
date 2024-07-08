@@ -166,6 +166,7 @@ const CurrentlyPlaying = () => {
   }, [getPlayData]);
 
   useEffect(() => {
+    cookies.remove('this-device-id');
     (window as any).onSpotifyWebPlaybackSDKReady = () => {
       player = new Spotify.Player({
         name: THIS_DEVICE_PLAYER_NAME,
@@ -174,7 +175,6 @@ const CurrentlyPlaying = () => {
         },
         volume: 0.5,
       });
-      (window as any).player = player;
 
       player.addListener('ready', ({ device_id }: { device_id: string }) => {
         console.log(
