@@ -18,7 +18,7 @@ export default function TransferPlaybackDropdown({
   const handleClick = useCallback(async () => {
     const thisDeviceId = cookies.get('this-device-id');
 
-    const response = await clientSpotifyFetch(`me/player`, {
+    await clientSpotifyFetch(`me/player`, {
       method: 'PUT',
       body: JSON.stringify({
         device_ids: [thisDeviceId],

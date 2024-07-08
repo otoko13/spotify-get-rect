@@ -70,10 +70,6 @@ const CurrentlyPlaying = () => {
   );
 
   const getPlayData = useCallback(async () => {
-    if (player) {
-      player.activateElement();
-    }
-
     const response = await clientSpotifyFetch('me/player', {
       headers: {
         Authorization: authToken,
@@ -122,6 +118,10 @@ const CurrentlyPlaying = () => {
     const { id } = await getActiveDevice();
 
     const deviceToUse = id ?? device?.id;
+
+    if (player) {
+      player.activateElement();
+    }
 
     await clientSpotifyFetch(
       `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
