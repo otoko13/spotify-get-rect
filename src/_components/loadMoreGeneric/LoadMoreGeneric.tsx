@@ -1,25 +1,24 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { SpotifyPlaylist } from '@/types';
 import { useCallback, useState } from 'react';
 import useAlbumDisplayScrollHandler from '@/_hooks/useAlbumDisplayScrollHandler';
 import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDisplay';
+import { BaseDisplayItem } from '../displayItem/DisplayItem';
 
-export interface LoadMorePlaylistsProps {
-  initialPlaylists: SpotifyPlaylist[];
+export interface LoadMoreGenericProps<T extends BaseDisplayItem> {
+  initialItems: T[];
   nextUrl?: string;
 }
 
-export default function LoadMorePlaylists({
-  initialPlaylists,
+export default function LoadMoreGeneric<T extends BaseDisplayItem>({
+  initialItems,
   nextUrl,
-}: LoadMorePlaylistsProps) {
+}: LoadMoreGenericProps<T>) {
   const [fetchUrl, setFetchUrl] = useState<string | undefined>(nextUrl);
   const [loading, setLoading] = useState(false);
   const [urlsFetched, setUrlsFetched] = useState<string[]>([]);
-  const [playlists, setPlaylists] =
-    useState<SpotifyPlaylist[]>(initialPlaylists);
+  const [audiobooks, setPlaylists] = useState<T[]>(initialItems);
 
   const authToken = useGetAuthToken();
 
@@ -80,7 +79,7 @@ export default function LoadMorePlaylists({
 
   return (
     <DualModeAlbumsDisplay
-      items={playlists}
+      items={audiobooks}
       loading={loading}
       noMoreItems={!fetchUrl}
       show3dOption={false}
