@@ -19,6 +19,12 @@ const Album = ({ album }: AlbumProps) => {
     async (spotifyId: string) => {
       const { id: deviceId } = await getActiveDevice();
 
+      const player = (window as any).player;
+      console.log(player);
+      if (player) {
+        player.activateElement();
+      }
+
       return await clientSpotifyFetch(
         `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
         {
