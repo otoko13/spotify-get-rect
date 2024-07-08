@@ -1,4 +1,4 @@
-import { Album, SpotifyAlbum, SpotifyPlayerTrack } from '@/types';
+import { SpotifyAlbum, SpotifyPlayerSongTrack } from '@/types';
 import {
   Vector3,
   MeshBuilder,
@@ -406,7 +406,7 @@ const triggerSpotlight = async ({
     return;
   }
 
-  const data: SpotifyPlayerTrack = await response?.json();
+  const data: SpotifyPlayerSongTrack = await response?.json();
 
   if (!data.is_playing) {
     return;

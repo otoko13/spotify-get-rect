@@ -2,7 +2,7 @@
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyPlayerTrack, SpotifyTrack } from '@/types';
+import { SpotifyImage, SpotifyPlayerTrack, SpotifyTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -47,19 +47,39 @@ const trackCoverHasChanged = (
 
 const convertSdkTrackToApiTrack = (
   sdkTrack: Spotify.Track,
-): SpotifyPlayerTrack =>
-  ({
-    item: {
-      album: sdkTrack.album,
-      artists: sdkTrack.artists.map((sdkArtist) => ({
-        uri: sdkArtist.uri,
-        name: sdkArtist.name,
-      })),
-      id: sdkTrack.id,
-      name: sdkTrack.name,
-      uri: sdkTrack.uri,
-    },
-  } as SpotifyPlayerTrack);
+): SpotifyPlayerTrack => {
+  const commonProperties = {
+    id: sdkTrack.id,
+    name: sdkTrack.name,
+    uri: sdkTrack.uri,
+  };
+
+  if (sdkTrack.type === 'track') {
+    return {
+      currently_playing_type: 'track',
+      item: {
+        album: sdkTrack.album,
+        artists: sdkTrack.artists.map((sdkArtist) => ({
+          uri: sdkArtist.uri,
+          name: sdkArtist.name,
+        })),
+        ...commonProperties,
+      },
+    } as SpotifyPlayerTrack;
+  } else {
+    return {
+      currently_playing_type: 'episode',
+      item: {
+        show: {
+          id: sdkTrack.album.uri as string,
+          name: sdkTrack.album.name,
+        },
+        images: sdkTrack.album.images as SpotifyImage[],
+        ...commonProperties,
+      },
+    } as unknown as SpotifyPlayerTrack;
+  }
+};
 
 const CurrentlyPlaying = () => {
   const authToken = useGetAuthToken();
@@ -117,30 +137,25 @@ const CurrentlyPlaying = () => {
 
     const data: SpotifyPlayerTrack = await response?.json();
 
-    if (data.device) {
-      if (device?.id !== data.device.id) {
-        setDevice({
-          id: data.device.id,
-          name: data.device.name,
-        });
-      }
+    if (data.device && data.device.id === thisDeviceId) {
+      // rely on the web playback sdk to change track data and playback status instead
+      return;
+    }
 
-      if (data.device.id === thisDeviceId) {
-        // rely on the web playback sdk to change track data and playback status instead
-        return;
-      }
+    if (device?.id !== data.device.id) {
+      setDevice({
+        id: data.device.id,
+        name: data.device.name,
+      });
     }
 
     if (data.is_playing) {
       setTrackStopped(false);
-
-      console.log(data);
-
       updateTracks(data);
     } else {
       setTrackStopped(true);
     }
-  }, [authToken, cookies, device, updateTracks]);
+  }, [device, cookies, authToken, updateTracks]);
 
   const handlePlay = useCallback(async () => {
     const { id } = await getActiveDevice();
@@ -176,21 +191,15 @@ const CurrentlyPlaying = () => {
   }, [authToken, getPlayData]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    const interval = setInterval(async () => {
+      await getPlayData();
+    }, 3500);
 
-    window.addEventListener('focus', () => {
-      interval = setInterval(async () => {
-        getPlayData();
-      }, 3500);
+    getPlayData();
 
-      getPlayData();
-    });
-
-    window.addEventListener('blur', () => {
+    return () => {
       clearInterval(interval);
-    });
-
-    return () => clearInterval(interval);
+    };
   }, [getPlayData]);
 
   useEffect(() => {
@@ -221,7 +230,9 @@ const CurrentlyPlaying = () => {
           paused,
           track_window: { current_track },
         } = response;
+
         setTrackStopped(!!paused);
+
         if (current_track) {
           const convertedTrack = convertSdkTrackToApiTrack(current_track);
 

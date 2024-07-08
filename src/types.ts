@@ -70,6 +70,8 @@ export type SpotifyPlayerItem = {
   is_playing: boolean;
 };
 
+export type SpotifyPlayerSongTrack = SpotifyPlayerItem & SpotifyPlayerSong;
+
 export type SpotifyPlayerTrack = SpotifyPlayerItem &
   (SpotifyPlayerSong | SpotifyPlayerEpisode);
 
