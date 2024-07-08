@@ -45,16 +45,18 @@ export default function DisplayItem<T extends BaseDisplayItem>({
 
   return (
     <button onClick={() => handleClicked(item.uri)}>
-      <Image
-        className="shadow-lg"
-        src={item.images[0].url}
-        alt={item.name}
-        width={0}
-        height={0}
-        priority
-        sizes="100vw"
-        style={{ width: '100%', height: 'auto' }}
-      />
+      {item.images?.[0]?.url && (
+        <Image
+          className="shadow-lg"
+          src={item.images[0].url}
+          alt={item.name}
+          width={0}
+          height={0}
+          priority
+          sizes="100vw"
+          style={{ width: '100%', height: 'auto' }}
+        />
+      )}
     </button>
   );
 }

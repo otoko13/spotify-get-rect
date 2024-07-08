@@ -32,6 +32,13 @@ export interface SpotifyAlbum {
   genres: string[];
 }
 
+export interface SpotifyPlaylist {
+  images: SpotifyImage[];
+  name: string;
+  uri: string;
+  id: string;
+}
+
 export interface Album extends SpotifyAlbum {
   link_url: string;
 }

@@ -1,7 +1,7 @@
 import LoadMoreAlbums from '@/_components/loadMoreAlbums/LoadMoreAlbums';
+import LoadMorePlaylists from '@/_components/loadMorePlaylists/LoadMorePlaylists';
 import { serverSpotifyFetch } from '@/_utils/serverUtils';
 import { getAuthToken } from '@/_utils/serverUtils';
-import { SpotifyAlbum } from '@/types';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PlaylistsPage({}: {}) {
-  const response = await serverSpotifyFetch('me/albums?limit=50', {
+  const response = await serverSpotifyFetch('me/playlists?limit=50', {
     headers: {
       Authorization: getAuthToken(),
     },
@@ -18,15 +18,7 @@ export default async function PlaylistsPage({}: {}) {
 
   const data = await response.json();
 
-  if (!data.items) {
-    console.error('No items', data);
-    return (
-      <LoadMoreAlbums
-        initialAlbums={[]}
-        nextUrl="https://api.spotify.com/v1/me/albums?limit=50"
-      />
-    );
-  }
-
-  return <LoadMoreAlbums initialAlbums={data.items} nextUrl={data.next} />;
+  return (
+    <LoadMorePlaylists initialPlaylists={data.items} nextUrl={data.next} />
+  );
 }

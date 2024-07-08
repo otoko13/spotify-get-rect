@@ -29,27 +29,27 @@ export default async function AlbumsLayout({
           tabs={[
             {
               label: 'Saved albums',
-              path: '/albums/saved-albums',
+              path: '/library/saved-albums',
             },
             {
               label: 'Most played',
-              path: '/albums/latest-played',
+              path: '/library/latest-played',
             },
             {
               label: 'Recommendations',
-              path: '/albums/recommendations',
+              path: '/library/recommendations',
             },
             {
               label: 'New releases',
-              path: '/albums/new-releases',
+              path: '/library/new-releases',
             },
             {
               label: 'Playlists',
-              path: '/albums/playlists',
+              path: '/library/playlists',
             },
             {
               label: 'Audiobooks',
-              path: '/albums/audiobooks',
+              path: '/library/audiobooks',
             },
           ]}
         />

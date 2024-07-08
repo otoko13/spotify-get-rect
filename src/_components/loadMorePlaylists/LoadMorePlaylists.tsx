@@ -1,31 +1,34 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { SpotifyAlbum } from '@/types';
+import { SpotifyPlaylist } from '@/types';
 import { useCallback, useState } from 'react';
 import useAlbumDisplayScrollHandler from '@/_hooks/useAlbumDisplayScrollHandler';
 import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDisplay';
 
 export interface LoadMorePlaylistsProps {
-  initialAlbums: SpotifyAlbum[];
+  initialPlaylists: SpotifyPlaylist[];
   nextUrl?: string;
-  sortAlbumsByDate?: boolean;
 }
 
 export default function LoadMorePlaylists({
-  initialAlbums,
+  initialPlaylists,
   nextUrl,
-  sortAlbumsByDate = false,
 }: LoadMorePlaylistsProps) {
   const [fetchUrl, setFetchUrl] = useState<string | undefined>(nextUrl);
   const [loading, setLoading] = useState(false);
   const [urlsFetched, setUrlsFetched] = useState<string[]>([]);
-  const [albums, setAlbums] = useState<SpotifyAlbum[]>(initialAlbums);
+  const [playlists, setPlaylists] =
+    useState<SpotifyPlaylist[]>(initialPlaylists);
 
   const authToken = useGetAuthToken();
 
-  const fetchMoreAlbums = useCallback(
+  const fetchMore = useCallback(
     async (url: string) => {
+      if (!url) {
+        return;
+      }
+
       if (urlsFetched.includes(url)) {
         return;
       }
@@ -46,29 +49,17 @@ export default function LoadMorePlaylists({
 
       setFetchUrl(data.next !== url ? data.next : undefined);
 
-      const sorted = sortAlbumsByDate
-        ? data.items.sort(
-            (
-              a: SpotifyAlbum & { added_at: string },
-              b: SpotifyAlbum & { added_at: string },
-            ) => (a.added_at < b.added_at ? 1 : -1),
-          )
-        : data.items;
-
-      const newAlbums = sorted
-        .map((d: { album: SpotifyAlbum }) => d.album)
-        .filter((a: SpotifyAlbum) => a.album_type !== 'single');
-
       setLoading(false);
-      setAlbums((albums) => [...albums, ...newAlbums]);
+      setPlaylists((albums) => [...albums, ...data.items]);
     },
-    [authToken, sortAlbumsByDate, urlsFetched],
+    [authToken, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({
+    disabled: !fetchUrl,
     fetchUrl,
     urlsFetched,
-    onBottom: fetchMoreAlbums,
+    onBottom: fetchMore,
   });
 
   // NOTE!!
@@ -87,18 +78,12 @@ export default function LoadMorePlaylists({
   // area for the saved-albums page, but there's not currently a clean place to do this.
   // For now, I'll leave it here and sort it out later.
 
-  const fetchMoreForCanvas = useCallback(async () => {
-    if (fetchUrl) {
-      await fetchMoreAlbums(fetchUrl);
-    }
-  }, [fetchUrl, fetchMoreAlbums]);
-
   return (
     <DualModeAlbumsDisplay
-      items={albums}
+      items={playlists}
       loading={loading}
       noMoreItems={!fetchUrl}
-      fetchMoreForCanvas={fetchMoreForCanvas}
+      show3dOption={false}
     />
   );
 }

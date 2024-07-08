@@ -1,14 +1,3 @@
-- touch sensitivities and zooming on start
-
-2 - Linting:
-  - eslint-plugin-react
-
-- visualiser
-
-
-
-General
-
 Rename albums to library
 
 
@@ -19,4 +8,6 @@ Add playlists and audiobooks
 
 
 Fix the start position of camera on mobile
+- touch sensitivities and zooming on start
 
+LINTING (eslint-plugin-react)

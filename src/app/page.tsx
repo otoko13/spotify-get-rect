@@ -15,8 +15,8 @@ export default async function Home() {
         />
       </div>
       <div className="mt-8">
-        <Link href="/albums/saved-albums" className="text-green-500">
-          Albums
+        <Link href="/library/saved-albums" className="text-green-500">
+          Spotify library
         </Link>
       </div>
       <div className="mt-4">

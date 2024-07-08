@@ -10,6 +10,7 @@ interface ItemsDisplayProps<T extends BaseDisplayItem> {
 
 export default function ItemsDisplay<T extends BaseDisplayItem>({
   items,
+  loading,
 }: ItemsDisplayProps<T>) {
   const colsToFillWhenLoading = useMemo(() => {
     return 6 - (items.length % 6);
@@ -20,9 +21,10 @@ export default function ItemsDisplay<T extends BaseDisplayItem>({
       {items.map((item) => (
         <DisplayItem key={item.id} item={item} />
       ))}
-      {Array.from(Array(colsToFillWhenLoading).keys()).map((i) => (
-        <div key={i} className="skeleton aspect-square" />
-      ))}
+      {loading &&
+        Array.from(Array(colsToFillWhenLoading).keys()).map((i) => (
+          <div key={i} className="skeleton aspect-square" />
+        ))}
     </div>
   );
 }
