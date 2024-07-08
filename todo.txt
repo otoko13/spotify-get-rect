@@ -1,5 +1,3 @@
-- extra tabs - audibooks, playlists
-
 - touch sensitivities and zooming on start
 
 2 - Linting:
@@ -21,7 +19,4 @@ Add playlists and audiobooks
 
 
 Fix the start position of camera on mobile
-
-
-Turn off polling if Window is not active
 

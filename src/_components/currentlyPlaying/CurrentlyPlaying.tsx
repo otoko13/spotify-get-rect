@@ -148,11 +148,19 @@ const CurrentlyPlaying = () => {
   }, [authToken, getPlayData]);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      getPlayData();
-    }, 3500);
+    let interval: NodeJS.Timeout;
 
-    getPlayData();
+    window.addEventListener('focus', () => {
+      interval = setInterval(async () => {
+        getPlayData();
+      }, 3500);
+
+      getPlayData();
+    });
+
+    window.addEventListener('blur', () => {
+      clearInterval(interval);
+    });
 
     return () => clearInterval(interval);
   }, [getPlayData]);
