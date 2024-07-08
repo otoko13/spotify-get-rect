@@ -195,8 +195,6 @@ const CurrentlyPlaying = () => {
         } = response;
         setTrackStopped(!!paused);
         if (current_track) {
-          console.log(current_track);
-
           const convertedTrack = convertSdkTrackToApiTrack(current_track);
 
           updateTracks(convertedTrack);

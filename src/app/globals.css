@@ -1,4 +1,10 @@
 @tailwind base;
+
+* {
+  scrollbar-width: thin;
+  /* scrollbar-color: theme(colors.slate.600) transparent; */
+}
+
 @tailwind components;
 @tailwind utilities;
 

@@ -1,9 +1,6 @@
 Add audiobooks
 
-
 Fix the start position of camera on mobile
 - touch sensitivities and zooming on start
 
 LINTING (eslint-plugin-react)
-
-scrollbar

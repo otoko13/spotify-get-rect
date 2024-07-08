@@ -19,9 +19,6 @@ export async function GET() {
 
   // no way to pass the path to the redirect URI right now, they won't allow wildcards or query params
 
-  console.log(scope);
-  console.log(`${process.env.HOST}${process.env.AUTH_REDIRECT_URI}`);
-
   redirect(
     'https://accounts.spotify.com/authorize?' +
       querystring.stringify({
