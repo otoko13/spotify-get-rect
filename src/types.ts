@@ -43,14 +43,35 @@ export interface Album extends SpotifyAlbum {
   link_url: string;
 }
 
-export interface SpotifyPlayerTrack {
+export interface SpotifyChapter {
+  id: string;
+  name: string;
+  show: {
+    id: string;
+    name: string;
+  };
+  images: SpotifyImage[];
+}
+
+export type SpotifyPlayerSong = {
+  currently_playing_type: 'track';
+  item: SpotifyTrack;
+};
+export type SpotifyPlayerEpisode = {
+  currently_playing_type: 'episode';
+  item: SpotifyChapter;
+};
+
+export type SpotifyPlayerItem = {
   device: SpotifyDevice;
   actions: {
     pausing: boolean;
   };
-  is_playing: true;
-  item: SpotifyTrack;
-}
+  is_playing: boolean;
+};
+
+export type SpotifyPlayerTrack = SpotifyPlayerItem &
+  (SpotifyPlayerSong | SpotifyPlayerEpisode);
 
 export interface SpotifyUser {
   images: SpotifyImage[];

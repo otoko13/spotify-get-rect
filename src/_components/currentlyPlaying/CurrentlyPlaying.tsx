@@ -5,7 +5,7 @@ import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyPlayerTrack, SpotifyTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './currentlyPlaying.module.scss';
 import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
@@ -21,6 +21,29 @@ interface SpotifyDeviceSimple {
   id: string;
   name: string;
 }
+
+const trackCoverHasChanged = (
+  newTrack: SpotifyPlayerTrack,
+  originalTrack: SpotifyPlayerTrack,
+) => {
+  if (
+    newTrack.currently_playing_type !== originalTrack.currently_playing_type
+  ) {
+    return true;
+  }
+  if (
+    newTrack.currently_playing_type === 'track' &&
+    originalTrack.currently_playing_type === 'track'
+  ) {
+    return newTrack.item.album.id !== originalTrack.item.album.id;
+  }
+  if (
+    newTrack.currently_playing_type === 'episode' &&
+    originalTrack.currently_playing_type === 'episode'
+  ) {
+    return newTrack.item.show.id !== originalTrack.item.show.id;
+  }
+};
 
 const convertSdkTrackToApiTrack = (
   sdkTrack: Spotify.Track,
@@ -57,7 +80,7 @@ const CurrentlyPlaying = () => {
       }
 
       // keep the last track so we can fade out its image
-      if (track && track?.item.album.id !== newTrack.item.album.id) {
+      if (track && trackCoverHasChanged(newTrack, track)) {
         setLastTrack(track);
       }
       // only set the track if it has changed, otherwise we trigger
@@ -70,12 +93,15 @@ const CurrentlyPlaying = () => {
   );
 
   const getPlayData = useCallback(async () => {
-    const response = await clientSpotifyFetch('me/player', {
-      headers: {
-        Authorization: authToken,
+    const response = await clientSpotifyFetch(
+      'me/player?additional_types=track,episode',
+      {
+        headers: {
+          Authorization: authToken,
+        },
+        method: 'GET',
       },
-      method: 'GET',
-    });
+    );
 
     // ignore too many requests responses
     if (response.status === 429) {
@@ -108,11 +134,13 @@ const CurrentlyPlaying = () => {
     if (data.is_playing) {
       setTrackStopped(false);
 
+      console.log(data);
+
       updateTracks(data);
     } else {
       setTrackStopped(true);
     }
-  }, [authToken, cookies, device?.id, updateTracks]);
+  }, [authToken, cookies, device, updateTracks]);
 
   const handlePlay = useCallback(async () => {
     const { id } = await getActiveDevice();
@@ -212,14 +240,43 @@ const CurrentlyPlaying = () => {
     };
   }, [cookies, updateTracks]);
 
+  const currentTrackImageToUse = useMemo(() => {
+    if (!track) {
+      return '';
+    }
+
+    return track.currently_playing_type === 'episode'
+      ? track.item.images[0].url
+      : track.item.album.images[0].url;
+  }, [track]);
+
+  const lastTrackImageToUse = useMemo(() => {
+    if (!lastTrack) {
+      return '';
+    }
+
+    return lastTrack.currently_playing_type === 'episode'
+      ? lastTrack.item.images[0].url
+      : lastTrack.item.album.images[0].url;
+  }, [lastTrack]);
+
+  const trackContext = useMemo(() => {
+    if (!track) {
+      return '';
+    }
+    return track?.currently_playing_type === 'track'
+      ? track?.item.artists.map((artist) => artist.name).join(', ')
+      : track?.item?.show?.name;
+  }, [track]);
+
   return (
     <>
       {lastTrack && (
         <Image
           alt="currently playing album art blurred"
           className="fixed top-0 left-0 blur-3xl opacity-67 -z-20"
-          key={lastTrack.item.album.images[0].url}
-          src={lastTrack.item.album.images[0].url}
+          key={lastTrackImageToUse}
+          src={lastTrackImageToUse}
           width={0}
           height={0}
           sizes="100vw"
@@ -230,8 +287,8 @@ const CurrentlyPlaying = () => {
         <Image
           alt="currently playing album art blurred"
           className="fixed top-0 left-0 blur-3xl opacity-67 -z-20 animate-fade-in"
-          key={track.item.album.images[0].url}
-          src={track.item.album.images[0].url}
+          key={currentTrackImageToUse}
+          src={currentTrackImageToUse}
           width={0}
           height={0}
           sizes="100vw"
@@ -258,8 +315,8 @@ const CurrentlyPlaying = () => {
             {track && (
               <Image
                 alt="currently playing album art blurred"
-                key={track.item.album.images[0].url}
-                src={track.item.album.images[0].url}
+                key={currentTrackImageToUse}
+                src={currentTrackImageToUse}
                 width={64}
                 height={64}
               />
@@ -267,9 +324,7 @@ const CurrentlyPlaying = () => {
           </div>
           <div className="flex flex-col ml-4 justify-center">
             <div className="lg:text-xl md:text-lg">{track?.item.name}</div>
-            <div className="text-sm text-slate-300">
-              {track?.item.artists.map((artist) => artist.name).join(', ')}
-            </div>
+            <div className="text-sm text-slate-300">{trackContext}</div>
           </div>
         </div>
         <div className="controls flex items-center">
