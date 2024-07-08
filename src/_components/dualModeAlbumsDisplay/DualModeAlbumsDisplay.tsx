@@ -71,9 +71,8 @@ export default function DualModeAlbumsDisplay<T extends BaseDisplayItem>({
           onLoadMoreButtonClicked={fetchMoreForCanvas as () => void}
         />
       ) : (
-        <div className="pb-4">
+        <div className="pb-4 pt-20 px-4">
           <ItemsDisplay items={items as T[]} loading={loading} />
-          {loading && <AlbumsLoading />}
         </div>
       )}
     </div>

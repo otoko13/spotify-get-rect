@@ -43,7 +43,7 @@ const BOX_WIDTH = BOX_SIZE + BOX_GAP;
 const BOX_TAG = 'album-art';
 const ALBUMS_PER_ROW = 24;
 const ROW_Z_SPACING = 6;
-const ROW_Y_SPACING = 4;
+const ROW_Y_SPACING = 3.2;
 const SPOTIFY_COLOR = new Color3(30, 215, 96);
 
 let scene: Scene;
@@ -80,17 +80,22 @@ const createScene = (scene: Scene, albumCount: number) => {
     0.01,
     0,
     // new Vector3(0, 0, -15),
-    new Vector3(-10, 2, -15),
+    new Vector3(-10, 2, -10),
     scene,
   );
   setCameraTarget(albumCount);
+  camera.target.addInPlace(new Vector3(4, 0, 0));
+  camera.position.addInPlace(new Vector3(4, 0, 0));
 
   camera.upperRadiusLimit = 100;
   // camera.upperBetaLimit = (2 * Math.PI) / 3;
-  camera.wheelDeltaPercentage = 0.01;
-  camera.minZ = 0.001;
+  // camera.wheelDeltaPercentage = 0.01;
+  camera.wheelPrecision = 50;
   camera.maxZ = 1000;
   camera.panningSensibility = 500;
+  camera.pinchPrecision = 50;
+  camera.angularSensibilityX = 6000;
+  camera.angularSensibilityY = 6000;
 
   const canvas = scene.getEngine().getRenderingCanvas();
 
