@@ -1,7 +1,7 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { clientSpotifyFetch } from '@/_utils/clientUtils';
+import { clientSpotifyFetch, setPlayerReady } from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack, SpotifyTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
@@ -17,10 +17,11 @@ import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlayba
 import AppCookies from '@/_constants/cookies';
 
 let player: Spotify.Player;
+let playerBeingUsed: boolean;
 
 interface SpotifyDeviceSimple {
-  id: string;
-  name: string;
+  id: string | null | undefined;
+  name: string | null | undefined;
 }
 
 const trackCoverHasChanged = (
@@ -88,6 +89,7 @@ const CurrentlyPlaying = () => {
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
   const [device, setDevice] = useState<SpotifyDeviceSimple>();
+  const [thisDeviceReady, setThisDeviceReady] = useState(false);
 
   const cookies = useCookies();
 
@@ -114,6 +116,9 @@ const CurrentlyPlaying = () => {
   );
 
   const getPlayData = useCallback(async () => {
+    if (playerBeingUsed) {
+      return;
+    }
     const response = await clientSpotifyFetch(
       'me/player?additional_types=track,episode',
       {
@@ -134,12 +139,17 @@ const CurrentlyPlaying = () => {
       return;
     }
 
-    const thisDeviceId = cookies.get(AppCookies.THIS_DEVICE_ID);
-
     const data: SpotifyPlayerTrack = await response?.json();
 
-    if (data.device && data.device.id === thisDeviceId) {
-      // rely on the web playback sdk to change track data and playback status instead
+    // rely on the web playback sdk to change track data and playback status instead
+    const thisDeviceId = cookies.get(AppCookies.THIS_DEVICE_ID);
+    if (playerBeingUsed || (data.device && data.device.id === thisDeviceId)) {
+      if (device?.id !== thisDeviceId) {
+        setDevice({
+          id: cookies.get(AppCookies.THIS_DEVICE_ID),
+          name: THIS_DEVICE_NAME,
+        });
+      }
       return;
     }
 
@@ -219,6 +229,8 @@ const CurrentlyPlaying = () => {
           device_id,
         );
         cookies.set(AppCookies.THIS_DEVICE_ID, device_id);
+        setPlayerReady();
+        setThisDeviceReady(true);
       });
 
       player.addListener('player_state_changed', (response) => {
@@ -232,6 +244,14 @@ const CurrentlyPlaying = () => {
         } = response;
 
         setTrackStopped(!!paused);
+        playerBeingUsed = !!paused;
+
+        if (!paused) {
+          setDevice({
+            id: cookies.get(AppCookies.THIS_DEVICE_ID),
+            name: THIS_DEVICE_NAME,
+          });
+        }
 
         if (current_track) {
           const convertedTrack = convertSdkTrackToApiTrack(current_track);
@@ -255,6 +275,15 @@ const CurrentlyPlaying = () => {
   useEffect(() => {
     cookies.remove(AppCookies.THIS_DEVICE_ID);
   }, []);
+
+  const setInitialDevice = useCallback(async () => {
+    const initialDevice = await getActiveDevice();
+    setDevice(initialDevice);
+  }, []);
+
+  useEffect(() => {
+    setInitialDevice();
+  }, [setInitialDevice]);
 
   const handlePlayTransferred = useCallback(() => {
     setDevice({
@@ -291,6 +320,13 @@ const CurrentlyPlaying = () => {
       ? track?.item.artists.map((artist) => artist.name).join(', ')
       : track?.item?.show?.name;
   }, [track]);
+
+  const needToWaitForThisDeviceToBeReady = useMemo(() => {
+    if (!trackStopped || thisDeviceReady) {
+      return false;
+    }
+    return !device?.id;
+  }, [trackStopped, thisDeviceReady, device]);
 
   return (
     <>
@@ -351,7 +387,7 @@ const CurrentlyPlaying = () => {
           </div>
         </div>
         <div className="controls flex items-center">
-          {device?.name !== THIS_DEVICE_NAME && (
+          {device?.name && device.name !== THIS_DEVICE_NAME && (
             <TransferPlaybackDropdown onPlayTransferred={handlePlayTransferred}>
               <div className="text-sm text-primary mr-4 ">
                 <span className="max-lg:hidden visible">Playing on </span>
@@ -359,7 +395,9 @@ const CurrentlyPlaying = () => {
               </div>
             </TransferPlaybackDropdown>
           )}
-          {trackStopped ? (
+          {needToWaitForThisDeviceToBeReady ? (
+            <div className="loading loading-dots loading-md"></div>
+          ) : trackStopped ? (
             <button onClick={handlePlay}>
               <Image alt="play" src={playButton} width={48} height={48} />
             </button>

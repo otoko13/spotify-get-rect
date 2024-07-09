@@ -1,5 +1,3 @@
 Wait for player initialisation (queue a track if not initialised yet) (set global state variable when ready and poll for it if not ready)
 
-Transfer playback - device name not working
-
 LINTING (eslint-plugin-react)

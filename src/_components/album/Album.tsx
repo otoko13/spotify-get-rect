@@ -1,8 +1,12 @@
 'use client';
 
+import AppCookies from '@/_constants/cookies';
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { clientSpotifyFetch } from '@/_utils/clientUtils';
+import {
+  clientSpotifyFetch,
+  waitForSpotifySdkPlayer,
+} from '@/_utils/clientUtils';
 import { SpotifyAlbum } from '@/types';
 import Image from 'next/image';
 import { useCallback } from 'react';
@@ -17,7 +21,12 @@ const Album = ({ album }: AlbumProps) => {
 
   const handleClicked = useCallback(
     async (spotifyId: string) => {
+      debugger;
       const { id: deviceId } = await getActiveDevice();
+
+      if (!deviceId && !window.spotifySdkPlayerReady) {
+        await waitForSpotifySdkPlayer();
+      }
 
       return await clientSpotifyFetch(
         `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,

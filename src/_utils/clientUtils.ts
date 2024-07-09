@@ -8,3 +8,25 @@ export async function clientSpotifyFetch(url: string, options: RequestInit) {
     },
   );
 }
+
+declare global {
+  interface Window {
+    spotifySdkPlayerReady?: boolean;
+  }
+}
+
+export function setPlayerReady() {
+  window.spotifySdkPlayerReady = true;
+}
+
+export async function waitForSpotifySdkPlayer(): Promise<void> {
+  return new Promise(function (resolve, reject) {
+    (function waitForReady() {
+      if (window.spotifySdkPlayerReady) {
+        return resolve();
+      }
+
+      setTimeout(waitForReady, 200);
+    })();
+  });
+}

@@ -1,8 +1,13 @@
 'use client';
 
+import AppCookies from '@/_constants/cookies';
 import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { clientSpotifyFetch } from '@/_utils/clientUtils';
+import {
+  clientSpotifyFetch,
+  waitForSpotifySdkPlayer,
+} from '@/_utils/clientUtils';
+import { useCookies } from 'next-client-cookies';
 import Image from 'next/image';
 import { useCallback } from 'react';
 
@@ -22,13 +27,21 @@ export default function DisplayItem<T extends BaseDisplayItem>({
 }: DisplayItemProps<T>) {
   const authToken = useGetAuthToken();
   const getActiveDevice = useGetActiveDevice();
+  const cookies = useCookies();
 
   const handleClicked = useCallback(
     async (spotifyId: string) => {
       const { id: deviceId } = await getActiveDevice();
 
+      let deviceToUse = deviceId;
+
+      if (!deviceId && !window.spotifySdkPlayerReady) {
+        await waitForSpotifySdkPlayer();
+        deviceToUse = cookies.get(AppCookies.THIS_DEVICE_ID);
+      }
+
       return await clientSpotifyFetch(
-        `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+        `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
         {
           method: 'PUT',
           body: JSON.stringify({
@@ -40,7 +53,7 @@ export default function DisplayItem<T extends BaseDisplayItem>({
         },
       );
     },
-    [authToken, getActiveDevice],
+    [authToken, getActiveDevice, cookies],
   );
 
   return (
