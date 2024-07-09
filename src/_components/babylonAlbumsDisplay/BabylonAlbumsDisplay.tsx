@@ -92,10 +92,12 @@ const createScene = (scene: Scene, albumCount: number) => {
   // camera.wheelDeltaPercentage = 0.01;
   camera.wheelPrecision = 50;
   camera.maxZ = 1000;
-  camera.panningSensibility = 500;
-  camera.pinchPrecision = 50;
-  camera.angularSensibilityX = 6000;
-  camera.angularSensibilityY = 6000;
+  camera.panningSensibility = 400;
+  // camera.pinchDeltaPercentage = 50;
+  // camera.pinchPrecision = 200;
+  camera.angularSensibilityX = 4000;
+  camera.angularSensibilityY = 4000;
+  camera.useNaturalPinchZoom = true;
 
   const canvas = scene.getEngine().getRenderingCanvas();
 
@@ -465,7 +467,7 @@ export default function BabylonAlbumsDisplay({
         onSceneReady={handleSceneReady}
         onRender={onRender}
         id="my-canvas"
-        adaptToDeviceRatio
+        adaptToDeviceRatio={false}
         antialias
       />
       <CanvasLoadMoreButton
