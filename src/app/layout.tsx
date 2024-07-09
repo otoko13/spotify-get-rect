@@ -41,10 +41,8 @@ export default async function RootLayout({
         )}
       >
         <CookiesProvider>
-          <>
-            {children}
-            <Script src="https://sdk.scdn.co/spotify-player.js" />
-          </>
+          {children}
+          <Script src="https://sdk.scdn.co/spotify-player.js" />
         </CookiesProvider>
       </body>
     </html>
