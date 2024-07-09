@@ -1,7 +1,11 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { clientSpotifyFetch, setPlayerReady } from '@/_utils/clientUtils';
+import {
+  clientSpotifyFetch,
+  setPlayerBeingUsed,
+  setPlayerReady,
+} from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack, SpotifyTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
@@ -17,7 +21,6 @@ import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlayba
 import AppCookies from '@/_constants/cookies';
 
 let player: Spotify.Player;
-let playerBeingUsed: boolean;
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -115,8 +118,16 @@ const CurrentlyPlaying = () => {
     [track],
   );
 
+  useEffect(() => {
+    console.info('TRACK CHANGED!', track?.item.name);
+  }, [track]);
+
+  useEffect(() => {
+    console.info('LAST TRACK CHANGED!', lastTrack?.item.name);
+  }, [lastTrack]);
+
   const getPlayData = useCallback(async () => {
-    if (playerBeingUsed) {
+    if (window.playerBeingUsed) {
       return;
     }
     const response = await clientSpotifyFetch(
@@ -143,7 +154,10 @@ const CurrentlyPlaying = () => {
 
     // rely on the web playback sdk to change track data and playback status instead
     const thisDeviceId = cookies.get(AppCookies.THIS_DEVICE_ID);
-    if (playerBeingUsed || (data.device && data.device.id === thisDeviceId)) {
+    if (
+      window.playerBeingUsed ||
+      (data.device && data.device.id === thisDeviceId)
+    ) {
       if (device?.id !== thisDeviceId) {
         setDevice({
           id: cookies.get(AppCookies.THIS_DEVICE_ID),
@@ -244,7 +258,7 @@ const CurrentlyPlaying = () => {
         } = response;
 
         setTrackStopped(!!paused);
-        playerBeingUsed = !!paused;
+        setPlayerBeingUsed(!!paused);
 
         if (!paused) {
           setDevice({
@@ -258,6 +272,14 @@ const CurrentlyPlaying = () => {
 
           updateTracks(convertedTrack);
         }
+      });
+
+      player.on('initialization_error', ({ message }) => {
+        console.error('Failed to initialize', message);
+      });
+
+      player.on('playback_error', ({ message }) => {
+        console.error('Failed to perform playback', message);
       });
 
       player.connect();
@@ -274,12 +296,12 @@ const CurrentlyPlaying = () => {
   // is refreshed
   useEffect(() => {
     cookies.remove(AppCookies.THIS_DEVICE_ID);
-  }, []);
+  }, [cookies]);
 
   const setInitialDevice = useCallback(async () => {
     const initialDevice = await getActiveDevice();
     setDevice(initialDevice);
-  }, []);
+  }, [getActiveDevice]);
 
   useEffect(() => {
     setInitialDevice();
