@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+import AppCookies from '@/_constants/cookies';
 
 export async function GET(request: NextRequest) {
   const queryParams = request.nextUrl.searchParams;
@@ -44,7 +44,10 @@ export async function GET(request: NextRequest) {
     new URL(path ?? '/', new URL(request.url).origin),
     { status: 302 },
   );
-  response.cookies.set('spotify-auth-token', jsonResult['access_token']);
+  response.cookies.set(
+    AppCookies.SPOTIFY_AUTH_TOKEN,
+    jsonResult['access_token'],
+  );
 
   return response;
 }

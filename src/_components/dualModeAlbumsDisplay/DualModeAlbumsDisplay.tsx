@@ -8,6 +8,7 @@ import AlbumsLoading from '../albumsLoading/AlbumsLoading';
 import { useCookies } from 'next-client-cookies';
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
 import { SpotifyAlbum } from '@/types';
+import AppCookies from '@/_constants/cookies';
 
 type BaseProps = {
   loading: boolean;
@@ -38,16 +39,16 @@ export default function DualModeAlbumsDisplay<T extends BaseDisplayItem>({
 }: DualModeAlbumsDisplayProps<T>) {
   const cookies = useCookies();
   const [use3D, setUse3D] = useState(
-    show3dOption && Boolean(cookies.get('use-3d')),
+    show3dOption && Boolean(cookies.get(AppCookies.USE_3D)),
   );
 
   const handleToggle = useCallback(
     (val: boolean) => {
       setUse3D(val);
       if (val) {
-        cookies.set('use-3d', 'true');
+        cookies.set(AppCookies.USE_3D, 'true');
       } else {
-        cookies.remove('use-3d');
+        cookies.remove(AppCookies.USE_3D);
       }
     },
     [cookies],

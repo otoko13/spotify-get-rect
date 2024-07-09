@@ -15,13 +15,8 @@ import {
   MirrorTexture,
   Plane,
   Tags,
-  Matrix,
   Mesh,
-  FramingBehavior,
-  Viewport,
   AbstractMesh,
-  ScenePerformancePriority,
-  Camera,
 } from '@babylonjs/core';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useEffect, useState } from 'react';
@@ -29,6 +24,7 @@ import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { Cookies, useCookies } from 'next-client-cookies';
 import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
+import AppCookies from '@/_constants/cookies';
 
 interface BabylonAlbumsDisplayProps {
   albums?: SpotifyAlbum[];
@@ -263,7 +259,8 @@ const playAlbum = async ({
   // const { id: deviceId } = await getActiveDevice();
 
   const deviceId =
-    cookies.get('active-device-id') ?? cookies.get('this-device-id');
+    cookies.get(AppCookies.ACTIVE_DEVICE_ID) ??
+    cookies.get(AppCookies.THIS_DEVICE_ID);
 
   await clientSpotifyFetch(
     `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,

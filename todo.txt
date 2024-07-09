@@ -1,9 +1,5 @@
 Wait for player initialisation (queue a track if not initialised yet) (set global state variable when ready and poll for it if not ready)
 
+Transfer playback - device name not working
+
 LINTING (eslint-plugin-react)
-
-Move this device id to local storage, not cookie
-
-Try adding a single div above the loading block
-
-Figure out the initial zoom on mobile... It starts correctly then changes

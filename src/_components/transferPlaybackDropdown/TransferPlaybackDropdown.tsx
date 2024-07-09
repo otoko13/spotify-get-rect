@@ -1,5 +1,6 @@
 'use client';
 
+import AppCookies from '@/_constants/cookies';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { useCookies } from 'next-client-cookies';
@@ -7,18 +8,21 @@ import { ReactNode, useCallback } from 'react';
 
 interface TransferPlaybackDropdownProps {
   children: ReactNode;
+  onPlayTransferred: () => void;
 }
 
 export default function TransferPlaybackDropdown({
   children,
+  onPlayTransferred,
 }: TransferPlaybackDropdownProps) {
   const cookies = useCookies();
   const authToken = useGetAuthToken();
 
   const handleClick = useCallback(async () => {
-    const thisDeviceId = cookies.get('this-device-id');
+    const thisDeviceId = cookies.get(AppCookies.THIS_DEVICE_ID);
+    console.log('transfer', thisDeviceId);
 
-    await clientSpotifyFetch(`me/player`, {
+    const response = await clientSpotifyFetch(`me/player`, {
       method: 'PUT',
       body: JSON.stringify({
         device_ids: [thisDeviceId],
@@ -27,7 +31,10 @@ export default function TransferPlaybackDropdown({
         Authorization: authToken,
       },
     });
-  }, [authToken, cookies]);
+    if (response.status === 200 || response.status === 204) {
+      onPlayTransferred();
+    }
+  }, [authToken, cookies, onPlayTransferred]);
 
   return (
     <div className="dropdown dropdown-top dropdown-end">

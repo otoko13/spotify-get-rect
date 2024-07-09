@@ -1,3 +1,4 @@
+import AppCookies from '@/_constants/cookies';
 import { redirect } from 'next/navigation';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -46,8 +47,14 @@ export async function GET(request: NextRequest) {
     new URL('/logged-in', new URL(request.url).origin),
     { status: 302 },
   );
-  response.cookies.set('spotify-auth-token', jsonResult['access_token']);
-  response.cookies.set('spotify-refresh-token', jsonResult['refresh_token']);
+  response.cookies.set(
+    AppCookies.SPOTIFY_AUTH_TOKEN,
+    jsonResult['access_token'],
+  );
+  response.cookies.set(
+    AppCookies.SPOTIFY_REFRESH_TOKEN,
+    jsonResult['refresh_token'],
+  );
 
   return response;
 }

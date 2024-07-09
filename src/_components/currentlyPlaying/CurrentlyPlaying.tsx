@@ -9,11 +9,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './currentlyPlaying.module.scss';
 import playButton from '@/_images/play.svg';
 import pauseButton from '@/_images/pause.svg';
-import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
+import useGetActiveDevice, {
+  THIS_DEVICE_NAME,
+} from '@/_hooks/useGetActiveDevice';
 import { useCookies } from 'next-client-cookies';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
-
-const THIS_DEVICE_PLAYER_NAME = 'Spotify Get Rect';
+import AppCookies from '@/_constants/cookies';
 
 let player: Spotify.Player;
 
@@ -124,7 +125,7 @@ const CurrentlyPlaying = () => {
     );
 
     // ignore too many requests responses
-    if (response.status === 429) {
+    if (response.status === 429 || response.status === 204) {
       return;
     }
 
@@ -133,7 +134,7 @@ const CurrentlyPlaying = () => {
       return;
     }
 
-    const thisDeviceId = cookies.get('this-device-id');
+    const thisDeviceId = cookies.get(AppCookies.THIS_DEVICE_ID);
 
     const data: SpotifyPlayerTrack = await response?.json();
 
@@ -203,12 +204,11 @@ const CurrentlyPlaying = () => {
   }, [getPlayData]);
 
   useEffect(() => {
-    cookies.remove('this-device-id');
     (window as any).onSpotifyWebPlaybackSDKReady = () => {
       player = new Spotify.Player({
-        name: THIS_DEVICE_PLAYER_NAME,
+        name: THIS_DEVICE_NAME,
         getOAuthToken: (cb: any) => {
-          cb(cookies.get('spotify-auth-token'));
+          cb(cookies.get(AppCookies.SPOTIFY_AUTH_TOKEN));
         },
         volume: 0.5,
       });
@@ -218,7 +218,7 @@ const CurrentlyPlaying = () => {
           'Spotify Web Playback SDK ready with Device ID ',
           device_id,
         );
-        cookies.set('this-device-id', device_id);
+        cookies.set(AppCookies.THIS_DEVICE_ID, device_id);
       });
 
       player.addListener('player_state_changed', (response) => {
@@ -243,13 +243,25 @@ const CurrentlyPlaying = () => {
       player.connect();
 
       return () => {
-        cookies.remove('this-device-id');
         player.removeListener('ready');
         player.removeListener('player_state_changed');
         player.disconnect();
       };
     };
   }, [cookies, updateTracks]);
+
+  // remove old device cookie on initialisation since this will be reset each time the app
+  // is refreshed
+  useEffect(() => {
+    cookies.remove(AppCookies.THIS_DEVICE_ID);
+  }, []);
+
+  const handlePlayTransferred = useCallback(() => {
+    setDevice({
+      id: cookies.get(AppCookies.THIS_DEVICE_ID) as string,
+      name: THIS_DEVICE_NAME,
+    });
+  }, [cookies]);
 
   const currentTrackImageToUse = useMemo(() => {
     if (!track) {
@@ -339,8 +351,8 @@ const CurrentlyPlaying = () => {
           </div>
         </div>
         <div className="controls flex items-center">
-          {device?.name !== THIS_DEVICE_PLAYER_NAME && (
-            <TransferPlaybackDropdown>
+          {device?.name !== THIS_DEVICE_NAME && (
+            <TransferPlaybackDropdown onPlayTransferred={handlePlayTransferred}>
               <div className="text-sm text-primary mr-4 ">
                 <span className="max-lg:hidden visible">Playing on </span>
                 {device?.name}
