@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Your Spotify playlists',
 };
 
-export default async function PlaylistsPage({}: {}) {
+export default async function PlaylistsPage() {
   const response = await serverSpotifyFetch('me/playlists?limit=50', {
     headers: {
       Authorization: getAuthToken(),

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Your audiobooks saved in Spotify',
 };
 
-export default async function AudiobooksPage({}: {}) {
+export default async function AudiobooksPage() {
   const response = await serverSpotifyFetch('me/audiobooks?limit=50', {
     headers: {
       Authorization: getAuthToken(),

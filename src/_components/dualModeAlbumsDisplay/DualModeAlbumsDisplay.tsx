@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react';
 import Toggle from '../toggle/Toggle';
 import BabylonAlbumsDisplay from '../babylonAlbumsDisplay/BabylonAlbumsDisplay';
 import ItemsDisplay from '../itemsDisplay/ItemsDisplay';
-import AlbumsLoading from '../albumsLoading/AlbumsLoading';
 import { useCookies } from 'next-client-cookies';
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
 import { SpotifyAlbum } from '@/types';

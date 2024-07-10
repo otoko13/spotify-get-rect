@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Your latest liked albums in Spotify',
 };
 
-export default async function SavedAlbumsPage({}: {}) {
+export default async function SavedAlbumsPage() {
   const response = await serverSpotifyFetch('me/albums?limit=50', {
     headers: {
       Authorization: getAuthToken(),

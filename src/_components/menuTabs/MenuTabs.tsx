@@ -1,7 +1,6 @@
 'use client';
 
 import classNames from 'classnames';
-import { usePathname, useRouter } from 'next/navigation';
 import styles from './menuTabs.module.scss';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';

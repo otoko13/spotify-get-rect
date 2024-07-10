@@ -49,6 +49,7 @@ let camera: ArcRotateCamera;
  * Will run on every frame render.  We are spinning the box on y-axis.
  */
 const onRender = (scene: Scene) => {
+  console.info(scene);
   // if (!box) {
   //   return;
   // }
@@ -189,6 +190,7 @@ const shineSpotlight = ({ albumIndex, spotifyId }: ShineSpotlightArgs) => {
   mirrorMesh.material = mirrorMaterial;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createFloor = (scene: Scene, albumCount: number) => {
   const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
 

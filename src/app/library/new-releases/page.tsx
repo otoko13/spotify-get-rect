@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Browse new releases for you from Spotify',
 };
 
-export default async function NewReleasesPage({}: {}) {
+export default async function NewReleasesPage() {
   const response = await serverSpotifyFetch('browse/new-releases?limit=50', {
     headers: {
       Authorization: getAuthToken(),

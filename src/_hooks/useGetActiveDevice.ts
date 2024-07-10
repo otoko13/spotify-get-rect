@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import useGetAuthToken from './useGetAuthToken';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyDevice } from '@/types';

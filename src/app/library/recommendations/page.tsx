@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Recommendations for you from Spotify',
 };
 
-export default async function RecommendationsPage({}: {}) {
+export default async function RecommendationsPage() {
   const randomOffset = Math.floor(Math.random() * 100);
 
   const response = await serverSpotifyFetch(

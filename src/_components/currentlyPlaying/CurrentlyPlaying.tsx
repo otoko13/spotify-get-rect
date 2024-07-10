@@ -6,7 +6,7 @@ import {
   setPlayerBeingUsed,
   setPlayerReady,
 } from '@/_utils/clientUtils';
-import { SpotifyImage, SpotifyPlayerTrack, SpotifyTrack } from '@/types';
+import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
