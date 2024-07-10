@@ -10,6 +10,7 @@ export async function clientSpotifyFetch(url: string, options: RequestInit) {
 }
 
 declare global {
+  // eslint-disable-next-line no-unused-vars
   interface Window {
     spotifySdkPlayerReady?: boolean;
     playerBeingUsed?: boolean;
