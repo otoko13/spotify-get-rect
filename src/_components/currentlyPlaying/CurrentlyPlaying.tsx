@@ -86,7 +86,13 @@ const convertSdkTrackToApiTrack = (
   }
 };
 
-const CurrentlyPlaying = () => {
+interface CurrentlyPlayingProps {
+  onSdkPlayerInitialised: (player: Spotify.Player) => void;
+}
+
+const CurrentlyPlaying = ({
+  onSdkPlayerInitialised,
+}: CurrentlyPlayingProps) => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();

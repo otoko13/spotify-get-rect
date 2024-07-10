@@ -1,9 +1,12 @@
+'use client';
+
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
 import { getAuthToken, serverSpotifyFetch } from '@/_utils/serverUtils';
 import { SpotifyUser } from '@/types';
+import { useEffect, useState } from 'react';
 
-export default async function AlbumsLayout({
+export default function LibraryLayout({
   children,
   modal,
 }: Readonly<{
@@ -11,21 +14,29 @@ export default async function AlbumsLayout({
   modal: React.ReactNode;
 }>) {
   const authToken = getAuthToken();
+  const [sdkPlayer, setSdkPlayer] = useState<Spotify.Player>();
+  const [user, setUser] = useState<SpotifyUser>();
 
-  const userResponse = await serverSpotifyFetch('me', {
-    headers: {
-      Authorization: authToken,
-    },
-  });
+  useEffect(() => {
+    async function getUser() {
+      const userResponse = await serverSpotifyFetch('me', {
+        headers: {
+          Authorization: authToken,
+        },
+      });
 
-  const userData: SpotifyUser = await userResponse.json();
-  const avatarUrl = userData.images?.[0]?.url;
+      const userData = await userResponse.json();
+      setUser(userData);
+    }
+
+    getUser();
+  }, [authToken]);
 
   return (
     <>
       <div>
         <MenuTabs
-          avatarUrl={avatarUrl}
+          avatarUrl={user?.images?.[0].url}
           tabs={[
             {
               label: 'Saved albums',
@@ -59,7 +70,7 @@ export default async function AlbumsLayout({
          because it causes a rerender of the whole page when the track changes - 
          moving to individual pages instead, which is OK since it's absolutely positioned, 
          however there might be a slight flicker as we move between the routes under albums*/}
-        <CurrentlyPlaying />
+        <CurrentlyPlaying onSdkPlayerInitialised={setSdkPlayer} />
       </div>
       {modal}
     </>
