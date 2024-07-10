@@ -455,7 +455,7 @@ export default function BabylonAlbumsDisplay({
   }, [albums, authToken, cookies]);
 
   return (
-    <div className="overflow-hidden" style={{ height: 'calc(100vh - 124px)' }}>
+    <div className="overflow-hidden h-screen">
       {(!ready || loading) && (
         <div className="fixed flex w-screen h-screen justify-center items-center overflow-hidden">
           <div className="loading loading-bars loading-lg text-primary absolute" />

@@ -1,8 +1,4 @@
 Wait for player initialisation (queue a track if not initialised yet) (set global state variable when ready and poll for it if not ready)
 
-LINTING (eslint-plugin-react)
-
-README
-
 Convert all this shitty code to client side... like a proper react app:
 - remove cookies / window / any other dodginess
