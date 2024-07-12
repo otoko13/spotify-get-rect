@@ -2,7 +2,9 @@
 
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
-import { getAuthToken, serverSpotifyFetch } from '@/_utils/serverUtils';
+import PlayerContext from '@/_context/PlayerContext';
+import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyUser } from '@/types';
 import { useEffect, useState } from 'react';
 
@@ -13,13 +15,15 @@ export default function LibraryLayout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }>) {
-  const authToken = getAuthToken();
+  const authToken = useGetAuthToken();
   const [sdkPlayer, setSdkPlayer] = useState<Spotify.Player>();
+  const [sdkPlayerInitialising, setSdkPlayerInitialising] =
+    useState<boolean>(true);
   const [user, setUser] = useState<SpotifyUser>();
 
   useEffect(() => {
     async function getUser() {
-      const userResponse = await serverSpotifyFetch('me', {
+      const userResponse = await clientSpotifyFetch('me', {
         headers: {
           Authorization: authToken,
         },
@@ -32,8 +36,12 @@ export default function LibraryLayout({
     getUser();
   }, [authToken]);
 
+  console.log(setSdkPlayerInitialising);
+
   return (
-    <>
+    <PlayerContext.Provider
+      value={{ loading: sdkPlayerInitialising, player: sdkPlayer }}
+    >
       <div>
         <MenuTabs
           avatarUrl={user?.images?.[0].url}
@@ -73,6 +81,6 @@ export default function LibraryLayout({
         <CurrentlyPlaying onSdkPlayerInitialised={setSdkPlayer} />
       </div>
       {modal}
-    </>
+    </PlayerContext.Provider>
   );
 }

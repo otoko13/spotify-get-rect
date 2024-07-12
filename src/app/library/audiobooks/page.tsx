@@ -1,31 +1,22 @@
-import LoadMoreGeneric from '@/_components/loadMoreGeneric/LoadMoreGeneric';
-import { serverSpotifyFetch } from '@/_utils/serverUtils';
-import { getAuthToken } from '@/_utils/serverUtils';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Audiobooks',
-  description: 'Your audiobooks saved in Spotify',
-};
+import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
+import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import { getSpotifyUrl } from '@/_utils/clientUtils';
+import { SpotifyChapter } from '@/types';
 
-export default async function AudiobooksPage() {
-  const response = await serverSpotifyFetch('me/audiobooks?limit=50', {
-    headers: {
-      Authorization: getAuthToken(),
-    },
-  });
+const mapResponseToDisplayItems = (data: {
+  items: SpotifyChapter[];
+}): SpotifyChapter[] => data.items;
 
-  const data = await response.json();
-
-  if (!data.items) {
-    console.error('No items', data);
-    return (
-      <LoadMoreGeneric
-        initialItems={[]}
-        nextUrl="https://api.spotify.com/v1/me/audiobooks?limit=50"
+export default function AudiobooksPage() {
+  return (
+    <>
+      <HtmlTitle pageTitle="Saved albums" />
+      <LoadMoreDisplayItems
+        initialUrl={getSpotifyUrl('me/audiobooks?limit=50')}
+        mapResponseToDisplayItems={mapResponseToDisplayItems}
       />
-    );
-  }
-
-  return <LoadMoreGeneric initialItems={data.items} nextUrl={data.next} />;
+    </>
+  );
 }

@@ -1,4 +1,4 @@
-import { SpotifyAlbum, SpotifyPlayerSongTrack } from '@/types';
+import { SpotifyPlayerSongTrack } from '@/types';
 import {
   Vector3,
   MeshBuilder,
@@ -25,9 +25,11 @@ import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { Cookies, useCookies } from 'next-client-cookies';
 import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
 import AppCookies from '@/_constants/cookies';
+import { BaseDisplayItem } from '../displayItem/DisplayItem';
+import FullPageSpinner from '../fullPageSpinner/FullPageSpinner';
 
 interface BabylonAlbumsDisplayProps {
-  albums?: SpotifyAlbum[];
+  albums?: BaseDisplayItem[];
   loading?: boolean;
   noMoreAlbums?: boolean;
   onLoadMoreButtonClicked: () => void;
@@ -283,7 +285,7 @@ const playAlbum = async ({
 interface AddAlbumsArgs {
   cookies: Cookies;
   authToken: string;
-  albums: SpotifyAlbum[];
+  albums: BaseDisplayItem[];
 }
 
 const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
@@ -384,7 +386,7 @@ const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
 };
 
 interface TriggerSpotlightArgs {
-  albums: SpotifyAlbum[];
+  albums: BaseDisplayItem[];
   authToken: string;
 }
 
@@ -423,7 +425,7 @@ const triggerSpotlight = async ({
   }
 };
 
-let displayedAlbums: SpotifyAlbum[] = [];
+let displayedAlbums: BaseDisplayItem[] = [];
 
 export default function BabylonAlbumsDisplay({
   albums = [],
@@ -456,11 +458,7 @@ export default function BabylonAlbumsDisplay({
 
   return (
     <div className="overflow-hidden h-screen">
-      {(!ready || loading) && (
-        <div className="fixed flex w-screen h-screen justify-center items-center overflow-hidden">
-          <div className="loading loading-bars loading-lg text-primary absolute" />
-        </div>
-      )}
+      {(!ready || loading) && <FullPageSpinner />}
       <BabylonCanvas
         hideCanvas={loading}
         onSceneReady={handleSceneReady}

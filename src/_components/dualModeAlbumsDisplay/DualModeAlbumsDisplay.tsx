@@ -6,28 +6,26 @@ import BabylonAlbumsDisplay from '../babylonAlbumsDisplay/BabylonAlbumsDisplay';
 import ItemsDisplay from '../itemsDisplay/ItemsDisplay';
 import { useCookies } from 'next-client-cookies';
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
-import { SpotifyAlbum } from '@/types';
 import AppCookies from '@/_constants/cookies';
 
-type BaseProps = {
+type BaseProps<T extends BaseDisplayItem> = {
   loading: boolean;
   noMoreItems?: boolean;
-};
-
-type AlbumOnlyProps = {
-  show3dOption?: true;
-  fetchMoreForCanvas: () => void;
-  items: SpotifyAlbum[];
-};
-
-type GenericItemProps<T extends BaseDisplayItem> = {
-  fetchMoreForCanvas?: never;
-  show3dOption: false;
   items: T[];
 };
 
-type DualModeAlbumsDisplayProps<T extends BaseDisplayItem> = BaseProps &
-  (AlbumOnlyProps | GenericItemProps<T>);
+type Show3DProps = {
+  show3dOption?: true;
+  fetchMoreForCanvas: () => void;
+};
+
+type GenericItemProps = {
+  fetchMoreForCanvas?: never;
+  show3dOption: false;
+};
+
+type DualModeAlbumsDisplayProps<T extends BaseDisplayItem> = BaseProps<T> &
+  (Show3DProps | GenericItemProps);
 
 export default function DualModeAlbumsDisplay<T extends BaseDisplayItem>({
   items,
@@ -65,7 +63,7 @@ export default function DualModeAlbumsDisplay<T extends BaseDisplayItem>({
       )}
       {show3dOption && use3D ? (
         <BabylonAlbumsDisplay
-          albums={items as SpotifyAlbum[]}
+          albums={items}
           loading={loading}
           noMoreAlbums={!!noMoreItems}
           onLoadMoreButtonClicked={fetchMoreForCanvas as () => void}
