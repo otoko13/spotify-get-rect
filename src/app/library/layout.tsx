@@ -2,11 +2,13 @@
 
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
-import PlayerContext from '@/_context/PlayerContext';
+import PlayerContext from '@/_context/playerContext/PlayerContext';
+import ThreeDOptionsContext from '@/_context/threeDOptionsContext/ThreeDOptionsContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import useInitialiseSpotifySdkPlayer from '@/_hooks/useInitialiseSpotifySdkPlayer';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyUser } from '@/types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function LibraryLayout({
   children,
@@ -17,9 +19,19 @@ export default function LibraryLayout({
 }>) {
   const authToken = useGetAuthToken();
   const [sdkPlayer, setSdkPlayer] = useState<Spotify.Player>();
-  const [sdkPlayerInitialising, setSdkPlayerInitialising] =
-    useState<boolean>(true);
+  const [thisDeviceId, setThisDeviceId] = useState<string>();
   const [user, setUser] = useState<SpotifyUser>();
+  const [use3d, setUse3d] = useState(false);
+
+  const handleInitialisation = useCallback(
+    (player: Spotify.Player, deviceId: string) => {
+      setSdkPlayer(player);
+      setThisDeviceId(deviceId);
+    },
+    [],
+  );
+
+  useInitialiseSpotifySdkPlayer({ onInitialised: handleInitialisation });
 
   useEffect(() => {
     async function getUser() {
@@ -36,51 +48,49 @@ export default function LibraryLayout({
     getUser();
   }, [authToken]);
 
-  console.log(setSdkPlayerInitialising);
-
   return (
     <PlayerContext.Provider
-      value={{ loading: sdkPlayerInitialising, player: sdkPlayer }}
+      value={{ player: sdkPlayer, deviceId: thisDeviceId }}
     >
-      <div>
-        <MenuTabs
-          avatarUrl={user?.images?.[0].url}
-          tabs={[
-            {
-              label: 'Saved albums',
-              path: '/library/saved-albums',
-            },
-            {
-              label: 'Most played',
-              path: '/library/latest-played',
-            },
-            {
-              label: 'Recommendations',
-              path: '/library/recommendations',
-            },
-            {
-              label: 'New releases',
-              path: '/library/new-releases',
-            },
-            {
-              label: 'Playlists',
-              path: '/library/playlists',
-            },
-            {
-              label: 'Audiobooks',
-              path: '/library/audiobooks',
-            },
-          ]}
-        />
+      <ThreeDOptionsContext.Provider value={{ use3d }}>
+        <div>
+          <MenuTabs
+            avatarUrl={user?.images?.[0].url}
+            use3d={use3d}
+            onUse3dChanged={setUse3d}
+            tabs={[
+              {
+                label: 'Saved albums',
+                path: '/library/saved-albums',
+              },
+              {
+                label: 'Most played',
+                path: '/library/latest-played',
+              },
+              {
+                label: 'Recommendations',
+                path: '/library/recommendations',
+              },
+              {
+                label: 'New releases',
+                path: '/library/new-releases',
+              },
+              {
+                label: 'Playlists',
+                path: '/library/playlists',
+              },
+              {
+                label: 'Audiobooks',
+                path: '/library/audiobooks',
+              },
+            ]}
+          />
 
-        {children}
-        {/* This is the ideal place for CurrentlyPlaying, but we can't do this
-         because it causes a rerender of the whole page when the track changes - 
-         moving to individual pages instead, which is OK since it's absolutely positioned, 
-         however there might be a slight flicker as we move between the routes under albums*/}
-        <CurrentlyPlaying onSdkPlayerInitialised={setSdkPlayer} />
-      </div>
-      {modal}
+          {children}
+          <CurrentlyPlaying />
+        </div>
+        {modal}
+      </ThreeDOptionsContext.Provider>
     </PlayerContext.Provider>
   );
 }

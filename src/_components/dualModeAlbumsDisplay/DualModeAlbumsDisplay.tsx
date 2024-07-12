@@ -1,12 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import Toggle from '../toggle/Toggle';
+import useThreeDOptionsContext from '@/_context/threeDOptionsContext/useThreeDOptionsContext';
 import BabylonAlbumsDisplay from '../babylonAlbumsDisplay/BabylonAlbumsDisplay';
-import ItemsDisplay from '../itemsDisplay/ItemsDisplay';
-import { useCookies } from 'next-client-cookies';
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
-import AppCookies from '@/_constants/cookies';
+import ItemsDisplay from '../itemsDisplay/ItemsDisplay';
 
 type BaseProps<T extends BaseDisplayItem> = {
   loading: boolean;
@@ -34,34 +31,10 @@ export default function DualModeAlbumsDisplay<T extends BaseDisplayItem>({
   noMoreItems,
   show3dOption = true,
 }: DualModeAlbumsDisplayProps<T>) {
-  const cookies = useCookies();
-  const [use3D, setUse3D] = useState(
-    show3dOption && Boolean(cookies.get(AppCookies.USE_3D)),
-  );
-
-  const handleToggle = useCallback(
-    (val: boolean) => {
-      setUse3D(val);
-      if (val) {
-        cookies.set(AppCookies.USE_3D, 'true');
-      } else {
-        cookies.remove(AppCookies.USE_3D);
-      }
-    },
-    [cookies],
-  );
-
+  const { use3d } = useThreeDOptionsContext();
   return (
     <div>
-      {show3dOption && (
-        <Toggle
-          label="Go 3D!"
-          on={use3D}
-          onChange={handleToggle}
-          className="fixed top-6 max-md:top-4 right-16"
-        />
-      )}
-      {show3dOption && use3D ? (
+      {show3dOption && use3d ? (
         <BabylonAlbumsDisplay
           albums={items}
           loading={loading}

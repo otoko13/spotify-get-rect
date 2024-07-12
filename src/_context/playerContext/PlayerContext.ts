@@ -1,13 +1,13 @@
 import { createContext } from 'react';
 
 export type PlayerContextType = {
-  loading?: boolean;
   player?: Spotify.Player;
+  deviceId?: string;
 };
 
 const PlayerContext = createContext<PlayerContextType>({
-  loading: false,
   player: undefined,
+  deviceId: undefined,
 });
 
 export default PlayerContext;

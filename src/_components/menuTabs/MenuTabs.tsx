@@ -8,6 +8,7 @@ import logoPic from '/src/_images/Spotify_Primary_Logo_RGB_Green.png';
 import Link from 'next/link';
 import DesktopLinks from './DesktopLinks';
 import MobileLinks from './MobileLinks';
+import Toggle from '../toggle/Toggle';
 
 export interface MenuTab {
   label: string;
@@ -15,11 +16,18 @@ export interface MenuTab {
 }
 
 interface MenuTabsProps {
+  onUse3dChanged: (use3d: boolean) => void;
+  use3d: boolean;
   tabs: MenuTab[];
   avatarUrl?: string;
 }
 
-export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
+export default function MenuTabs({
+  avatarUrl,
+  tabs,
+  use3d,
+  onUse3dChanged,
+}: MenuTabsProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -60,18 +68,21 @@ export default function MenuTabs({ avatarUrl, tabs }: MenuTabsProps) {
           <DesktopLinks className="max-lg:hidden visible" tabs={tabs} />
           <MobileLinks className="md:visible lg:hidden" tabs={tabs} />
         </div>
-        <div className="avatar mr-4 flex-grow justify-end">
-          <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
-            {avatarUrl && (
-              <Link href="/profile">
-                <Image
-                  alt="avatar image"
-                  src={avatarUrl}
-                  width={48}
-                  height={48}
-                />
-              </Link>
-            )}
+        <div className="flex-grow flex items-center justify-end">
+          <Toggle label="Go 3D!" on={use3d} onChange={onUse3dChanged} />
+          <div className="avatar mr-4">
+            <div className="w-12 h-12 rounded-full border-solid border-2 border-gray-600">
+              {avatarUrl && (
+                <Link href="/profile">
+                  <Image
+                    alt="avatar image"
+                    src={avatarUrl}
+                    width={48}
+                    height={48}
+                  />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

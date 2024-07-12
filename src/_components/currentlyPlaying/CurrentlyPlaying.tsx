@@ -1,11 +1,7 @@
 'use client';
 
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import {
-  clientSpotifyFetch,
-  setPlayerBeingUsed,
-  setPlayerReady,
-} from '@/_utils/clientUtils';
+import { clientSpotifyFetch, setPlayerBeingUsed } from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
@@ -19,8 +15,7 @@ import useGetActiveDevice, {
 import { useCookies } from 'next-client-cookies';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import AppCookies from '@/_constants/cookies';
-
-let player: Spotify.Player;
+import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -86,19 +81,14 @@ const convertSdkTrackToApiTrack = (
   }
 };
 
-interface CurrentlyPlayingProps {
-  onSdkPlayerInitialised: (player: Spotify.Player) => void;
-}
-
-const CurrentlyPlaying = ({
-  onSdkPlayerInitialised,
-}: CurrentlyPlayingProps) => {
+const CurrentlyPlaying = () => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
   const [device, setDevice] = useState<SpotifyDeviceSimple>();
-  const [thisDeviceReady, setThisDeviceReady] = useState(false);
+
+  const { player } = usePlayerContext();
 
   const cookies = useCookies();
 
@@ -234,69 +224,37 @@ const CurrentlyPlaying = ({
   }, [getPlayData]);
 
   useEffect(() => {
-    (window as any).onSpotifyWebPlaybackSDKReady = () => {
-      player = new Spotify.Player({
-        name: THIS_DEVICE_NAME,
-        getOAuthToken: (cb: any) => {
-          cb(cookies.get(AppCookies.SPOTIFY_AUTH_TOKEN));
-        },
-        volume: 0.5,
-      });
+    if (!player) {
+      return;
+    }
 
-      player.addListener('ready', ({ device_id }: { device_id: string }) => {
-        console.log(
-          'Spotify Web Playback SDK ready with Device ID ',
-          device_id,
-        );
-        cookies.set(AppCookies.THIS_DEVICE_ID, device_id);
-        setPlayerReady();
-        setThisDeviceReady(true);
-      });
+    player.addListener('player_state_changed', (response) => {
+      if (!response) {
+        return;
+      }
 
-      player.addListener('player_state_changed', (response) => {
-        if (!response) {
-          return;
-        }
+      const {
+        paused,
+        track_window: { current_track },
+      } = response;
 
-        const {
-          paused,
-          track_window: { current_track },
-        } = response;
+      setTrackStopped(!!paused);
+      setPlayerBeingUsed(!!paused);
 
-        setTrackStopped(!!paused);
-        setPlayerBeingUsed(!!paused);
+      if (!paused) {
+        setDevice({
+          id: cookies.get(AppCookies.THIS_DEVICE_ID),
+          name: THIS_DEVICE_NAME,
+        });
+      }
 
-        if (!paused) {
-          setDevice({
-            id: cookies.get(AppCookies.THIS_DEVICE_ID),
-            name: THIS_DEVICE_NAME,
-          });
-        }
+      if (current_track) {
+        const convertedTrack = convertSdkTrackToApiTrack(current_track);
 
-        if (current_track) {
-          const convertedTrack = convertSdkTrackToApiTrack(current_track);
-
-          updateTracks(convertedTrack);
-        }
-      });
-
-      player.on('initialization_error', ({ message }) => {
-        console.error('Failed to initialize', message);
-      });
-
-      player.on('playback_error', ({ message }) => {
-        console.error('Failed to perform playback', message);
-      });
-
-      player.connect();
-
-      return () => {
-        player.removeListener('ready');
-        player.removeListener('player_state_changed');
-        player.disconnect();
-      };
-    };
-  }, [cookies, updateTracks]);
+        updateTracks(convertedTrack);
+      }
+    });
+  }, [cookies, player, updateTracks]);
 
   // remove old device cookie on initialisation since this will be reset each time the app
   // is refreshed
@@ -350,11 +308,11 @@ const CurrentlyPlaying = ({
   }, [track]);
 
   const needToWaitForThisDeviceToBeReady = useMemo(() => {
-    if (!trackStopped || thisDeviceReady) {
+    if (!trackStopped || player) {
       return false;
     }
     return !device?.id;
-  }, [trackStopped, thisDeviceReady, device]);
+  }, [device?.id, player, trackStopped]);
 
   return (
     <>
