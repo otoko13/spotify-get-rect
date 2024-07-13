@@ -36,7 +36,11 @@ export default function LibraryLayout({
 
   const handleUse3dChanged = useCallback(
     (value: boolean) => {
-      cookies.set(AppCookies.USE_3D, value.toString());
+      if (value) {
+        cookies.set(AppCookies.USE_3D, 'true');
+      } else {
+        cookies.remove(AppCookies.USE_3D);
+      }
       setUse3d(value);
     },
     [cookies],
