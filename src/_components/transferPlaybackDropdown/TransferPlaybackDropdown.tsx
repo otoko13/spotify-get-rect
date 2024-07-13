@@ -15,12 +15,14 @@ export default function TransferPlaybackDropdown({
   onPlayTransferred,
 }: TransferPlaybackDropdownProps) {
   const authToken = useGetAuthToken();
-  const { deviceId } = usePlayerContext();
+  const { player, deviceId } = usePlayerContext();
 
   const handleClick = useCallback(async () => {
-    if (!deviceId) {
+    if (!(deviceId && player)) {
       return;
     }
+
+    player.activateElement();
 
     const response = await clientSpotifyFetch(`me/player`, {
       method: 'PUT',
@@ -34,7 +36,7 @@ export default function TransferPlaybackDropdown({
     if (response.status === 200 || response.status === 204) {
       onPlayTransferred();
     }
-  }, [authToken, deviceId, onPlayTransferred]);
+  }, [authToken, deviceId, onPlayTransferred, player]);
 
   return (
     <div className="dropdown dropdown-top dropdown-end">

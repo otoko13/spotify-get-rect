@@ -109,14 +109,6 @@ const CurrentlyPlaying = () => {
     [track],
   );
 
-  useEffect(() => {
-    console.info('TRACK CHANGED!', track?.item.name);
-  }, [track]);
-
-  useEffect(() => {
-    console.info('LAST TRACK CHANGED!', lastTrack?.item.name);
-  }, [lastTrack]);
-
   const getPlayData = useCallback(async () => {
     const response = await clientSpotifyFetch(
       'me/player?additional_types=track,episode',
@@ -140,17 +132,19 @@ const CurrentlyPlaying = () => {
 
     const data: SpotifyPlayerTrack = await response?.json();
 
-    if (data.device && data.device.id === thisDeviceId) {
-      if (device?.id !== thisDeviceId) {
-        setDevice({
-          id: thisDeviceId,
-          name: THIS_DEVICE_NAME,
-        });
-      }
+    if (
+      data.device &&
+      data.device.id === thisDeviceId &&
+      data.device.id !== thisDeviceId
+    ) {
+      setDevice({
+        id: thisDeviceId,
+        name: THIS_DEVICE_NAME,
+      });
       return;
     }
 
-    if (device?.id !== data.device.id) {
+    if (device?.id && device?.id !== data.device.id) {
       setDevice({
         id: data.device.id,
         name: data.device.name,
@@ -197,14 +191,22 @@ const CurrentlyPlaying = () => {
   }, [authToken, getPlayData]);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    let timeout: NodeJS.Timeout;
+
+    const pollPlayData = async () => {
       await getPlayData();
-    }, 3500);
+      timeout = setTimeout(pollPlayData, 3500);
+    };
+
+    // const interval = setInterval(async () => {
+    //   await getPlayData();
+    // }, 3500);
 
     getPlayData();
+    pollPlayData();
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(timeout);
     };
   }, [getPlayData]);
 
@@ -275,13 +277,6 @@ const CurrentlyPlaying = () => {
       ? track?.item.artists.map((artist) => artist.name).join(', ')
       : track?.item?.show?.name;
   }, [track]);
-
-  const needToWaitForThisDeviceToBeReady = useMemo(() => {
-    if (!trackStopped || player) {
-      return false;
-    }
-    return !device?.id;
-  }, [device?.id, player, trackStopped]);
 
   return (
     <>
@@ -354,7 +349,7 @@ const CurrentlyPlaying = () => {
               </div>
             </TransferPlaybackDropdown>
           )}
-          {needToWaitForThisDeviceToBeReady ? (
+          {!player ? (
             <div className="loading loading-dots loading-md"></div>
           ) : trackStopped ? (
             <button onClick={handlePlay}>
