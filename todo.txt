@@ -1,12 +1,12 @@
-Wait for player initialisation (queue a track if not initialised yet) (set global state variable when ready and poll for it if not ready)
-
-Convert all this shitty code to client side... like a proper react app:
-- remove cookies / window / any other dodginess
-
 Utilise next js routes now that most of the fetching is done from client side
 - will hide spotify credentials
+ 
+- remember to initialise use3d state from cookie
 
+- Add current device and name to a new current player context (don't think we need this actually) Update that when polling
 
-client side move;
-- move use3d to menu bar, add to context
-- move player initialisation to layout
+OK now for when polling, keep polling but start by relying only on the polling to update the track info. And set device in context if it's changed
+
+Then add in the player events to set the track immediately . And the device. And see what happens. Maybe still keep the code that compares the device to this device, and does nothing if they don't match, however this could lead to locking out any changes if there's a race condition with another interval that completes out of order
+
+Maybe put current track on context as well? For the babylon highlighting. 

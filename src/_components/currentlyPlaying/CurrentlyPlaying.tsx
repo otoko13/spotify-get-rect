@@ -1,21 +1,18 @@
 'use client';
 
+import { THIS_DEVICE_NAME } from '@/_context/playerContext/PlayerContext';
+import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { clientSpotifyFetch, setPlayerBeingUsed } from '@/_utils/clientUtils';
+import pauseButton from '@/_images/pause.svg';
+import playButton from '@/_images/play.svg';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
+import { useCookies } from 'next-client-cookies';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import styles from './currentlyPlaying.module.scss';
-import playButton from '@/_images/play.svg';
-import pauseButton from '@/_images/pause.svg';
-import useGetActiveDevice, {
-  THIS_DEVICE_NAME,
-} from '@/_hooks/useGetActiveDevice';
-import { useCookies } from 'next-client-cookies';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
-import AppCookies from '@/_constants/cookies';
-import usePlayerContext from '@/_context/playerContext/usePlayerContext';
+import styles from './currentlyPlaying.module.scss';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -88,11 +85,9 @@ const CurrentlyPlaying = () => {
   const [trackStopped, setTrackStopped] = useState(true);
   const [device, setDevice] = useState<SpotifyDeviceSimple>();
 
-  const { player } = usePlayerContext();
+  const { player, deviceId: thisDeviceId } = usePlayerContext();
 
   const cookies = useCookies();
-
-  const getActiveDevice = useGetActiveDevice();
 
   const updateTracks = useCallback(
     (newTrack: SpotifyPlayerTrack) => {
@@ -123,9 +118,6 @@ const CurrentlyPlaying = () => {
   }, [lastTrack]);
 
   const getPlayData = useCallback(async () => {
-    if (window.playerBeingUsed) {
-      return;
-    }
     const response = await clientSpotifyFetch(
       'me/player?additional_types=track,episode',
       {
@@ -148,15 +140,10 @@ const CurrentlyPlaying = () => {
 
     const data: SpotifyPlayerTrack = await response?.json();
 
-    // rely on the web playback sdk to change track data and playback status instead
-    const thisDeviceId = cookies.get(AppCookies.THIS_DEVICE_ID);
-    if (
-      window.playerBeingUsed ||
-      (data.device && data.device.id === thisDeviceId)
-    ) {
+    if (data.device && data.device.id === thisDeviceId) {
       if (device?.id !== thisDeviceId) {
         setDevice({
-          id: cookies.get(AppCookies.THIS_DEVICE_ID),
+          id: thisDeviceId,
           name: THIS_DEVICE_NAME,
         });
       }
@@ -176,16 +163,14 @@ const CurrentlyPlaying = () => {
     } else {
       setTrackStopped(true);
     }
-  }, [device, cookies, authToken, updateTracks]);
+  }, [authToken, device?.id, thisDeviceId, updateTracks]);
 
   const handlePlay = useCallback(async () => {
-    const { id } = await getActiveDevice();
+    const { id } = await getTargetDevice();
 
     const deviceToUse = id ?? device?.id;
 
-    if (player) {
-      player.activateElement();
-    }
+    player?.activateElement();
 
     await clientSpotifyFetch(
       `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
@@ -198,7 +183,7 @@ const CurrentlyPlaying = () => {
     );
 
     getPlayData();
-  }, [authToken, device?.id, getActiveDevice, getPlayData]);
+  }, [authToken, device?.id, getPlayData, player]);
 
   const handlePause = useCallback(async () => {
     await clientSpotifyFetch('me/player/pause', {
@@ -239,11 +224,10 @@ const CurrentlyPlaying = () => {
       } = response;
 
       setTrackStopped(!!paused);
-      setPlayerBeingUsed(!!paused);
 
       if (!paused) {
         setDevice({
-          id: cookies.get(AppCookies.THIS_DEVICE_ID),
+          id: thisDeviceId,
           name: THIS_DEVICE_NAME,
         });
       }
@@ -254,29 +238,14 @@ const CurrentlyPlaying = () => {
         updateTracks(convertedTrack);
       }
     });
-  }, [cookies, player, updateTracks]);
-
-  // remove old device cookie on initialisation since this will be reset each time the app
-  // is refreshed
-  useEffect(() => {
-    cookies.remove(AppCookies.THIS_DEVICE_ID);
-  }, [cookies]);
-
-  const setInitialDevice = useCallback(async () => {
-    const initialDevice = await getActiveDevice();
-    setDevice(initialDevice);
-  }, [getActiveDevice]);
-
-  useEffect(() => {
-    setInitialDevice();
-  }, [setInitialDevice]);
+  }, [cookies, player, thisDeviceId, updateTracks]);
 
   const handlePlayTransferred = useCallback(() => {
     setDevice({
-      id: cookies.get(AppCookies.THIS_DEVICE_ID) as string,
+      id: thisDeviceId,
       name: THIS_DEVICE_NAME,
     });
-  }, [cookies]);
+  }, [thisDeviceId]);
 
   const currentTrackImageToUse = useMemo(() => {
     if (!track) {
@@ -317,28 +286,32 @@ const CurrentlyPlaying = () => {
   return (
     <>
       {lastTrack && (
-        <Image
-          alt="currently playing album art blurred"
-          className="fixed top-0 left-0 blur-3xl opacity-67 -z-20"
-          key={lastTrackImageToUse}
-          src={lastTrackImageToUse}
-          width={0}
-          height={0}
-          sizes="100vw"
-          style={{ width: '100vw', height: '100vh' }}
-        />
+        <div>
+          <Image
+            alt="currently playing album art blurred"
+            className="fixed top-0 left-0 blur-3xl opacity-67 -z-20"
+            key={lastTrackImageToUse}
+            src={lastTrackImageToUse}
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ width: '100vw', height: '100vh' }}
+          />
+        </div>
       )}
       {track && (
-        <Image
-          alt="currently playing album art blurred"
-          className="fixed top-0 left-0 blur-3xl opacity-67 -z-20 animate-fade-in"
-          key={currentTrackImageToUse}
-          src={currentTrackImageToUse}
-          width={0}
-          height={0}
-          sizes="100vw"
-          style={{ width: '100vw', height: '100vh' }}
-        />
+        <div>
+          <Image
+            alt="currently playing album art blurred"
+            className="fixed top-0 left-0 blur-3xl opacity-67 -z-20 animate-fade-in"
+            key={currentTrackImageToUse}
+            src={currentTrackImageToUse}
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ width: '100vw', height: '100vh' }}
+          />
+        </div>
       )}
       <div
         className={classNames(
@@ -399,3 +372,6 @@ const CurrentlyPlaying = () => {
 };
 
 export default CurrentlyPlaying;
+function getTargetDevice(): { id: any } | PromiseLike<{ id: any }> {
+  throw new Error('Function not implemented.');
+}

@@ -2,12 +2,14 @@
 
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
+import AppCookies from '@/_constants/cookies';
 import PlayerContext from '@/_context/playerContext/PlayerContext';
 import ThreeDOptionsContext from '@/_context/threeDOptionsContext/ThreeDOptionsContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import useInitialiseSpotifySdkPlayer from '@/_hooks/useInitialiseSpotifySdkPlayer';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyUser } from '@/types';
+import { useCookies } from 'next-client-cookies';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function LibraryLayout({
@@ -18,10 +20,11 @@ export default function LibraryLayout({
   modal: React.ReactNode;
 }>) {
   const authToken = useGetAuthToken();
+  const cookies = useCookies();
   const [sdkPlayer, setSdkPlayer] = useState<Spotify.Player>();
   const [thisDeviceId, setThisDeviceId] = useState<string>();
   const [user, setUser] = useState<SpotifyUser>();
-  const [use3d, setUse3d] = useState(false);
+  const [use3d, setUse3d] = useState(Boolean(cookies.get(AppCookies.USE_3D)));
 
   const handleInitialisation = useCallback(
     (player: Spotify.Player, deviceId: string) => {
@@ -29,6 +32,14 @@ export default function LibraryLayout({
       setThisDeviceId(deviceId);
     },
     [],
+  );
+
+  const handleUse3dChanged = useCallback(
+    (value: boolean) => {
+      cookies.set(AppCookies.USE_3D, value.toString());
+      setUse3d(value);
+    },
+    [cookies],
   );
 
   useInitialiseSpotifySdkPlayer({ onInitialised: handleInitialisation });
@@ -57,7 +68,7 @@ export default function LibraryLayout({
           <MenuTabs
             avatarUrl={user?.images?.[0].url}
             use3d={use3d}
-            onUse3dChanged={setUse3d}
+            onUse3dChanged={handleUse3dChanged}
             tabs={[
               {
                 label: 'Saved albums',

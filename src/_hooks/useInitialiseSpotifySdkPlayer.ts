@@ -1,7 +1,7 @@
-import { useCookies } from 'next-client-cookies';
-import { useEffect, useRef, useState } from 'react';
-import { THIS_DEVICE_NAME } from './useGetActiveDevice';
 import AppCookies from '@/_constants/cookies';
+import { THIS_DEVICE_NAME } from '@/_context/playerContext/PlayerContext';
+import { useCookies } from 'next-client-cookies';
+import { useEffect } from 'react';
 
 interface UseInitialiseSpotifySdkPlayerArgs {
   onInitialised: (player: Spotify.Player, deviceId: string) => void;
@@ -10,59 +10,43 @@ interface UseInitialiseSpotifySdkPlayerArgs {
 const useInitialiseSpotifySdkPlayer = ({
   onInitialised,
 }: UseInitialiseSpotifySdkPlayerArgs) => {
-  const [player, setPlayer] = useState<Spotify.Player>();
   const cookies = useCookies();
-  const deviceId = useRef<string>();
 
   useEffect(() => {
-    (window as any).onSpotifyWebPlaybackSDKReady = () => {
-      console.log(cookies.get(AppCookies.SPOTIFY_AUTH_TOKEN));
-
-      const _player = new Spotify.Player({
+    (window as any).onSpotifyWebPlaybackSDKReady = async () => {
+      const player = new Spotify.Player({
         name: THIS_DEVICE_NAME,
         getOAuthToken: (cb: any) => {
           cb(cookies.get(AppCookies.SPOTIFY_AUTH_TOKEN));
         },
         volume: 0.5,
       });
-      _player.on('initialization_error', ({ message }) => {
+
+      player.on('initialization_error', ({ message }) => {
         console.error('Failed to initialize', message);
       });
 
-      _player.on('playback_error', ({ message }) => {
+      player.on('playback_error', ({ message }) => {
         console.error('Failed to perform playback', message);
       });
 
-      _player.addListener('ready', ({ device_id }: { device_id: string }) => {
+      player.addListener('ready', ({ device_id }: { device_id: string }) => {
         console.log(
           'Spotify Web Playback SDK ready with Device ID ',
           device_id,
         );
-        deviceId.current = device_id;
-        setPlayer(_player);
+        onInitialised(player, device_id);
       });
 
+      player.connect();
+
       return () => {
-        _player.removeListener('ready');
-        _player.removeListener('player_state_changed');
+        player.removeListener('ready');
+        player.removeListener('player_state_changed');
+        player.disconnect();
       };
     };
-  }, [cookies]);
-
-  useEffect(() => {
-    if (!player) {
-      return;
-    }
-    player.connect().then((success) => {
-      if (success && deviceId.current) {
-        onInitialised(player, deviceId.current);
-      }
-    });
-
-    return () => {
-      player.disconnect();
-    };
-  }, [onInitialised, player]);
+  }, [cookies, onInitialised]);
 };
 
 export default useInitialiseSpotifySdkPlayer;
