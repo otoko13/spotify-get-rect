@@ -83,7 +83,7 @@ const CurrentlyPlaying = () => {
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
-  const [device, setDevice] = useState<SpotifyDeviceSimple>();
+  const [currentDevice, setCurrentDevice] = useState<SpotifyDeviceSimple>();
 
   const { player, deviceId: thisDeviceId } = usePlayerContext();
 
@@ -132,37 +132,25 @@ const CurrentlyPlaying = () => {
 
     const data: SpotifyPlayerTrack = await response?.json();
 
-    if (
-      data.device &&
-      data.device.id === thisDeviceId &&
-      data.device.id !== thisDeviceId
-    ) {
-      setDevice({
-        id: thisDeviceId,
-        name: THIS_DEVICE_NAME,
-      });
-      return;
-    }
-
-    if (device?.id && device?.id !== data.device.id) {
-      setDevice({
+    if (currentDevice?.id !== data.device.id) {
+      setCurrentDevice({
         id: data.device.id,
         name: data.device.name,
       });
     }
 
-    if (data.is_playing) {
-      setTrackStopped(false);
+    setTrackStopped(!data.is_playing);
+    if (data.is_playing && data.item.id !== track?.item.id) {
       updateTracks(data);
-    } else {
-      setTrackStopped(true);
     }
-  }, [authToken, device?.id, thisDeviceId, updateTracks]);
+
+    return Promise.resolve();
+  }, [authToken, currentDevice?.id, track?.item.id, updateTracks]);
 
   const handlePlay = useCallback(async () => {
     const { id } = await getTargetDevice();
 
-    const deviceToUse = id ?? device?.id;
+    const deviceToUse = id ?? currentDevice?.id;
 
     player?.activateElement();
 
@@ -177,7 +165,7 @@ const CurrentlyPlaying = () => {
     );
 
     getPlayData();
-  }, [authToken, device?.id, getPlayData, player]);
+  }, [authToken, currentDevice?.id, getPlayData, player]);
 
   const handlePause = useCallback(async () => {
     await clientSpotifyFetch('me/player/pause', {
@@ -190,25 +178,22 @@ const CurrentlyPlaying = () => {
     getPlayData();
   }, [authToken, getPlayData]);
 
+  // set up polling for data
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
-    const pollPlayData = async () => {
+    const interval = setInterval(async () => {
+      if (!getPlayData) {
+        return;
+      }
       await getPlayData();
-      timeout = setTimeout(pollPlayData, 3500);
-    };
-
-    // const interval = setInterval(async () => {
-    //   await getPlayData();
-    // }, 3500);
+    }, 3500);
 
     getPlayData();
-    pollPlayData();
 
     return () => {
-      clearTimeout(timeout);
+      clearInterval(interval);
     };
-  }, [getPlayData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!player) {
@@ -227,12 +212,14 @@ const CurrentlyPlaying = () => {
 
       setTrackStopped(!!paused);
 
-      if (!paused) {
-        setDevice({
-          id: thisDeviceId,
-          name: THIS_DEVICE_NAME,
-        });
+      if (paused) {
+        return;
       }
+
+      setCurrentDevice({
+        id: thisDeviceId,
+        name: THIS_DEVICE_NAME,
+      });
 
       if (current_track) {
         const convertedTrack = convertSdkTrackToApiTrack(current_track);
@@ -243,7 +230,7 @@ const CurrentlyPlaying = () => {
   }, [cookies, player, thisDeviceId, updateTracks]);
 
   const handlePlayTransferred = useCallback(() => {
-    setDevice({
+    setCurrentDevice({
       id: thisDeviceId,
       name: THIS_DEVICE_NAME,
     });
@@ -341,11 +328,11 @@ const CurrentlyPlaying = () => {
           </div>
         </div>
         <div className="controls flex items-center">
-          {device?.name && device.name !== THIS_DEVICE_NAME && (
+          {currentDevice?.name && currentDevice.name !== THIS_DEVICE_NAME && (
             <TransferPlaybackDropdown onPlayTransferred={handlePlayTransferred}>
               <div className="text-sm text-primary mr-4 ">
                 <span className="max-lg:hidden visible">Playing on </span>
-                {device?.name}
+                {currentDevice?.name}
               </div>
             </TransferPlaybackDropdown>
           )}
