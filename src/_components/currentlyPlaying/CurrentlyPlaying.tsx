@@ -10,9 +10,10 @@ import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import { useCookies } from 'next-client-cookies';
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import styles from './currentlyPlaying.module.scss';
+import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -84,8 +85,10 @@ const CurrentlyPlaying = () => {
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
   const [currentDevice, setCurrentDevice] = useState<SpotifyDeviceSimple>();
+  const localPlayerTrackUpdateTime = useRef<number>();
 
   const { player, deviceId: thisDeviceId } = usePlayerContext();
+  const getTargetDevice = useGetTargetDevice();
 
   const cookies = useCookies();
 
@@ -110,6 +113,8 @@ const CurrentlyPlaying = () => {
   );
 
   const getPlayData = useCallback(async () => {
+    const fnStart = Date.now();
+
     const response = await clientSpotifyFetch(
       'me/player?additional_types=track,episode',
       {
@@ -139,18 +144,36 @@ const CurrentlyPlaying = () => {
       });
     }
 
+    if (data.device.id === thisDeviceId) {
+      return;
+    }
+
+    if (fnStart < (localPlayerTrackUpdateTime?.current ?? 0)) {
+      console.warn('FOUND AN OVERLAP!');
+      return;
+    }
+
     setTrackStopped(!data.is_playing);
     if (data.is_playing && data.item.id !== track?.item.id) {
       updateTracks(data);
     }
 
     return Promise.resolve();
-  }, [authToken, currentDevice?.id, track?.item.id, updateTracks]);
+  }, [
+    authToken,
+    currentDevice?.id,
+    thisDeviceId,
+    track?.item.id,
+    updateTracks,
+  ]);
 
   const handlePlay = useCallback(async () => {
-    const { id } = await getTargetDevice();
+    if (!trackStopped) {
+      return;
+    }
+    const targetDeviceId = await getTargetDevice();
 
-    const deviceToUse = id ?? currentDevice?.id;
+    const deviceToUse = currentDevice?.id ?? targetDeviceId;
 
     player?.activateElement();
 
@@ -163,20 +186,33 @@ const CurrentlyPlaying = () => {
         method: 'PUT',
       },
     );
-
-    getPlayData();
-  }, [authToken, currentDevice?.id, getPlayData, player]);
+    if (deviceToUse !== thisDeviceId) {
+      getPlayData();
+    }
+  }, [
+    authToken,
+    currentDevice?.id,
+    getPlayData,
+    getTargetDevice,
+    player,
+    thisDeviceId,
+    trackStopped,
+  ]);
 
   const handlePause = useCallback(async () => {
+    if (trackStopped) {
+      return;
+    }
     await clientSpotifyFetch('me/player/pause', {
       headers: {
         Authorization: authToken,
       },
       method: 'PUT',
     });
-
-    getPlayData();
-  }, [authToken, getPlayData]);
+    if (currentDevice?.id !== thisDeviceId) {
+      getPlayData();
+    }
+  }, [authToken, currentDevice?.id, getPlayData, thisDeviceId, trackStopped]);
 
   // set up polling for data
   useEffect(() => {
@@ -204,6 +240,8 @@ const CurrentlyPlaying = () => {
       if (!response) {
         return;
       }
+
+      localPlayerTrackUpdateTime.current = Date.now();
 
       const {
         paused,
@@ -354,6 +392,3 @@ const CurrentlyPlaying = () => {
 };
 
 export default CurrentlyPlaying;
-function getTargetDevice(): { id: any } | PromiseLike<{ id: any }> {
-  throw new Error('Function not implemented.');
-}
