@@ -1,5 +1,5 @@
+import { generateRandomString } from '@/_utils/sharedUtils';
 import { redirect } from 'next/navigation';
-import { generateRandomString } from './utils';
 import querystring from 'querystring';
 
 const REQUESTED_PERMISSIONS = [
@@ -13,13 +13,11 @@ const REQUESTED_PERMISSIONS = [
   'playlist-read-private',
 ];
 
-export async function GET() {
-  const state = generateRandomString(16);
-  const scope = REQUESTED_PERMISSIONS.join(' ');
+const scope = REQUESTED_PERMISSIONS.join(' ');
+const state = generateRandomString(16);
 
-  // no way to pass the path to the redirect URI right now, they won't allow wildcards or query params
-
-  redirect(
+export default function SpotifyAuthForwarder() {
+  return redirect(
     'https://accounts.spotify.com/authorize?' +
       querystring.stringify({
         response_type: 'code',
