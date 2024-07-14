@@ -19,7 +19,7 @@ interface BabylonCanvasProps extends Record<string, any> {
   hideCanvas?: boolean;
   engineOptions?: EngineOptions;
   sceneOptions?: SceneOptions;
-  onRender: (scene: Scene) => void;
+  onRender?: (scene: Scene) => void;
   onSceneReady: (scene: Scene) => void;
   onPointerObservable?: (
     eventInfo: PointerInfo,
@@ -71,7 +71,7 @@ export default function BabylonCanvas({
     }
 
     engine.runRenderLoop(() => {
-      if (typeof onRender === 'function') onRender(scene);
+      onRender?.(scene);
       scene.render();
     });
   }, [

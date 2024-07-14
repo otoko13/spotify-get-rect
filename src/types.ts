@@ -51,6 +51,7 @@ export interface SpotifyChapter {
     name: string;
   };
   images: SpotifyImage[];
+  uri: string;
 }
 
 export type SpotifyPlayerSong = {

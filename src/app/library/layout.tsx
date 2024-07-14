@@ -1,67 +1,111 @@
+'use client';
+
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
-import { getAuthToken, serverSpotifyFetch } from '@/_utils/serverUtils';
+import AppCookies from '@/_constants/cookies';
+import PlayerContext from '@/_context/playerContext/PlayerContext';
+import ThreeDOptionsContext from '@/_context/threeDOptionsContext/ThreeDOptionsContext';
+import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import useInitialiseSpotifySdkPlayer from '@/_hooks/useInitialiseSpotifySdkPlayer';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyUser } from '@/types';
+import { useCookies } from 'next-client-cookies';
+import { useCallback, useEffect, useState } from 'react';
 
-export default async function AlbumsLayout({
+export default function LibraryLayout({
   children,
   modal,
 }: Readonly<{
   children: React.ReactNode;
   modal: React.ReactNode;
 }>) {
-  const authToken = getAuthToken();
+  const authToken = useGetAuthToken();
+  const cookies = useCookies();
+  const [sdkPlayer, setSdkPlayer] = useState<Spotify.Player>();
+  const [thisDeviceId, setThisDeviceId] = useState<string>();
+  const [user, setUser] = useState<SpotifyUser>();
+  const [use3d, setUse3d] = useState(Boolean(cookies.get(AppCookies.USE_3D)));
 
-  const userResponse = await serverSpotifyFetch('me', {
-    headers: {
-      Authorization: authToken,
+  const handleInitialisation = useCallback(
+    (player: Spotify.Player, deviceId: string) => {
+      setSdkPlayer(player);
+      setThisDeviceId(deviceId);
     },
-  });
+    [],
+  );
 
-  const userData: SpotifyUser = await userResponse.json();
-  const avatarUrl = userData.images?.[0]?.url;
+  const handleUse3dChanged = useCallback(
+    (value: boolean) => {
+      if (value) {
+        cookies.set(AppCookies.USE_3D, 'true');
+      } else {
+        cookies.remove(AppCookies.USE_3D);
+      }
+      setUse3d(value);
+    },
+    [cookies],
+  );
+
+  useInitialiseSpotifySdkPlayer({ onInitialised: handleInitialisation });
+
+  useEffect(() => {
+    async function getUser() {
+      const userResponse = await clientSpotifyFetch('me', {
+        headers: {
+          Authorization: authToken,
+        },
+      });
+
+      const userData = await userResponse.json();
+      setUser(userData);
+    }
+
+    getUser();
+  }, [authToken]);
 
   return (
-    <>
-      <div>
-        <MenuTabs
-          avatarUrl={avatarUrl}
-          tabs={[
-            {
-              label: 'Saved albums',
-              path: '/library/saved-albums',
-            },
-            {
-              label: 'Most played',
-              path: '/library/latest-played',
-            },
-            {
-              label: 'Recommendations',
-              path: '/library/recommendations',
-            },
-            {
-              label: 'New releases',
-              path: '/library/new-releases',
-            },
-            {
-              label: 'Playlists',
-              path: '/library/playlists',
-            },
-            {
-              label: 'Audiobooks',
-              path: '/library/audiobooks',
-            },
-          ]}
-        />
+    <PlayerContext.Provider
+      value={{ player: sdkPlayer, deviceId: thisDeviceId }}
+    >
+      <ThreeDOptionsContext.Provider value={{ use3d }}>
+        <div>
+          <MenuTabs
+            avatarUrl={user?.images?.[0].url}
+            use3d={use3d}
+            onUse3dChanged={handleUse3dChanged}
+            tabs={[
+              {
+                label: 'Saved albums',
+                path: '/library/saved-albums',
+              },
+              {
+                label: 'Most played',
+                path: '/library/latest-played',
+              },
+              {
+                label: 'Recommendations',
+                path: '/library/recommendations',
+              },
+              {
+                label: 'New releases',
+                path: '/library/new-releases',
+              },
+              {
+                label: 'Playlists',
+                path: '/library/playlists',
+              },
+              {
+                label: 'Audiobooks',
+                path: '/library/audiobooks',
+              },
+            ]}
+          />
 
-        {children}
-        {/* This is the ideal place for CurrentlyPlaying, but we can't do this
-         because it causes a rerender of the whole page when the track changes - 
-         moving to individual pages instead, which is OK since it's absolutely positioned, 
-         however there might be a slight flicker as we move between the routes under albums*/}
-        <CurrentlyPlaying />
-      </div>
-      {modal}
-    </>
+          {children}
+          <CurrentlyPlaying />
+        </div>
+        {modal}
+      </ThreeDOptionsContext.Provider>
+    </PlayerContext.Provider>
   );
 }

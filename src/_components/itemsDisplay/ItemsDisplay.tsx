@@ -18,8 +18,8 @@ export default function ItemsDisplay<T extends BaseDisplayItem>({
 
   return (
     <div className="grid max-md:grid-cols-2 grid-cols-6 max-md:gap-4 gap-10 mb-10 max-md:mb-4">
-      {items.map((item) => (
-        <DisplayItem key={item.id} item={item} />
+      {items.map((item, index) => (
+        <DisplayItem key={`${index}-${item.id}`} item={item} />
       ))}
       {loading &&
         Array.from(Array(colsToFillWhenLoading + 24).keys()).map((i) => (

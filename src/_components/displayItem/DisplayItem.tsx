@@ -1,15 +1,11 @@
 'use client';
 
-import AppCookies from '@/_constants/cookies';
-import useGetActiveDevice from '@/_hooks/useGetActiveDevice';
+import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import {
-  clientSpotifyFetch,
-  waitForSpotifySdkPlayer,
-} from '@/_utils/clientUtils';
-import { useCookies } from 'next-client-cookies';
+import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import Image from 'next/image';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface BaseDisplayItem {
   id: string;
@@ -22,39 +18,61 @@ interface DisplayItemProps<T extends BaseDisplayItem> {
   item: T;
 }
 
+interface PlayItemArgs {
+  spotifyId: string;
+  deviceId: string;
+  authToken: string;
+}
+
+const playItem = async ({ spotifyId, deviceId, authToken }: PlayItemArgs) => {
+  return clientSpotifyFetch(
+    `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        context_uri: spotifyId,
+      }),
+      headers: {
+        Authorization: authToken,
+      },
+    },
+  );
+};
+
 export default function DisplayItem<T extends BaseDisplayItem>({
   item,
 }: DisplayItemProps<T>) {
   const authToken = useGetAuthToken();
-  const getActiveDevice = useGetActiveDevice();
-  const cookies = useCookies();
+  const getTargetDevice = useGetTargetDevice();
+  const [queuedItem, setQueuedItem] = useState<string>();
+  const { player, deviceId: thisDeviceId } = usePlayerContext();
 
   const handleClicked = useCallback(
     async (spotifyId: string) => {
-      const { id: deviceId } = await getActiveDevice();
+      const targetDeviceId = await getTargetDevice();
 
-      let deviceToUse = deviceId;
-
-      if (!deviceId && !window.spotifySdkPlayerReady) {
-        await waitForSpotifySdkPlayer();
-        deviceToUse = cookies.get(AppCookies.THIS_DEVICE_ID);
+      if (!targetDeviceId) {
+        setQueuedItem(spotifyId);
+        return;
       }
 
-      return await clientSpotifyFetch(
-        `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            context_uri: spotifyId,
-          }),
-          headers: {
-            Authorization: authToken,
-          },
-        },
-      );
+      player?.activateElement();
+
+      return await playItem({
+        authToken,
+        deviceId: targetDeviceId,
+        spotifyId,
+      });
     },
-    [authToken, getActiveDevice, cookies],
+    [authToken, getTargetDevice, player],
   );
+
+  useEffect(() => {
+    if (queuedItem && thisDeviceId) {
+      playItem({ spotifyId: queuedItem, authToken, deviceId: thisDeviceId });
+      setQueuedItem(undefined);
+    }
+  }, [authToken, queuedItem, thisDeviceId]);
 
   return (
     <button onClick={() => handleClicked(item.uri)}>

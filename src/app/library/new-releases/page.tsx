@@ -1,31 +1,30 @@
-import LoadMoreNewReleases from '@/_components/loadMoreNewReleases/LoadMoreNewReleases';
-import { serverSpotifyFetch } from '@/_utils/serverUtils';
-import { getAuthToken } from '@/_utils/serverUtils';
-import { SpotifyAlbum } from '@/types';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'New releases',
-  description: 'Browse new releases for you from Spotify',
+import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
+import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import { getSpotifyUrl } from '@/_utils/clientUtils';
+import { SpotifyAlbum } from '@/types';
+
+type DataItem = {
+  items: SpotifyAlbum[];
 };
 
-export default async function NewReleasesPage() {
-  const response = await serverSpotifyFetch('browse/new-releases?limit=50', {
-    headers: {
-      Authorization: getAuthToken(),
-    },
-  });
-
-  const data = await response.json();
-
-  const sortedAlbums: SpotifyAlbum[] = data.albums.items?.filter(
+const mapResponseToDisplayItems = (data: {
+  albums: DataItem;
+}): SpotifyAlbum[] => {
+  return data.albums.items?.filter(
     (a: SpotifyAlbum) => a.album_type !== 'single',
   );
+};
 
+export default function NewReleasesPage() {
   return (
-    <LoadMoreNewReleases
-      initialAlbums={sortedAlbums ?? []}
-      nextUrl={data.next}
-    />
+    <>
+      <HtmlTitle pageTitle="New releases" />
+      <LoadMoreDisplayItems
+        initialUrl={getSpotifyUrl('browse/new-releases?limit=50')}
+        mapResponseToDisplayItems={mapResponseToDisplayItems}
+      />
+    </>
   );
 }

@@ -1,21 +1,27 @@
-import LoadMoreGeneric from '@/_components/loadMoreGeneric/LoadMoreGeneric';
-import { serverSpotifyFetch } from '@/_utils/serverUtils';
-import { getAuthToken } from '@/_utils/serverUtils';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Playlists',
-  description: 'Your Spotify playlists',
-};
+import { BaseDisplayItem } from '@/_components/displayItem/DisplayItem';
+import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
+import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import { getSpotifyUrl } from '@/_utils/clientUtils';
 
-export default async function PlaylistsPage() {
-  const response = await serverSpotifyFetch('me/playlists?limit=50', {
-    headers: {
-      Authorization: getAuthToken(),
-    },
-  });
+// export const metadata: Metadata = {
+//   title: 'Playlists',
+//   description: 'Your Spotify playlists',
+// };
 
-  const data = await response.json();
+const mapResponseToDisplayItems = (data: {
+  items: BaseDisplayItem[];
+}): BaseDisplayItem[] => data.items;
 
-  return <LoadMoreGeneric initialItems={data.items} nextUrl={data.next} />;
+export default function PlaylistsPage() {
+  return (
+    <>
+      <HtmlTitle pageTitle="Playlists" />
+      <LoadMoreDisplayItems
+        initialUrl={getSpotifyUrl('me/playlists?limit=48')}
+        mapResponseToDisplayItems={mapResponseToDisplayItems}
+      />
+    </>
+  );
 }

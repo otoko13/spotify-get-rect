@@ -1,33 +1,34 @@
-import { SpotifyAlbum, SpotifyPlayerSongTrack } from '@/types';
+import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
+import { clientSpotifyFetch } from '@/_utils/clientUtils';
+import { SpotifyPlayerSongTrack } from '@/types';
 import {
-  Vector3,
-  MeshBuilder,
-  Scene,
-  ArcRotateCamera,
-  StandardMaterial,
-  Texture,
-  Vector4,
-  DirectionalLight,
-  SpotLight,
+  AbstractMesh,
   ActionManager,
-  ExecuteCodeAction,
+  ArcRotateCamera,
   Color3,
+  DirectionalLight,
+  ExecuteCodeAction,
+  Mesh,
+  MeshBuilder,
   MirrorTexture,
   Plane,
+  Scene,
+  SpotLight,
+  StandardMaterial,
   Tags,
-  Mesh,
-  AbstractMesh,
+  Texture,
+  Vector3,
+  Vector4,
 } from '@babylonjs/core';
-import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import { useCallback, useEffect, useState } from 'react';
-import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import { Cookies, useCookies } from 'next-client-cookies';
+import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
-import AppCookies from '@/_constants/cookies';
+import { BaseDisplayItem } from '../displayItem/DisplayItem';
+import FullPageSpinner from '../fullPageSpinner/FullPageSpinner';
 
 interface BabylonAlbumsDisplayProps {
-  albums?: SpotifyAlbum[];
+  albums?: BaseDisplayItem[];
   loading?: boolean;
   noMoreAlbums?: boolean;
   onLoadMoreButtonClicked: () => void;
@@ -48,15 +49,15 @@ let camera: ArcRotateCamera;
 /**
  * Will run on every frame render.  We are spinning the box on y-axis.
  */
-const onRender = (scene: Scene) => {
-  console.info(scene);
-  // if (!box) {
-  //   return;
-  // }
-  // const deltaTimeInMillis = scene.getEngine().getDeltaTime();
-  // const rpm = 10;
-  // box.rotation.y += (rpm / 60) * Math.PI * 2 * (deltaTimeInMillis / 1000);
-};
+// const onRender = (scene: Scene) => {
+//   console.info(scene);
+//   // if (!box) {
+//   //   return;
+//   // }
+//   // const deltaTimeInMillis = scene.getEngine().getDeltaTime();
+//   // const rpm = 10;
+//   // box.rotation.y += (rpm / 60) * Math.PI * 2 * (deltaTimeInMillis / 1000);
+// };
 
 const setCameraTarget = (albumCount: number) => {
   const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
@@ -245,48 +246,17 @@ const createFloor = (scene: Scene, albumCount: number) => {
 
 interface PlayAlbumsArgs {
   authToken: string;
-  cookies: Cookies;
   spotifyId: string;
   albumIndex: number;
 }
 
-const playAlbum = async ({
-  authToken,
-  spotifyId,
-  albumIndex,
-  cookies,
-}: PlayAlbumsArgs) => {
-  // this line is causing massive rerenders of the canvas and no idea why just yet, so using
-  // cookies which are updated every poll of currently playing:
-  // const { id: deviceId } = await getActiveDevice();
-
-  const deviceId =
-    cookies.get(AppCookies.ACTIVE_DEVICE_ID) ??
-    cookies.get(AppCookies.THIS_DEVICE_ID);
-
-  await clientSpotifyFetch(
-    `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify({
-        context_uri: spotifyId,
-      }),
-      headers: {
-        Authorization: authToken,
-      },
-    },
-  );
-
-  shineSpotlight({ albumIndex, spotifyId });
-};
-
 interface AddAlbumsArgs {
-  cookies: Cookies;
   authToken: string;
-  albums: SpotifyAlbum[];
+  albums: BaseDisplayItem[];
+  playAlbum: (args: PlayAlbumsArgs) => void;
 }
 
-const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
+const addAlbums = ({ albums, authToken, playAlbum }: AddAlbumsArgs) => {
   if (!scene) {
     return;
   }
@@ -331,7 +301,6 @@ const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
           await playAlbum({
             spotifyId: box.name,
             albumIndex: i,
-            cookies,
             authToken,
           }),
       ),
@@ -384,7 +353,7 @@ const addAlbums = ({ albums, authToken, cookies }: AddAlbumsArgs) => {
 };
 
 interface TriggerSpotlightArgs {
-  albums: SpotifyAlbum[];
+  albums: BaseDisplayItem[];
   authToken: string;
 }
 
@@ -423,7 +392,7 @@ const triggerSpotlight = async ({
   }
 };
 
-let displayedAlbums: SpotifyAlbum[] = [];
+let displayedAlbums: BaseDisplayItem[] = [];
 
 export default function BabylonAlbumsDisplay({
   albums = [],
@@ -432,39 +401,56 @@ export default function BabylonAlbumsDisplay({
   onLoadMoreButtonClicked,
 }: BabylonAlbumsDisplayProps) {
   const authToken = useGetAuthToken();
-  const cookies = useCookies();
   const [ready, setReady] = useState(false);
+  const getTargetDevice = useGetTargetDevice();
+
+  const playAlbum = useCallback(
+    async ({ authToken, spotifyId, albumIndex }: PlayAlbumsArgs) => {
+      const deviceId = await getTargetDevice();
+
+      await clientSpotifyFetch(
+        `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            context_uri: spotifyId,
+          }),
+          headers: {
+            Authorization: authToken,
+          },
+        },
+      );
+
+      shineSpotlight({ albumIndex, spotifyId });
+    },
+    [getTargetDevice],
+  );
 
   const handleSceneReady = useCallback(
     (newScene: Scene) => {
       setReady(true);
       scene = newScene;
       createScene(scene, albums.length);
-      addAlbums({ albums, authToken, cookies });
+      addAlbums({ albums, authToken, playAlbum });
       triggerSpotlight({ albums, authToken });
       displayedAlbums = albums;
       // createFloor(scene, albums.length);
     },
-    [albums, authToken, cookies],
+    [albums, authToken, playAlbum],
   );
 
   useEffect(() => {
     const newAlbums = albums.splice(displayedAlbums.length);
-    addAlbums({ albums: newAlbums, authToken, cookies });
+    addAlbums({ albums: newAlbums, authToken, playAlbum });
     // setCameraTarget(albums.length);
-  }, [albums, authToken, cookies]);
+  }, [albums, authToken, playAlbum]);
 
   return (
     <div className="overflow-hidden h-screen">
-      {(!ready || loading) && (
-        <div className="fixed flex w-screen h-screen justify-center items-center overflow-hidden">
-          <div className="loading loading-bars loading-lg text-primary absolute" />
-        </div>
-      )}
+      {(!ready || loading) && <FullPageSpinner />}
       <BabylonCanvas
         hideCanvas={loading}
         onSceneReady={handleSceneReady}
-        onRender={onRender}
         id="my-canvas"
         adaptToDeviceRatio={false}
         antialias

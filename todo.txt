@@ -1,4 +1,3 @@
-Wait for player initialisation (queue a track if not initialised yet) (set global state variable when ready and poll for it if not ready)
+Play/pause buttons fixed, but now the issue with one of the images being cached as the last track is back.
 
-Convert all this shitty code to client side... like a proper react app:
-- remove cookies / window / any other dodginess
+Initial track on Babylong Display

@@ -1,45 +1,33 @@
-import LoadMoreAlbums from '@/_components/loadMoreAlbums/LoadMoreAlbums';
-import { serverSpotifyFetch } from '@/_utils/serverUtils';
-import { getAuthToken } from '@/_utils/serverUtils';
-import { SpotifyAlbum } from '@/types';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Saved Albums',
-  description: 'Your latest liked albums in Spotify',
+import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
+import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import { getSpotifyUrl } from '@/_utils/clientUtils';
+import { SpotifyAlbum } from '@/types';
+
+type DataItem = {
+  album: SpotifyAlbum;
+  added_at: string;
 };
 
-export default async function SavedAlbumsPage() {
-  const response = await serverSpotifyFetch('me/albums?limit=50', {
-    headers: {
-      Authorization: getAuthToken(),
-    },
-  });
+const mapResponseToDisplayItems = (data: {
+  items: DataItem[];
+}): SpotifyAlbum[] => {
+  const sorted = data.items.sort((a, b) => (a.added_at < b.added_at ? 1 : -1));
 
-  const data = await response.json();
-
-  if (!data.items) {
-    console.error('No items', data);
-    return (
-      <LoadMoreAlbums
-        initialAlbums={[]}
-        nextUrl="https://api.spotify.com/v1/me/albums?limit=50"
-      />
-    );
-  }
-
-  const sortedAlbums: SpotifyAlbum[] = data.items
-    .sort((a: { added_at: string }, b: { added_at: string }) =>
-      a.added_at < b.added_at ? 1 : -1,
-    )
+  return sorted
     .map((d: { album: SpotifyAlbum }) => d.album)
     .filter((a: SpotifyAlbum) => a.album_type !== 'single');
+};
 
+export default function SavedAlbumsPage() {
   return (
-    <LoadMoreAlbums
-      initialAlbums={sortedAlbums}
-      nextUrl={data.next}
-      sortAlbumsByDate
-    />
+    <>
+      <HtmlTitle pageTitle="Saved albums" />
+      <LoadMoreDisplayItems
+        initialUrl={getSpotifyUrl('me/albums?limit=50')}
+        mapResponseToDisplayItems={mapResponseToDisplayItems}
+      />
+    </>
   );
 }

@@ -1,49 +1,64 @@
-import LoadMoreRecommendations from '@/_components/loadMoreRecommendations/LoadMoreRecommendations';
-import { serverSpotifyFetch } from '@/_utils/serverUtils';
-import { getAuthToken } from '@/_utils/serverUtils';
-import { SpotifyAlbum, SpotifyTrack } from '@/types';
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Recommendations',
-  description: 'Recommendations for you from Spotify',
+import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
+import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import { clientSpotifyFetch, getSpotifyUrl } from '@/_utils/clientUtils';
+import { SpotifyAlbum, SpotifyTrack } from '@/types';
+import { useCallback, useEffect, useState } from 'react';
+
+// export const metadata: Metadata = {
+//   title: 'Recommendations',
+//   description: 'Recommendations for you from Spotify',
+// };
+
+type DataItem = {
+  album: SpotifyAlbum;
 };
 
-export default async function RecommendationsPage() {
-  const randomOffset = Math.floor(Math.random() * 100);
+const mapResponseToDisplayItems = (data: {
+  tracks: DataItem[];
+}): SpotifyAlbum[] => {
+  return data.tracks.map((track) => track.album);
+};
 
-  const response = await serverSpotifyFetch(
-    `me/top/tracks?limit=5&offset=${randomOffset}`,
-    {
-      headers: {
-        Authorization: getAuthToken(),
+export default function RecommendationsPage() {
+  const [initialUrl, setInitialUrl] = useState<string>();
+  const authToken = useGetAuthToken();
+
+  const setInitialRecommendationsUrl = useCallback(async () => {
+    const randomOffset = Math.floor(Math.random() * 100);
+
+    const response = await clientSpotifyFetch(
+      `me/top/tracks?limit=5&offset=${randomOffset}`,
+      {
+        headers: {
+          Authorization: authToken,
+        },
       },
-    },
-  );
+    );
 
-  const topData = await response.json();
+    const topData = await response.json();
 
-  const seedTrackIds = topData.items.map((t: SpotifyTrack) => t.id);
+    const seedTrackIds = topData.items.map((t: SpotifyTrack) => t.id);
 
-  const response2 = await serverSpotifyFetch(
-    `recommendations?limit=50&seed_tracks=${seedTrackIds.join(',')}`,
-    {
-      headers: {
-        Authorization: getAuthToken(),
-      },
-    },
-  );
+    const recommendationsUrl = getSpotifyUrl(
+      `recommendations?limit=50&seed_tracks=${seedTrackIds.join(',')}`,
+    );
+    setInitialUrl(recommendationsUrl);
+  }, [authToken]);
 
-  const recommendationData = await response2.json();
-
-  const recommendations: SpotifyAlbum[] = recommendationData.tracks.map(
-    (t: SpotifyTrack) => t.album,
-  );
+  useEffect(() => {
+    setInitialRecommendationsUrl();
+  }, [setInitialRecommendationsUrl]);
 
   return (
-    <LoadMoreRecommendations
-      initialAlbums={recommendations}
-      nextUrl={topData.next}
-    />
+    <>
+      <HtmlTitle pageTitle="Recommendations" />
+      <LoadMoreDisplayItems
+        initialUrl={initialUrl}
+        mapResponseToDisplayItems={mapResponseToDisplayItems}
+      />
+    </>
   );
 }
