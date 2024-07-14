@@ -2,6 +2,7 @@
 
 import CurrentlyPlaying from '@/_components/currentlyPlaying/CurrentlyPlaying';
 import MenuTabs from '@/_components/menuTabs/MenuTabs';
+import WarningAlert from '@/_components/warningAlert/WarningAlert';
 import AppCookies from '@/_constants/cookies';
 import PlayerContext from '@/_context/playerContext/PlayerContext';
 import ThreeDOptionsContext from '@/_context/threeDOptionsContext/ThreeDOptionsContext';
@@ -113,6 +114,9 @@ export default function LibraryLayout({
           <CurrentlyPlaying />
         </div>
         {modal}
+        {playerInitFailed && (
+          <WarningAlert text="The Spotify player couldn't be started on this device. Please start playback on another device and come back here to control it. " />
+        )}
       </ThreeDOptionsContext.Provider>
     </PlayerContext.Provider>
   );

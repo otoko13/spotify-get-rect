@@ -49,7 +49,7 @@ const useInitialiseSpotifySdkPlayer = ({
         player.disconnect();
       };
     };
-  }, [cookies, onInitialised]);
+  }, [cookies, onInitialisationFailed, onInitialised]);
 };
 
 export default useInitialiseSpotifySdkPlayer;

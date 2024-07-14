@@ -53,18 +53,6 @@ Daisy UI was chosen for the component library because it integrates so well with
 
 I've wanted to experiment with browser 3D rendering for a long time and Babylon JS is an excellent library, that is pretty easy to integrate into a React application.
 
-## Open issues
+## Open Issues
 
-- There is sometimes a race condition when authenticating for the first time and the app gets stuck on the api/get-auth-token page. It seems to work better in Incognito mode for some reason.
-
-- I don't like using the "any" type but I've had to disable this rule for now. I will reinstate it once I've fixed the couple places where it's currently being used.
-
-- If you click on an album before the player SDK is intiialised, there is some code that waits for the player and then tries to start playback. This doesn't work every time currently.
-
-- There are lots of horrendous places where I use cookies and global variables to communicate playback and device status between client side components. This is because there are server components in between (from the initial intention to leverage server side rendering as much as possible and before the complications of introducing the playback SDK and making it work with the web API polling to get playback status on remote devices).
-
-- The last track and current track are both stored to allow for the last track image to be faded into the new track image on the background. This works perfectly for remote playback but not SDK playback.
-
-- The SDK playback information is event based and possibly not interacting well with the React state right now. Especially as we need to poll the Spotify web API for currently playing track info for remote play. The 2 methods are possibly conflicting, with the asynchronous polling function reading the wrong variables in its closure.
-
-- We currently hit all Spotify API endpoints directly. This is because we have both client and server side components. If we move to a predominantly client side approach, we can move a lot of this logic to Next JS routes (you shouldn't hit routes from server side components as there's not much point).
+- The SDK doesn't work on mobile browsers. So for mobiles, we can only use the app for controlling play on other active devices.
