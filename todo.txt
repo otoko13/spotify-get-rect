@@ -1,3 +1,0 @@
-Play/pause buttons fixed, but now the issue with one of the images being cached as the last track is back.
-
-Initial track on Babylong Display
