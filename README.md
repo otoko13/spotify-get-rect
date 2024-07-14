@@ -55,4 +55,4 @@ I've wanted to experiment with browser 3D rendering for a long time and Babylon 
 
 ## Open Issues
 
-- The SDK doesn't work on mobile browsers. So for mobiles, we can only use the app for controlling play on other active devices.
+- I've cleared quite a few issues. Will definitely add more here as soon as they're undoubtedly discovered!
