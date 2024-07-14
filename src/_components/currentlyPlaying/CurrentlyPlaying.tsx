@@ -86,7 +86,11 @@ const CurrentlyPlaying = () => {
   const [currentDevice, setCurrentDevice] = useState<SpotifyDeviceSimple>();
   const localPlayerTrackUpdateTime = useRef<number>();
 
-  const { player, deviceId: thisDeviceId } = usePlayerContext();
+  const {
+    player,
+    deviceId: thisDeviceId,
+    initialisationFailed: playerInitialisationFailed,
+  } = usePlayerContext();
   const getTargetDevice = useGetTargetDevice();
 
   const updateTracks = useCallback(
@@ -391,7 +395,7 @@ const CurrentlyPlaying = () => {
               </div>
             </TransferPlaybackDropdown>
           )}
-          {!player ? (
+          {!player && !playerInitialisationFailed ? (
             <div className="loading loading-dots loading-md"></div>
           ) : trackStopped ? (
             <button onClick={handlePlay}>

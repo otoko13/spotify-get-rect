@@ -25,6 +25,7 @@ export default function LibraryLayout({
   const [thisDeviceId, setThisDeviceId] = useState<string>();
   const [user, setUser] = useState<SpotifyUser>();
   const [use3d, setUse3d] = useState(Boolean(cookies.get(AppCookies.USE_3D)));
+  const [playerInitFailed, setPlayerInitFailed] = useState(false);
 
   const handleInitialisation = useCallback(
     (player: Spotify.Player, deviceId: string) => {
@@ -46,7 +47,10 @@ export default function LibraryLayout({
     [cookies],
   );
 
-  useInitialiseSpotifySdkPlayer({ onInitialised: handleInitialisation });
+  useInitialiseSpotifySdkPlayer({
+    onInitialised: handleInitialisation,
+    onInitialisationFailed: () => setPlayerInitFailed(true),
+  });
 
   useEffect(() => {
     async function getUser() {
@@ -65,7 +69,11 @@ export default function LibraryLayout({
 
   return (
     <PlayerContext.Provider
-      value={{ player: sdkPlayer, deviceId: thisDeviceId }}
+      value={{
+        player: sdkPlayer,
+        deviceId: thisDeviceId,
+        initialisationFailed: playerInitFailed,
+      }}
     >
       <ThreeDOptionsContext.Provider value={{ use3d }}>
         <div>

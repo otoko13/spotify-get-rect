@@ -5,10 +5,12 @@ import { useEffect } from 'react';
 
 interface UseInitialiseSpotifySdkPlayerArgs {
   onInitialised: (player: Spotify.Player, deviceId: string) => void;
+  onInitialisationFailed: () => void;
 }
 
 const useInitialiseSpotifySdkPlayer = ({
   onInitialised,
+  onInitialisationFailed,
 }: UseInitialiseSpotifySdkPlayerArgs) => {
   const cookies = useCookies();
 
@@ -24,6 +26,7 @@ const useInitialiseSpotifySdkPlayer = ({
 
       player.on('initialization_error', ({ message }) => {
         console.error('Failed to initialize', message);
+        onInitialisationFailed();
       });
 
       player.on('playback_error', ({ message }) => {
