@@ -3,17 +3,16 @@
 import { THIS_DEVICE_NAME } from '@/_context/playerContext/PlayerContext';
 import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
+import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
 import pauseButton from '@/_images/pause.svg';
 import playButton from '@/_images/play.svg';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
-import { useCookies } from 'next-client-cookies';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import styles from './currentlyPlaying.module.scss';
-import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -33,7 +32,7 @@ const trackCoverHasChanged = (
     newTrack.currently_playing_type === 'track' &&
     originalTrack.currently_playing_type === 'track'
   ) {
-    return newTrack.item.album.id !== originalTrack.item.album.id;
+    return newTrack.item.album.uri !== originalTrack.item.album.uri;
   }
   if (
     newTrack.currently_playing_type === 'episode' &&
@@ -90,26 +89,32 @@ const CurrentlyPlaying = () => {
   const { player, deviceId: thisDeviceId } = usePlayerContext();
   const getTargetDevice = useGetTargetDevice();
 
-  const cookies = useCookies();
-
   const updateTracks = useCallback(
-    (newTrack: SpotifyPlayerTrack) => {
-      if (!track) {
+    (newTrack: SpotifyPlayerTrack, oldTrack?: SpotifyPlayerTrack | null) => {
+      // only update if track has changed, otherwise we trigger unnecessary rerenders
+      if (!newTrack) {
+        return;
+      }
+
+      if (oldTrack && oldTrack.item.id === newTrack.item.id) {
+        return;
+      }
+
+      if (!oldTrack) {
         setTrack(newTrack);
         return;
       }
 
       // keep the last track so we can fade out its image
-      if (track && trackCoverHasChanged(newTrack, track)) {
-        setLastTrack(track);
+      if (trackCoverHasChanged(newTrack, oldTrack)) {
+        setLastTrack(oldTrack);
       }
-      // only set the track if it has changed, otherwise we trigger
-      // rerenders with the state change
-      if (track.item.id !== newTrack.item.id) {
+
+      if (oldTrack.item.id !== newTrack.item.id) {
         setTrack(newTrack);
       }
     },
-    [track],
+    [],
   );
 
   const getPlayData = useCallback(async () => {
@@ -137,6 +142,11 @@ const CurrentlyPlaying = () => {
 
     const data: SpotifyPlayerTrack = await response?.json();
 
+    if (fnStart < (localPlayerTrackUpdateTime?.current ?? 0)) {
+      console.warn('FOUND AN OVERLAP!');
+      return;
+    }
+
     if (currentDevice?.id !== data.device.id) {
       setCurrentDevice({
         id: data.device.id,
@@ -144,28 +154,23 @@ const CurrentlyPlaying = () => {
       });
     }
 
+    if (!data.is_playing) {
+      setTrackStopped(true);
+      return;
+    }
+
     if (data.device.id === thisDeviceId) {
       return;
     }
 
-    if (fnStart < (localPlayerTrackUpdateTime?.current ?? 0)) {
-      console.warn('FOUND AN OVERLAP!');
-      return;
-    }
+    setTrackStopped(false);
 
-    setTrackStopped(!data.is_playing);
-    if (data.is_playing && data.item.id !== track?.item.id) {
-      updateTracks(data);
+    if (data.item.id !== track?.item?.id) {
+      updateTracks(data, track);
     }
 
     return Promise.resolve();
-  }, [
-    authToken,
-    currentDevice?.id,
-    thisDeviceId,
-    track?.item.id,
-    updateTracks,
-  ]);
+  }, [authToken, currentDevice?.id, thisDeviceId, track, updateTracks]);
 
   const handlePlay = useCallback(async () => {
     if (!trackStopped) {
@@ -187,7 +192,7 @@ const CurrentlyPlaying = () => {
       },
     );
     if (deviceToUse !== thisDeviceId) {
-      getPlayData();
+      await getPlayData();
     }
   }, [
     authToken,
@@ -210,7 +215,7 @@ const CurrentlyPlaying = () => {
       method: 'PUT',
     });
     if (currentDevice?.id !== thisDeviceId) {
-      getPlayData();
+      await getPlayData();
     }
   }, [authToken, currentDevice?.id, getPlayData, thisDeviceId, trackStopped]);
 
@@ -228,15 +233,10 @@ const CurrentlyPlaying = () => {
     return () => {
       clearInterval(interval);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getPlayData]);
 
-  useEffect(() => {
-    if (!player) {
-      return;
-    }
-
-    player.addListener('player_state_changed', (response) => {
+  const handleLocalPlaybackStateChanged = useCallback(
+    (response: Spotify.PlaybackState) => {
       if (!response) {
         return;
       }
@@ -259,13 +259,28 @@ const CurrentlyPlaying = () => {
         name: THIS_DEVICE_NAME,
       });
 
-      if (current_track) {
+      if (current_track && current_track.id !== track?.item.id) {
         const convertedTrack = convertSdkTrackToApiTrack(current_track);
 
-        updateTracks(convertedTrack);
+        updateTracks(convertedTrack, track);
       }
-    });
-  }, [cookies, player, thisDeviceId, updateTracks]);
+    },
+    [thisDeviceId, track, updateTracks],
+  );
+
+  useEffect(() => {
+    if (!player) {
+      return;
+    }
+    player.addListener('player_state_changed', handleLocalPlaybackStateChanged);
+
+    return () => {
+      player.removeListener(
+        'player_state_changed',
+        handleLocalPlaybackStateChanged,
+      );
+    };
+  }, [handleLocalPlaybackStateChanged, player]);
 
   const handlePlayTransferred = useCallback(() => {
     setCurrentDevice({
@@ -309,8 +324,10 @@ const CurrentlyPlaying = () => {
         <div>
           <Image
             alt="currently playing album art blurred"
-            className="fixed top-0 left-0 blur-3xl opacity-67 -z-20"
-            key={lastTrackImageToUse}
+            className={classNames(
+              'fixed top-0 left-0 blur-3xl opacity-67 -z-20',
+              { 'opacity-0': trackStopped },
+            )}
             src={lastTrackImageToUse}
             width={0}
             height={0}
