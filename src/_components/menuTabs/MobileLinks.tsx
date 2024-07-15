@@ -45,10 +45,14 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
       <div tabIndex={0} role="button" className="m-1">
         <div
           key={selectedTabs?.currentTab.label}
-          className={classNames('tab text-current', styles['custom-tab'])}
+          className={classNames(
+            'tab text-current max-sm:text-sm max-sm:px-1',
+            styles['custom-tab'],
+          )}
         >
           <div
             className={classNames(styles['show-indicator'], [styles.display])}
+            style={{ width: '95%', left: '2.5%' }}
           />
           {selectedTabs?.currentTab.label}
         </div>

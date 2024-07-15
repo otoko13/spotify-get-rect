@@ -53,15 +53,15 @@ export default function MenuTabs({
           },
         )}
       />
-      <div className="flex items-center justify-between w-full">
-        <div className="flex-shrink pl-4">
+      <div className="flex items-center justify-between w-full py-2">
+        <div className="flex-none pl-4">
           <Link href="/">
             <Image alt="spotify logo" src={logoPic} width={48} height={48} />
           </Link>
         </div>
         <div
           role="tablist"
-          className={classNames('tabs tabs-lg flex flex-shrink py-2', {
+          className={classNames('tabs tabs-lg flex flex-shrink', {
             [styles.tabs]: scrolled,
           })}
         >
