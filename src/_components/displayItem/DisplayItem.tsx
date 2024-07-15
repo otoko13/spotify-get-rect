@@ -68,11 +68,12 @@ export default function DisplayItem<T extends BaseDisplayItem>({
   );
 
   useEffect(() => {
-    if (queuedItem && thisDeviceId) {
+    if (queuedItem && thisDeviceId && player) {
+      player.activateElement();
       playItem({ spotifyId: queuedItem, authToken, deviceId: thisDeviceId });
       setQueuedItem(undefined);
     }
-  }, [authToken, queuedItem, thisDeviceId]);
+  }, [authToken, player, queuedItem, thisDeviceId]);
 
   return (
     <button onClick={() => handleClicked(item.uri)}>

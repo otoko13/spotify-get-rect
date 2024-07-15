@@ -26,6 +26,7 @@ import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
 import FullPageSpinner from '../fullPageSpinner/FullPageSpinner';
+import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 
 interface BabylonAlbumsDisplayProps {
   albums?: BaseDisplayItem[];
@@ -297,12 +298,13 @@ const addAlbums = ({ albums, authToken, playAlbum }: AddAlbumsArgs) => {
         {
           trigger: ActionManager.OnPickTrigger,
         },
-        async () =>
+        async () => {
           await playAlbum({
             spotifyId: box.name,
             albumIndex: i,
             authToken,
-          }),
+          });
+        },
       ),
     );
     box.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_OPTIMISTIC_INCLUSION;
@@ -403,10 +405,13 @@ export default function BabylonAlbumsDisplay({
   const authToken = useGetAuthToken();
   const [ready, setReady] = useState(false);
   const getTargetDevice = useGetTargetDevice();
+  const { player } = usePlayerContext();
 
   const playAlbum = useCallback(
     async ({ authToken, spotifyId, albumIndex }: PlayAlbumsArgs) => {
       const deviceId = await getTargetDevice();
+
+      player?.activateElement();
 
       await clientSpotifyFetch(
         `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
@@ -423,7 +428,7 @@ export default function BabylonAlbumsDisplay({
 
       shineSpotlight({ albumIndex, spotifyId });
     },
-    [getTargetDevice],
+    [getTargetDevice, player],
   );
 
   const handleSceneReady = useCallback(
