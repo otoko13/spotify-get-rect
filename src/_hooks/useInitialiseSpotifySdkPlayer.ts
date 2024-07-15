@@ -31,6 +31,7 @@ const useInitialiseSpotifySdkPlayer = ({
 
       player.on('playback_error', ({ message }) => {
         console.error('Failed to perform playback', message);
+        onInitialisationFailed();
       });
 
       player.addListener('ready', ({ device_id }: { device_id: string }) => {

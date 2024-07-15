@@ -362,15 +362,15 @@ const CurrentlyPlaying = () => {
       />
       <div
         className={classNames(
-          'border-solid border-t-1 border-gray-600',
+          'border-solid border-t-1 border-gray-600 px-4 py-1',
           styles['now-playing-bar'],
           {
             [styles.visible]: !!track,
           },
         )}
       >
-        <div className="flex">
-          <div>
+        <div className="flex overflow-hidden">
+          <div className="flex-none">
             {track && (
               <Image
                 alt="currently playing album art blurred"
@@ -381,12 +381,16 @@ const CurrentlyPlaying = () => {
               />
             )}
           </div>
-          <div className="flex flex-col ml-4 justify-center">
-            <div className="lg:text-xl md:text-lg">{track?.item.name}</div>
-            <div className="text-sm text-slate-300">{trackContext}</div>
+          <div className="flex flex-col max-md:ml-2 ml-4 justify-center basis-1/2 overflow-hidden">
+            <div className="lg:text-xl md:text-lg whitespace-nowrap text-ellipsis overflow-hidden">
+              {track?.item.name}
+            </div>
+            <div className="text-sm text-slate-300 whitespace-nowrap text-ellipsis overflow-hidden">
+              {trackContext}
+            </div>
           </div>
         </div>
-        <div className="controls flex items-center">
+        <div className="controls flex items-center flex-none">
           {currentDevice?.name && currentDevice.name !== THIS_DEVICE_NAME && (
             <TransferPlaybackDropdown onPlayTransferred={handlePlayTransferred}>
               <div className="text-sm text-primary mr-4 ">

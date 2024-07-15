@@ -4,6 +4,7 @@ import { MenuTab } from './MenuTabs';
 import { usePathname, useRouter } from 'next/navigation';
 import classNames from 'classnames';
 import styles from './menuTabs.module.scss';
+import { useCallback, useMemo } from 'react';
 
 interface MobileLinksProps {
   className?: string;
@@ -13,33 +14,50 @@ interface MobileLinksProps {
 export default function MobileLinks({ className, tabs }: MobileLinksProps) {
   const router = useRouter();
   const path = usePathname();
-  const currentTabIndex = tabs.findIndex((tab) => tab.path === path);
 
-  if (currentTabIndex === -1) {
-    return null;
-  }
+  const selectedTabs = useMemo(() => {
+    const currentTabIndex = tabs.findIndex((tab) => tab.path === path);
 
-  const currentTab = tabs[currentTabIndex];
-  const remainingTabs = tabs.toSpliced(currentTabIndex, 1);
+    if (currentTabIndex === -1) {
+      return null;
+    }
+
+    return {
+      currentTab: tabs[currentTabIndex],
+      remainingTabs: tabs.toSpliced(currentTabIndex, 1),
+    };
+  }, [path, tabs]);
+
+  const handleClick = useCallback(
+    (tab: MenuTab) => {
+      const elem = document.activeElement as HTMLDivElement;
+      if (elem) {
+        elem?.blur();
+      }
+
+      router.push(tab.path);
+    },
+    [router],
+  );
 
   return (
     <div className={classNames('dropdown', className)}>
       <div tabIndex={0} role="button" className="m-1">
         <div
-          key={currentTab.label}
+          key={selectedTabs?.currentTab.label}
           className={classNames('tab text-current', styles['custom-tab'])}
         >
           <div
             className={classNames(styles['show-indicator'], [styles.display])}
           />
-          {currentTab.label}
+          {selectedTabs?.currentTab.label}
         </div>
       </div>
       <ul
         tabIndex={0}
         className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
       >
-        {remainingTabs.map((tab, index) => (
+        {selectedTabs?.remainingTabs.map((tab, index) => (
           <li key={index}>
             <a
               key={tab.label}
@@ -49,7 +67,7 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
                 styles['custom-tab'],
                 className,
               )}
-              onClick={() => router.push(tab.path)}
+              onClick={() => handleClick(tab)}
             >
               {tab.label}
             </a>

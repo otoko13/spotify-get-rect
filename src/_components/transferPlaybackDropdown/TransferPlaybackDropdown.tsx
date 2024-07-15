@@ -18,6 +18,11 @@ export default function TransferPlaybackDropdown({
   const { player, deviceId } = usePlayerContext();
 
   const handleClick = useCallback(async () => {
+    const elem = document.activeElement as HTMLDivElement;
+    if (elem) {
+      elem?.blur();
+    }
+
     if (!(deviceId && player)) {
       return;
     }
