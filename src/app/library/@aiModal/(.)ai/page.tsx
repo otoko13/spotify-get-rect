@@ -2,8 +2,8 @@ import CloseButton from '@/_components/closeButton/CloseButton';
 
 export default function AiPage() {
   return (
-    <dialog id="my_modal_1" className="modal modal-open">
-      <div className="modal-box max-w-none max-md:w-10/12 w-8/12">
+    <dialog id="ai_modal" className="modal modal-open z-10">
+      <div className="modal-box max-w-full w-full rounded-none opacity-90 min-h-screen max-h-screen pb-20">
         <CloseButton />
         AI SHIT
       </div>

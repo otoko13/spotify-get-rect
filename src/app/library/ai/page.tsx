@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function Ai() {
-  redirect('/library/saved-albums/ai');
+  redirect('/library/saved-albums');
 }
