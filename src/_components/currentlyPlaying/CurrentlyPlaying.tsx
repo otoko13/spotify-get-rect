@@ -13,6 +13,7 @@ import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import styles from './currentlyPlaying.module.scss';
+import Link from 'next/link';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -369,16 +370,18 @@ const CurrentlyPlaying = () => {
           },
         )}
       >
-        <div className="flex overflow-hidden">
+        <div className="flex flex-grow overflow-hidden">
           <div className="flex-none">
             {track && (
-              <Image
-                alt="currently playing album art blurred"
-                key={currentTrackImageToUse}
-                src={currentTrackImageToUse}
-                width={64}
-                height={64}
-              />
+              <Link href="/library/ai">
+                <Image
+                  alt="currently playing album art blurred"
+                  key={currentTrackImageToUse}
+                  src={currentTrackImageToUse}
+                  width={64}
+                  height={64}
+                />
+              </Link>
             )}
           </div>
           <div className="flex flex-col max-md:ml-2 ml-4 justify-center basis-1/2 overflow-hidden">

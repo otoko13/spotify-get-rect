@@ -11,14 +11,16 @@ import useInitialiseSpotifySdkPlayer from '@/_hooks/useInitialiseSpotifySdkPlaye
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyUser } from '@/types';
 import { useCookies } from 'next-client-cookies';
-import { useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 
 export default function LibraryLayout({
   children,
   modal,
+  aiModal,
 }: Readonly<{
-  children: React.ReactNode;
-  modal: React.ReactNode;
+  children: ReactNode;
+  modal: ReactNode;
+  aiModal: ReactNode;
 }>) {
   const authToken = useGetAuthToken();
   const cookies = useCookies();
@@ -114,6 +116,7 @@ export default function LibraryLayout({
           <CurrentlyPlaying />
         </div>
         {modal}
+        {aiModal}
         {playerInitFailed && (
           <WarningAlert text="The Spotify player couldn't be started on this device. Please start playback on another device and come back here to control it. " />
         )}
