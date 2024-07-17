@@ -21,7 +21,6 @@ export default function AiModal({ open }: AiModalProps) {
 
   useEffect(() => {
     const handleScroll = (event: Event) => {
-      console.log(scrolled);
       setScrolled((event.target as HTMLDivElement).scrollTop > 30);
     };
 
