@@ -10,14 +10,7 @@ import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
-import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import styles from './currentlyPlaying.module.scss';
 import Link from 'next/link';
@@ -163,31 +156,27 @@ const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
       return;
     }
 
-    startTransition(() => {
-      if (currentDevice?.id !== data.device.id) {
-        setCurrentDevice({
-          id: data.device.id,
-          name: data.device.name,
-        });
-      }
+    if (currentDevice?.id !== data.device.id) {
+      setCurrentDevice({
+        id: data.device.id,
+        name: data.device.name,
+      });
+    }
 
-      if (!data.is_playing) {
-        setTrackStopped(true);
-        return;
-      }
-    });
+    if (!data.is_playing) {
+      setTrackStopped(true);
+      return;
+    }
 
     if (data.device.id === thisDeviceId) {
       return;
     }
 
-    startTransition(() => {
-      setTrackStopped(false);
+    setTrackStopped(false);
 
-      if (data.item.id !== track?.item?.id) {
-        updateTracks(data, track);
-      }
-    });
+    if (data.item.id !== track?.item?.id) {
+      updateTracks(data, track);
+    }
 
     return Promise.resolve();
   }, [authToken, currentDevice?.id, thisDeviceId, track, updateTracks]);
@@ -268,24 +257,22 @@ const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
         track_window: { current_track },
       } = response;
 
-      startTransition(() => {
-        setTrackStopped(!!paused);
+      setTrackStopped(!!paused);
 
-        if (paused) {
-          return;
-        }
+      if (paused) {
+        return;
+      }
 
-        setCurrentDevice({
-          id: thisDeviceId,
-          name: THIS_DEVICE_NAME,
-        });
-
-        if (current_track && current_track.id !== track?.item.id) {
-          const convertedTrack = convertSdkTrackToApiTrack(current_track);
-
-          updateTracks(convertedTrack, track);
-        }
+      setCurrentDevice({
+        id: thisDeviceId,
+        name: THIS_DEVICE_NAME,
       });
+
+      if (current_track && current_track.id !== track?.item.id) {
+        const convertedTrack = convertSdkTrackToApiTrack(current_track);
+
+        updateTracks(convertedTrack, track);
+      }
     },
     [thisDeviceId, track, updateTracks],
   );
