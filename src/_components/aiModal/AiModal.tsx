@@ -50,7 +50,7 @@ export default function AiModal({ open }: AiModalProps) {
         <div className="py-3 px-2 flex justify-start items-center w-full">
           <Image alt="Open AI logo" src={openAiLogo} width={36} height={36} />
           <div className="text-3xl ml-2 pt-1.5 flex-grow">AI playground</div>
-          <CloseButton className="justify-self-end" />
+          <CloseButton className="justify-self-end relative" />
         </div>
       </div>
 

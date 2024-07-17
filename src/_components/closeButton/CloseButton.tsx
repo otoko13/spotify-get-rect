@@ -16,7 +16,7 @@ const CloseButton = ({ className }: CloseButtonProps) => {
     <button
       onClick={() => router.back()}
       className={classNames(
-        'btn btn-sm btn-circle btn-ghost w-12 h-12 relative',
+        'btn btn-sm btn-circle btn-ghost w-12 h-12',
         className,
       )}
     >
