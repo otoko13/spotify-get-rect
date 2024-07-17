@@ -1,7 +1,2 @@
-Fix sdk script initialisation issue
-
-Fix timeout with maxDuration
-
-Try moving parallel routes into individual pages
-
 Fix currently playing bottom bar styling
+SimpleBar - but need to make a div scroll rather than the whole page. But try it anyway
