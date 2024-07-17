@@ -86,7 +86,11 @@ const convertSdkTrackToApiTrack = (
   }
 };
 
-const CurrentlyPlaying = () => {
+interface CurrentlyPlayingProps {
+  onTrackChange: (track?: SpotifyPlayerTrack) => void;
+}
+
+const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
@@ -300,6 +304,10 @@ const CurrentlyPlaying = () => {
     };
   }, [handleLocalPlaybackStateChanged, player]);
 
+  useEffect(() => {
+    onTrackChange(track);
+  }, [onTrackChange, track]);
+
   const handlePlayTransferred = useCallback(() => {
     setCurrentDevice({
       id: thisDeviceId,
@@ -335,6 +343,19 @@ const CurrentlyPlaying = () => {
       ? track?.item.artists.map((artist) => artist.name).join(', ')
       : track?.item?.show?.name;
   }, [track]);
+
+  const nowPlayingBarImage = useMemo(
+    () => (
+      <Image
+        alt="currently playing album art blurred"
+        key={currentTrackImageToUse}
+        src={currentTrackImageToUse}
+        width={64}
+        height={64}
+      />
+    ),
+    [currentTrackImageToUse],
+  );
 
   return (
     <>
@@ -385,17 +406,12 @@ const CurrentlyPlaying = () => {
       >
         <div className="flex flex-grow overflow-hidden">
           <div className="flex-none">
-            {track && (
-              <Link href="/library/ai">
-                <Image
-                  alt="currently playing album art blurred"
-                  key={currentTrackImageToUse}
-                  src={currentTrackImageToUse}
-                  width={64}
-                  height={64}
-                />
-              </Link>
-            )}
+            {track &&
+              (track.currently_playing_type === 'track' ? (
+                <Link href="/library/ai">{nowPlayingBarImage}</Link>
+              ) : (
+                nowPlayingBarImage
+              ))}
           </div>
           <div className="flex flex-col max-md:ml-2 ml-4 justify-center basis-1/2 overflow-hidden">
             <div className="lg:text-xl md:text-lg whitespace-nowrap text-ellipsis overflow-hidden">

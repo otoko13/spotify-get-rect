@@ -11,17 +11,20 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
 
   const response = await openai.images.generate({
-    model: 'dall-e-2',
+    model: 'dall-e-3',
+    quality: 'standard',
+    response_format: 'url',
+    style: 'vivid',
     prompt: `Create a ${
       params.get('style') ?? 'comic book'
     } painting representing the lyrics to the song "${params.get(
       'song',
     )}" by ${params.get('artist')}.`,
     n: 1,
-    size: '512x512',
+    size: '1024x1024',
   });
   const image_url = response.data[0].url;
-
   console.log(image_url);
-  return Response.json(response);
+
+  return Response.json({ url: image_url });
 }

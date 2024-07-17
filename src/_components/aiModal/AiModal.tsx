@@ -1,10 +1,13 @@
 'use client';
 
 import CloseButton from '@/_components/closeButton/CloseButton';
+import useCurrentTrackContext from '@/_context/currentTrackContext/useCurrentTrackContext';
+import openAiLogo from '@/_images/openai-white-logomark.svg';
+import { SpotifyPlayerSongTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
-import openAiLogo from '@/_images/openai-white-logomark.svg';
-import { useMemo, useState } from 'react';
+import OpenAI from 'openai';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Typewriter from 'typewriter-effect';
 
 const artStyles = [
@@ -46,11 +49,52 @@ export default function AiModal({ open }: AiModalProps) {
   const [selectedStyle, setSelectedStyle] = useState<ArtStyle>();
   const [imageUrl, setImageUrl] = useState<string>();
   const [generateArtistInfo, setGenerateArtistInfo] = useState(false);
-  const [artistResponse, setArtistResponse] = useState<string>();
+  const [artistResponse, setArtistResponse] = useState<string | null>();
+  const { track } = useCurrentTrackContext();
 
   const styleOptions = useMemo(() => {
     return getStyleOptions();
   }, []);
+
+  const fetchArtistInfo = useCallback(async () => {
+    const response = await fetch(
+      `/api/artist-summary?artist=${
+        (track as SpotifyPlayerSongTrack)?.item.artists[0].name
+      }`,
+    );
+    if (response.status !== 200) {
+      return;
+    }
+
+    const data: OpenAI.ChatCompletion = await response.json();
+    setArtistResponse(data.choices[0]?.message?.content);
+  }, [track]);
+
+  useEffect(() => {
+    if (generateArtistInfo && track?.currently_playing_type === 'track') {
+      fetchArtistInfo();
+    }
+  }, [generateArtistInfo, track, fetchArtistInfo]);
+
+  const fetchTrackImage = useCallback(async () => {
+    const response = await fetch(
+      `/api/track-image?style=${selectedStyle}&artist=${
+        (track as SpotifyPlayerSongTrack)?.item.artists[0].name
+      }&song=${(track as SpotifyPlayerSongTrack)?.item.name}`,
+    );
+    if (response.status !== 200) {
+      return;
+    }
+
+    const data = await response.json();
+    setImageUrl(data.url);
+  }, [selectedStyle, track]);
+
+  useEffect(() => {
+    if (selectedStyle && track?.currently_playing_type === 'track') {
+      fetchTrackImage();
+    }
+  }, [selectedStyle, track, fetchTrackImage]);
 
   return (
     <dialog
@@ -63,34 +107,43 @@ export default function AiModal({ open }: AiModalProps) {
           <div className="text-3xl ml-2 pt-1.5">AI playground</div>
         </div>
         <CloseButton />
-        {!selectedStyle ? (
-          <div className="track-image-section w-full h-1/2 flex-none flex flex-col items-center justify-center">
-            <div className="pb-4">
-              Generate an image from the lyrics of the current track using one
-              of the following styles:
-            </div>
-            <div className="grid grid-cols-2 gap-2 pb-4 mx-auto">
-              {styleOptions.map((style) => (
-                <button
-                  className="btn btn-outline btn-lg btn-primary"
-                  onClick={() => setSelectedStyle(style)}
-                  key={style}
-                >
-                  {style}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt="ai generate track image"
-            width={512}
-            height={512}
-          />
-        ) : (
-          <div className="loading loading-bars loading-lg text-primary" />
-        )}
+        <div
+          className="track-image-section w-full h-1/2 flex-none flex flex-col items-center justify-center py-8"
+          style={{ minHeight: 512 }}
+        >
+          {!selectedStyle ? (
+            <>
+              <div className="pb-8 text-slate-500">
+                Generate an image from the lyrics of the current track using one
+                of the following styles:
+              </div>
+              <div className="grid grid-cols-2 gap-2 pb-4 mx-auto">
+                {styleOptions.map((style) => (
+                  <button
+                    className="btn btn-outline btn-lg btn-primary"
+                    onClick={() => setSelectedStyle(style)}
+                    key={style}
+                  >
+                    {style}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt="ai generate track image"
+              width={0}
+              height={0}
+              style={{
+                height: '100%',
+                width: 'auto',
+              }}
+            />
+          ) : (
+            <div className="loading loading-bars loading-lg text-primary" />
+          )}
+        </div>
         <div className="artist-info-section flex-grow border-slate-700 border-t w-full flex flex-col items-center justify-center">
           {!generateArtistInfo ? (
             <button
@@ -100,11 +153,16 @@ export default function AiModal({ open }: AiModalProps) {
               Tell me more about this artist
             </button>
           ) : artistResponse ? (
-            <Typewriter
-              onInit={(typewriter) => {
-                typewriter.pauseFor(2500).typeString(artistResponse).start();
-              }}
-            />
+            <div className="text-center w-8/12">
+              <Typewriter
+                options={{
+                  delay: 30,
+                }}
+                onInit={(typewriter) => {
+                  typewriter.pauseFor(2500).typeString(artistResponse).start();
+                }}
+              />
+            </div>
           ) : (
             <div className="loading loading-bars loading-lg text-primary" />
           )}
