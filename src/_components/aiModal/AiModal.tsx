@@ -92,82 +92,89 @@ export default function AiModal({ open }: AiModalProps) {
 
   useEffect(() => {
     if (selectedStyle && track?.currently_playing_type === 'track') {
-      fetchTrackImage();
+      // fetchTrackImage();
     }
   }, [selectedStyle, track, fetchTrackImage]);
 
   return (
-    <dialog
-      id="ai_modal"
-      className={classNames('modal z-10', { 'modal-open': open })}
-    >
-      <div className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none opacity-90 min-h-screen max-h-screen pb-20">
-        <div className="flex items-center self-start">
-          <Image alt="Open AI logo" src={openAiLogo} width={36} height={36} />
-          <div className="text-3xl ml-2 pt-1.5">AI playground</div>
-        </div>
-        <CloseButton />
-        <div
-          className="track-image-section w-full h-1/2 flex-none flex flex-col items-center justify-center py-8"
-          style={{ minHeight: 512 }}
-        >
-          {!selectedStyle ? (
-            <>
-              <div className="pb-8 text-slate-500">
-                Generate an image from the lyrics of the current track using one
-                of the following styles:
-              </div>
-              <div className="grid grid-cols-2 gap-2 pb-4 mx-auto">
-                {styleOptions.map((style) => (
-                  <button
-                    className="btn btn-outline btn-lg btn-primary"
-                    onClick={() => setSelectedStyle(style)}
-                    key={style}
-                  >
-                    {style}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt="ai generate track image"
-              width={0}
-              height={0}
-              style={{
-                height: '100%',
-                width: 'auto',
-              }}
-            />
-          ) : (
-            <div className="loading loading-bars loading-lg text-primary" />
-          )}
-        </div>
-        <div className="artist-info-section flex-grow border-slate-700 border-t w-full flex flex-col items-center justify-center">
-          {!generateArtistInfo ? (
-            <button
-              className="btn btn-outline btn-lg btn-primary"
-              onClick={() => setGenerateArtistInfo(true)}
-            >
-              Tell me more about this artist
-            </button>
-          ) : artistResponse ? (
-            <div className="text-center w-8/12">
-              <Typewriter
-                options={{
-                  delay: 30,
-                }}
-                onInit={(typewriter) => {
-                  typewriter.pauseFor(2500).typeString(artistResponse).start();
+    <>
+      <div className="fixed top-4 left-2 flex items-center self-start z-30">
+        <Image alt="Open AI logo" src={openAiLogo} width={36} height={36} />
+        <div className="text-3xl ml-2 pt-1.5">AI playground</div>
+        <CloseButton className="fixed right-0" />
+      </div>
+
+      <dialog
+        id="ai_modal"
+        className={classNames('modal z-10', { 'modal-open': open })}
+      >
+        <div className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none opacity-90 min-h-screen max-h-screen pb-20">
+          <div
+            className="track-image-section w-full h-3/4 flex-none flex flex-col items-center justify-center py-4"
+            style={{ minHeight: 512 }}
+          >
+            {!selectedStyle ? (
+              <>
+                <div className="pb-8 text-slate-500">
+                  Generate an image from the lyrics of the current track using
+                  one of the following styles:
+                </div>
+                <div className="grid grid-cols-2 gap-2 pb-4 mx-auto">
+                  {styleOptions.map((style) => (
+                    <button
+                      className="btn btn-outline btn-lg btn-primary"
+                      onClick={() => setSelectedStyle(style)}
+                      key={style}
+                    >
+                      {style}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : imageUrl ? (
+              <Image
+                className="animate-fade-in"
+                src={imageUrl}
+                alt="ai generate track image"
+                width={0}
+                height={0}
+                style={{
+                  height: '100%',
+                  width: 'auto',
                 }}
               />
-            </div>
-          ) : (
-            <div className="loading loading-bars loading-lg text-primary" />
-          )}
+            ) : (
+              <div className="loading loading-bars loading-lg text-primary" />
+            )}
+          </div>
+          <div className="artist-info-section flex-grow border-slate-700 border-t w-full flex flex-col items-center justify-center p-4">
+            {!generateArtistInfo ? (
+              <button
+                className="btn btn-outline btn-lg btn-primary"
+                onClick={() => setGenerateArtistInfo(true)}
+              >
+                Tell me more about this artist
+              </button>
+            ) : artistResponse ? (
+              <div className="text-center max-md:w-full w-8/12">
+                <Typewriter
+                  options={{
+                    delay: 30,
+                  }}
+                  onInit={(typewriter) => {
+                    typewriter
+                      .pauseFor(2500)
+                      .typeString(artistResponse)
+                      .start();
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="loading loading-bars loading-lg text-primary" />
+            )}
+          </div>
         </div>
-      </div>
-    </dialog>
+      </dialog>
+    </>
   );
 }
