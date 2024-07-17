@@ -10,25 +10,6 @@ const openai = new OpenAI({
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
 
-  //   const completion = await openai.chat.completions.create({
-  //     messages: [
-  //       {
-  //         role: 'system',
-  //         content:
-  //           'You are an artist specializing in creating art for the music industry.',
-  //       },
-  //       {
-  //         role: 'user',
-  //         content: `Create a 512x512px ${
-  //           params.get('style') ?? 'comic book'
-  //         } painting representing the lyrics to the song "${params.get(
-  //           'song',
-  //         )}" by ${params.get('artist')}.`,
-  //       },
-  //     ],
-  //     model: 'gpt-4o',
-  //   });
-
   const response = await openai.images.generate({
     model: 'dall-e-3',
     prompt: `Create a ${
@@ -37,7 +18,7 @@ export async function GET(request: NextRequest) {
       'song',
     )}" by ${params.get('artist')}.`,
     n: 1,
-    size: '1024x1024',
+    size: '512x512',
   });
   const image_url = response.data[0].url;
 
