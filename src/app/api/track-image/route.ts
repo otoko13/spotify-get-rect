@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
 
   const response = await openai.images.generate({
-    model: 'dall-e-3',
+    model: 'dall-e-2',
     prompt: `Create a ${
       params.get('style') ?? 'comic book'
     } painting representing the lyrics to the song "${params.get(
