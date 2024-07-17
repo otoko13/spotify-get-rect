@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import styles from './currentlyPlaying.module.scss';
 import Link from 'next/link';
+import Script from 'next/script';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -431,6 +432,7 @@ const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
           )}
         </div>
       </div>
+      <Script src="https://sdk.scdn.co/spotify-player.js" />
     </>
   );
 };

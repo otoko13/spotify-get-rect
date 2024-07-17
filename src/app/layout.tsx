@@ -1,11 +1,10 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { authorize } from './authorize';
 import classnames from 'classnames';
-import localFont from 'next/font/local';
+import type { Metadata } from 'next';
 import { CookiesProvider } from 'next-client-cookies/server';
-import Script from 'next/script';
+import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
+import { authorize } from './authorize';
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -40,10 +39,7 @@ export default async function RootLayout({
           'h-full',
         )}
       >
-        <CookiesProvider>
-          {children}
-          <Script src="https://sdk.scdn.co/spotify-player.js" />
-        </CookiesProvider>
+        <CookiesProvider>{children}</CookiesProvider>
       </body>
     </html>
   );

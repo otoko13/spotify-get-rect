@@ -59,7 +59,8 @@ export default function AiModal({ open }: AiModalProps) {
         className={classNames('modal z-10', { 'modal-open': open })}
       >
         <div
-          className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none opacity-90 min-h-screen max-h-screen pb-20"
+          className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none min-h-screen max-h-screen pb-20"
+          style={{ opacity: 0.97 }}
           ref={(elem) => setModalWindow(elem)}
         >
           <AiTrackImage track={track} />

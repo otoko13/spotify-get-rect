@@ -45,7 +45,10 @@ export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
 
       const data = await response.json();
 
-      setFetchUrl(data.next !== url ? data.next : undefined);
+      // new releases uses albums.next - TODO: make the accessor a prop
+      const nextUrl = data.next ?? data.albums?.next;
+
+      setFetchUrl(nextUrl !== url ? nextUrl : undefined);
 
       const processedItems = mapResponseToDisplayItems(data);
 

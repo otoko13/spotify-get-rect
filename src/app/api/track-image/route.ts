@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
+export const maxDuration = 60;
+
 const openai = new OpenAI({
   organization: 'org-s63ZpSumEt4Yd88NqZhK3vSi',
   project: 'proj_gddFkp48WXYWLJu9dY3xbiip',

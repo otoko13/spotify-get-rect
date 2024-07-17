@@ -43,7 +43,7 @@ export default function RecommendationsPage() {
     const seedTrackIds = topData.items.map((t: SpotifyTrack) => t.id);
 
     const recommendationsUrl = getSpotifyUrl(
-      `recommendations?limit=50&seed_tracks=${seedTrackIds.join(',')}`,
+      `recommendations?limit=100&seed_tracks=${seedTrackIds.join(',')}`,
     );
     setInitialUrl(recommendationsUrl);
   }, [authToken]);
