@@ -30,6 +30,7 @@ export default async function RootLayout({
   return (
     <html
       className="bg-gradient-to-br from-black to-slate-800 h-full"
+      style={{ scrollbarGutter: 'auto' }}
       lang="en"
     >
       <body

@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import AiArtistInfo from './AiArtistInfo';
 import styles from './aiModal.module.scss';
 import AiTrackImage from './AiTrackImage';
+import 'overlayscrollbars/overlayscrollbars.css';
+import { OverlayScrollbars } from 'overlayscrollbars';
 
 interface AiModalProps {
   open?: boolean;
@@ -20,20 +22,25 @@ export default function AiModal({ open }: AiModalProps) {
   const { track } = useCurrentTrackContext();
 
   useEffect(() => {
-    const handleScroll = (event: Event) => {
-      setScrolled((event.target as HTMLDivElement).scrollTop > 10);
-    };
-
     if (!modalWindow) {
       return;
     }
 
-    modalWindow.addEventListener('scroll', handleScroll);
-
-    return () => {
-      modalWindow.removeEventListener('scroll', handleScroll);
-    };
-  }, [modalWindow, scrolled]);
+    OverlayScrollbars(
+      modalWindow,
+      {
+        scrollbars: {
+          visibility: 'auto',
+          autoHideDelay: 2000,
+        },
+      },
+      {
+        scroll(_instance, event) {
+          setScrolled((event.target as HTMLDivElement).scrollTop > 10);
+        },
+      },
+    );
+  }, [modalWindow]);
 
   return (
     <>

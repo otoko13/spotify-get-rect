@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     size: '1024x1024',
   });
   const image_url = response.data[0].url;
-  console.log(image_url);
+  console.log('IMAGE GENERATED', image_url);
 
   return Response.json({ url: image_url });
 }

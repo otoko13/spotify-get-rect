@@ -15,6 +15,9 @@ import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlayba
 import styles from './currentlyPlaying.module.scss';
 import Link from 'next/link';
 import Script from 'next/script';
+import 'overlayscrollbars/overlayscrollbars.css';
+import { OverlayScrollbars } from 'overlayscrollbars';
+import { usePathname } from 'next/navigation';
 
 interface SpotifyDeviceSimple {
   id: string | null | undefined;
@@ -91,12 +94,37 @@ const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
   const [trackStopped, setTrackStopped] = useState(true);
   const [currentDevice, setCurrentDevice] = useState<SpotifyDeviceSimple>();
   const localPlayerTrackUpdateTime = useRef<number>();
+  const [osScrollbar, setOsScrollbar] = useState<OverlayScrollbars>();
+
+  const path = usePathname();
+
+  // we're putting this here because document is only defined in
+  // client side components. Since we have some SSC higher up in the tree
+  // let's not put it at the root layout.
+
+  // Due to bug with scrollbar in body being scrolled when scrolling in a
+  // modal, we temporarily destroy the scrollbar and reinstate when moving
+  // away from the ai modal
+  useEffect(() => {
+    if (path.endsWith('/ai')) {
+      osScrollbar?.destroy();
+    } else {
+      const osScrollbar = OverlayScrollbars(document.body, {
+        scrollbars: {
+          visibility: 'auto',
+          autoHideDelay: 2000,
+        },
+      });
+      setOsScrollbar(osScrollbar);
+    }
+  }, [osScrollbar, path]);
 
   const {
     player,
     deviceId: thisDeviceId,
     initialisationFailed: playerInitialisationFailed,
   } = usePlayerContext();
+
   const getTargetDevice = useGetTargetDevice();
 
   const updateTracks = useCallback(

@@ -26,6 +26,6 @@ export async function GET(request: NextRequest) {
     model: 'gpt-4o',
   });
 
-  console.log(`\n\n\n${completion}\n\n\n`);
+  console.log('COMPLETION', completion);
   return Response.json(completion);
 }
