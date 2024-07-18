@@ -1,2 +1,9 @@
 Fix currently playing bottom bar styling
-SimpleBar - but need to make a div scroll rather than the whole page. But try it anyway
+
+Custom scrollbars - overlay scrollbar package
+
+Padding on bottom of ai text not big enough
+
+Consider side by side layout for bigger screens
+
+Aspect ratio not maintained on mobile screenSet max height to be available widtg (height auto instead of width? Or try fill in relative container
