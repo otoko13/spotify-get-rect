@@ -17,12 +17,14 @@ const config: Config = {
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
-          '100%%': { opacity: '1' },
+          '100%': { opacity: '1' },
         },
       },
       animation: {
-        ['fade-in']: 'fadeIn 1.5s ease-out 1',
-        ['fade-out']: 'fadeIn reverse 1.5s ease-out 1',
+        ['fade-in']: 'fadeIn 1.5s ease-out 1 forwards',
+        ['slow-fade-in']: 'fadeIn 2.5s ease-out 1 forwards',
+        ['fast-fade-in']: 'fadeIn 0.5s ease-out 1 forwards',
+        ['fade-out']: 'fadeIn reverse 1.5s ease-out 1 forwards',
       },
     },
   },

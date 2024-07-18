@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     model: 'dall-e-3',
     quality: 'standard',
     response_format: 'url',
-    style: 'vivid',
+    style: 'natural',
     prompt: `Create a ${
-      params.get('style') ?? 'comic book'
+      params.get('style') ?? ''
     } painting representing the lyrics to the song "${params.get(
       'song',
     )}" by ${params.get('artist')}.`,

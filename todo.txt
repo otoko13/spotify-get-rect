@@ -7,3 +7,4 @@ Padding on bottom of ai text not big enough
 Consider side by side layout for bigger screens
 
 Aspect ratio not maintained on mobile screenSet max height to be available widtg (height auto instead of width? Or try fill in relative container
+

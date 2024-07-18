@@ -21,7 +21,7 @@ export default function AiModal({ open }: AiModalProps) {
 
   useEffect(() => {
     const handleScroll = (event: Event) => {
-      setScrolled((event.target as HTMLDivElement).scrollTop > 30);
+      setScrolled((event.target as HTMLDivElement).scrollTop > 10);
     };
 
     if (!modalWindow) {
@@ -59,7 +59,7 @@ export default function AiModal({ open }: AiModalProps) {
         className={classNames('modal z-10', { 'modal-open': open })}
       >
         <div
-          className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none min-h-screen max-h-screen pb-20"
+          className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none min-h-screen max-h-screen pb-28 pt-20 max-sm:pt-16"
           style={{ opacity: 0.97 }}
           ref={(elem) => setModalWindow(elem)}
         >

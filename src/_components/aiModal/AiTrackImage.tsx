@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ArtStyleOptions, { ArtStyle } from './ArtStyleOptions';
 import { SpotifyPlayerSongTrack, SpotifyPlayerTrack } from '@/types';
 import Image from 'next/image';
+import classNames from 'classnames';
 
 interface AiTrackImageProps {
   track: SpotifyPlayerTrack | undefined;
@@ -12,6 +13,7 @@ interface AiTrackImageProps {
 export default function AiTrackImage({ track }: AiTrackImageProps) {
   const [selectedStyle, setSelectedStyle] = useState<ArtStyle>();
   const [imageUrl, setImageUrl] = useState<string>();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const fetchTrackImage = useCallback(async () => {
     const response = await fetch(
@@ -42,15 +44,16 @@ export default function AiTrackImage({ track }: AiTrackImageProps) {
         <ArtStyleOptions onStyleSelected={setSelectedStyle} />
       ) : imageUrl ? (
         <Image
-          className="animate-fade-in"
+          className={classNames(
+            'h-full w-auto max-sm:w-full max-sm:h-auto opacity-0',
+            { 'animate-slow-fade-in': imageLoaded },
+          )}
+          key={imageUrl}
+          onLoad={() => setImageLoaded(true)}
           src={imageUrl}
           alt="ai generate track image"
           width={0}
           height={0}
-          style={{
-            height: '100%',
-            width: 'auto',
-          }}
         />
       ) : (
         <div className="loading loading-bars loading-lg text-primary" />
