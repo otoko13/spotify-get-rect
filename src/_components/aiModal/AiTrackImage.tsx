@@ -37,7 +37,7 @@ export default function AiTrackImage({ track }: AiTrackImageProps) {
 
   return (
     <div
-      className="track-image-section w-full h-3/4 flex-none flex flex-col items-center justify-center py-4"
+      className="track-image-section max-lg:w-full w-1/2 h-full flex-none flex flex-col items-center justify-center py-4 max-lg:px-0 px-4 border-slate-700 max-lg:border-b max-lg:border-r-0 border-r"
       style={{ minHeight: 512 }}
     >
       {!selectedStyle ? (

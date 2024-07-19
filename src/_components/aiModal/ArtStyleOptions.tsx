@@ -50,7 +50,7 @@ export default function ArtStyleOptions({
 
   return (
     <>
-      <div className="pb-8 text-slate-500 text-center">
+      <div className="pb-8 text-slate-400 text-center">
         Generate an image from the lyrics of the current track using one of the
         following styles:
       </div>

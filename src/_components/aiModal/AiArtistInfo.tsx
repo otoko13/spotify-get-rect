@@ -34,7 +34,7 @@ export default function AiTrackImage({ track }: AiTrackImageProps) {
   }, [generateArtistInfo, track, fetchArtistInfo]);
 
   return (
-    <div className="artist-info-section flex-grow border-slate-700 border-t w-full flex flex-col items-center justify-center p-4">
+    <div className="artist-info-section max-lg:flex-grow max-lg:w-full w-1/2 flex flex-col items-center justify-center p-4 max-lg:pb-32">
       {!generateArtistInfo ? (
         <button
           className="btn btn-outline btn-lg btn-primary"
@@ -43,7 +43,7 @@ export default function AiTrackImage({ track }: AiTrackImageProps) {
           Tell me more about this artist
         </button>
       ) : artistResponse ? (
-        <div className="text-center max-md:w-full w-8/12">
+        <div className="text-center max-lg:w-full max-md:w-10/12 w-8/12">
           <Typewriter
             options={{
               delay: 30,

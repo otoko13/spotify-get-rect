@@ -66,12 +66,14 @@ export default function AiModal({ open }: AiModalProps) {
         className={classNames('modal z-10', { 'modal-open': open })}
       >
         <div
-          className="flex flex-col justify-evenly items-center h-full modal-box max-w-full w-full rounded-none min-h-screen max-h-screen pb-28 pt-20 max-sm:pt-16"
+          className="modal-box h-full max-w-full w-full rounded-none min-h-screen max-h-screen pb-28 pt-20 max-md:pt-16 flex items-center"
           style={{ opacity: 0.97 }}
           ref={(elem) => setModalWindow(elem)}
         >
-          <AiTrackImage track={track} />
-          <AiArtistInfo track={track} />
+          <div className="flex max-lg:flex-col flex-row justify-evenly items-center w-full max-lg:h-full h-5/6 max-lg:pb-64">
+            <AiTrackImage track={track} />
+            <AiArtistInfo track={track} />
+          </div>
         </div>
       </dialog>
     </>
