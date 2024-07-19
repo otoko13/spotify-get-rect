@@ -17,7 +17,7 @@ export default function ItemsDisplay<T extends BaseDisplayItem>({
   }, [items.length]);
 
   return (
-    <div className="grid max-md:grid-cols-2 grid-cols-6 max-md:gap-4 gap-10 mb-10 max-md:mb-4">
+    <div className="grid max-md:grid-cols-2 grid-cols-6 max-md:gap-x-4 gap-x-10 gap-y-16 mb-10 max-md:mb-4">
       {items.map((item, index) => (
         <DisplayItem key={`${index}-${item.id}`} item={item} />
       ))}

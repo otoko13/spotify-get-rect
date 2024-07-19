@@ -43,7 +43,7 @@ export default function MenuTabs({
   }, []);
 
   return (
-    <div className="flex flex-col flex-grow fixed top-0 left-0 w-full">
+    <div className="flex flex-col flex-grow fixed top-0 left-0 w-full z-20">
       <div
         className={classNames(
           'absolute top-0 left-0 w-full h-full -z-10',
