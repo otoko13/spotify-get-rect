@@ -2,6 +2,7 @@
 
 import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
 import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import useDisplayedItemCacheContext from '@/_context/displayedItemCacheContext/useDisplayedItemCacheContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import { clientSpotifyFetch, getSpotifyUrl } from '@/_utils/clientUtils';
 import { SpotifyAlbum, SpotifyTrack } from '@/types';
@@ -17,19 +18,28 @@ const mapResponseToDisplayItems = (
   },
   existingItems?: SpotifyAlbum[],
 ): SpotifyAlbum[] => {
-  return data.tracks
-    .map((track) => track.album)
-    .filter(
-      (album) =>
-        (existingItems ?? []).findIndex(
-          (existingAlbum) => existingAlbum.id === album.id,
-        ) === -1,
-    );
+  return data
+    ? data.tracks
+        .map((track) => track.album)
+        .filter(
+          (album) =>
+            (existingItems ?? []).findIndex(
+              (existingAlbum) => existingAlbum.id === album.id,
+            ) === -1,
+        )
+    : [];
 };
 
 export default function RecommendationsPage() {
   const [initialUrl, setInitialUrl] = useState<string>();
   const authToken = useGetAuthToken();
+
+  const {
+    recommendations,
+    onRecommendationsChanged,
+    recommendationsNextUrl,
+    onRecommendationsNextUrlChanged,
+  } = useDisplayedItemCacheContext();
 
   const getRecommendationsUrl = useCallback(async () => {
     const randomOffset = Math.floor(Math.random() * 100);
@@ -84,6 +94,10 @@ export default function RecommendationsPage() {
     <>
       <HtmlTitle pageTitle="Recommendations" />
       <LoadMoreDisplayItems
+        cachedNextUrl={recommendationsNextUrl}
+        updatedCachedNextUrl={onRecommendationsNextUrlChanged}
+        cachedItems={recommendations}
+        updatedCachedItems={onRecommendationsChanged}
         customFetchMore={fetchMore}
         initialUrl={initialUrl}
         mapResponseToDisplayItems={mapResponseToDisplayItems}

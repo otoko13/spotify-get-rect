@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export interface BaseDisplayItem {
   id: string;
-  images: { url: string }[];
+  images: { url: string; width: number; height: number }[];
   name: string;
   uri: string;
 }
