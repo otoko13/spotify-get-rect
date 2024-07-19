@@ -7,8 +7,8 @@ export type CurrentTrackContextType = {
   track?: SpotifyPlayerTrack;
 };
 
-const PlayerContext = createContext<CurrentTrackContextType>({
+const CurrentTrackContext = createContext<CurrentTrackContextType>({
   track: undefined,
 });
 
-export default PlayerContext;
+export default CurrentTrackContext;

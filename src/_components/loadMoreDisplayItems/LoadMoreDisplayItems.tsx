@@ -7,12 +7,14 @@ import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDispla
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
 
 export interface LoadMoreDisplayItemsProps<T extends BaseDisplayItem> {
+  customFetchMore?: () => Promise<any>;
   initialUrl?: string;
   isAlbums?: boolean;
-  mapResponseToDisplayItems: (items: any) => T[];
+  mapResponseToDisplayItems: (items: any, existingItems?: T[]) => T[];
 }
 
 export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
+  customFetchMore,
   initialUrl,
   isAlbums = true,
   mapResponseToDisplayItems,
@@ -31,35 +33,43 @@ export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
         return;
       }
       setLoading(true);
-      setUrlsFetched((fetchedUrls) => [...fetchedUrls, url]);
-      const response = await fetch(url, {
-        headers: {
-          Authorization: authToken,
-        },
-      });
 
-      if (response.status !== 200) {
-        setLoading(false);
-        return;
+      let data;
+
+      if (customFetchMore) {
+        data = await customFetchMore().catch(() => {
+          setLoading(false);
+          return;
+        });
+      } else {
+        setUrlsFetched((fetchedUrls) => [...fetchedUrls, url]);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: authToken,
+          },
+        });
+
+        if (response.status !== 200) {
+          setLoading(false);
+          return;
+        }
+
+        data = await response.json();
+        // new releases uses albums.next - TODO: make the accessor a prop
+        const nextUrl = data.next ?? data.albums?.next;
+        setFetchUrl(nextUrl !== url ? nextUrl : undefined);
       }
 
-      const data = await response.json();
-
-      // new releases uses albums.next - TODO: make the accessor a prop
-      const nextUrl = data.next ?? data.albums?.next;
-
-      setFetchUrl(nextUrl !== url ? nextUrl : undefined);
-
-      const processedItems = mapResponseToDisplayItems(data);
+      const processedItems = mapResponseToDisplayItems(data, items);
 
       setLoading(false);
       setItems((items) => [...items, ...processedItems]);
     },
-    [authToken, mapResponseToDisplayItems, urlsFetched],
+    [authToken, customFetchMore, items, mapResponseToDisplayItems, urlsFetched],
   );
 
   useAlbumDisplayScrollHandler({
-    disabled: !initialLoadComplete,
+    disabled: !initialLoadComplete || loading,
     fetchUrl,
     urlsFetched,
     onBottom: fetchMoreItems,

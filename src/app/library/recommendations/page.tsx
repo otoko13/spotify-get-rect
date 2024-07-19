@@ -7,26 +7,31 @@ import { clientSpotifyFetch, getSpotifyUrl } from '@/_utils/clientUtils';
 import { SpotifyAlbum, SpotifyTrack } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 
-// export const metadata: Metadata = {
-//   title: 'Recommendations',
-//   description: 'Recommendations for you from Spotify',
-// };
-
 type DataItem = {
   album: SpotifyAlbum;
 };
 
-const mapResponseToDisplayItems = (data: {
-  tracks: DataItem[];
-}): SpotifyAlbum[] => {
-  return data.tracks.map((track) => track.album);
+const mapResponseToDisplayItems = (
+  data: {
+    tracks: DataItem[];
+  },
+  existingItems?: SpotifyAlbum[],
+): SpotifyAlbum[] => {
+  return data.tracks
+    .map((track) => track.album)
+    .filter(
+      (album) =>
+        (existingItems ?? []).findIndex(
+          (existingAlbum) => existingAlbum.id === album.id,
+        ) === -1,
+    );
 };
 
 export default function RecommendationsPage() {
   const [initialUrl, setInitialUrl] = useState<string>();
   const authToken = useGetAuthToken();
 
-  const setInitialRecommendationsUrl = useCallback(async () => {
+  const getRecommendationsUrl = useCallback(async () => {
     const randomOffset = Math.floor(Math.random() * 100);
 
     const response = await clientSpotifyFetch(
@@ -42,20 +47,44 @@ export default function RecommendationsPage() {
 
     const seedTrackIds = topData.items.map((t: SpotifyTrack) => t.id);
 
-    const recommendationsUrl = getSpotifyUrl(
-      `recommendations?limit=100&seed_tracks=${seedTrackIds.join(',')}`,
+    return getSpotifyUrl(
+      `recommendations?limit=48&seed_tracks=${seedTrackIds.join(',')}`,
     );
-    setInitialUrl(recommendationsUrl);
   }, [authToken]);
 
+  const setInitialRecommendationsUrl = useCallback(async () => {
+    const url = await getRecommendationsUrl();
+
+    setInitialUrl(url);
+  }, [getRecommendationsUrl]);
+
   useEffect(() => {
-    setInitialRecommendationsUrl();
-  }, [setInitialRecommendationsUrl]);
+    if (!initialUrl) {
+      setInitialRecommendationsUrl();
+    }
+  }, [initialUrl, setInitialRecommendationsUrl]);
+
+  const fetchMore = useCallback(async () => {
+    const nextUrl = await getRecommendationsUrl();
+
+    const response = await fetch(nextUrl, {
+      headers: {
+        Authorization: authToken,
+      },
+    });
+
+    if (response.status !== 200) {
+      return;
+    }
+
+    return await response.json();
+  }, [authToken, getRecommendationsUrl]);
 
   return (
     <>
       <HtmlTitle pageTitle="Recommendations" />
       <LoadMoreDisplayItems
+        customFetchMore={fetchMore}
         initialUrl={initialUrl}
         mapResponseToDisplayItems={mapResponseToDisplayItems}
       />

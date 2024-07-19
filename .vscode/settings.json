@@ -1,7 +1,5 @@
 {
-  "cSpell.words": [
-    "authorised"
-  ],
+  "cSpell.words": ["authorised", "Scroller"],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

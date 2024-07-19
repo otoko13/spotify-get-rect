@@ -1,3 +1,5 @@
+import useBodyScrollerContext from '@/_context/bodyScrollerContext/useBodyScrollerContext';
+import { OverlayScrollbars } from 'overlayscrollbars';
 import { useEffect } from 'react';
 
 interface UseAlbumDisplayScrollHandlerArgs {
@@ -13,27 +15,27 @@ const useAlbumDisplayScrollHandler = ({
   urlsFetched,
   onBottom,
 }: UseAlbumDisplayScrollHandlerArgs) => {
-  useEffect(() => {
-    const handleScroll = (event: any) => {
-      const target = event.target.scrollingElement as HTMLElement;
+  const { scroller } = useBodyScrollerContext();
 
-      if (
-        !disabled &&
-        target.scrollTop >=
-          (target.scrollHeight - target.clientHeight) * 0.95 &&
-        fetchUrl &&
-        !urlsFetched.includes(fetchUrl)
-      ) {
+  useEffect(() => {
+    const handleScroll = (instance: OverlayScrollbars) => {
+      if (disabled || !fetchUrl || urlsFetched.includes(fetchUrl)) {
+        return;
+      }
+
+      const { viewport } = instance.elements();
+      const { scrollHeight, clientHeight, scrollTop } = viewport;
+      if (scrollTop >= (scrollHeight - clientHeight) * 0.95) {
         onBottom(fetchUrl);
       }
     };
 
-    document.addEventListener('scroll', handleScroll);
+    scroller?.on('scroll', handleScroll);
 
     return () => {
-      document.removeEventListener('scroll', handleScroll);
+      scroller?.off('scroll', handleScroll);
     };
-  }, [fetchUrl, urlsFetched, onBottom, disabled]);
+  }, [fetchUrl, urlsFetched, onBottom, disabled, scroller]);
 };
 
 export default useAlbumDisplayScrollHandler;

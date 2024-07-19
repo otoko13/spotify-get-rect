@@ -85,16 +85,21 @@ const convertSdkTrackToApiTrack = (
 
 interface CurrentlyPlayingProps {
   onTrackChange: (track?: SpotifyPlayerTrack) => void;
+  onScrollbarInitialised: (scrollbar: OverlayScrollbars) => void;
+  scrollbar?: OverlayScrollbars;
 }
 
-const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
+const CurrentlyPlaying = ({
+  onTrackChange,
+  onScrollbarInitialised,
+  scrollbar,
+}: CurrentlyPlayingProps) => {
   const authToken = useGetAuthToken();
   const [track, setTrack] = useState<SpotifyPlayerTrack>();
   const [lastTrack, setLastTrack] = useState<SpotifyPlayerTrack>();
   const [trackStopped, setTrackStopped] = useState(true);
   const [currentDevice, setCurrentDevice] = useState<SpotifyDeviceSimple>();
   const localPlayerTrackUpdateTime = useRef<number>();
-  const [osScrollbar, setOsScrollbar] = useState<OverlayScrollbars>();
 
   const path = usePathname();
 
@@ -106,8 +111,8 @@ const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
   // modal, we temporarily destroy the scrollbar and reinstate when moving
   // away from the ai modal
   useEffect(() => {
-    if (path.endsWith('/ai')) {
-      osScrollbar?.destroy();
+    if (path.endsWith('/ai') && scrollbar) {
+      scrollbar?.destroy();
     } else {
       const osScrollbar = OverlayScrollbars(document.body, {
         scrollbars: {
@@ -115,9 +120,9 @@ const CurrentlyPlaying = ({ onTrackChange }: CurrentlyPlayingProps) => {
           autoHideDelay: 2000,
         },
       });
-      setOsScrollbar(osScrollbar);
+      onScrollbarInitialised(osScrollbar);
     }
-  }, [osScrollbar, path]);
+  }, [scrollbar, path, onScrollbarInitialised]);
 
   const {
     player,

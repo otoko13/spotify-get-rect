@@ -1,3 +1,7 @@
 Consider side by side layout for bigger screens
 
 Custom recommendations paging
+
+Local caching of files
+
+Display titles when hovering
