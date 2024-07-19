@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 interface UseAlbumDisplayScrollHandlerArgs {
   disabled?: boolean;
-  fetchUrl?: string;
+  fetchUrl?: string | null;
   urlsFetched: string[];
   onBottom: (url: string) => void;
 }

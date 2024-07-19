@@ -2,6 +2,7 @@
 
 import HtmlTitle from '@/_components/htmlTitle/HtmlTitle';
 import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDisplayItems';
+import useDisplayedItemCacheContext from '@/_context/displayedItemCacheContext/useDisplayedItemCacheContext';
 import { getSpotifyUrl } from '@/_utils/clientUtils';
 import { SpotifyAlbum } from '@/types';
 
@@ -21,10 +22,21 @@ const mapResponseToDisplayItems = (data: {
 };
 
 export default function SavedAlbumsPage() {
+  const {
+    savedAlbums,
+    onSavedAlbumsChanged,
+    onSavedAlbumsNextUrlChanged,
+    savedAlbumsNextUrl,
+  } = useDisplayedItemCacheContext();
+
   return (
     <>
       <HtmlTitle pageTitle="Saved albums" />
       <LoadMoreDisplayItems
+        cachedNextUrl={savedAlbumsNextUrl}
+        updatedCachedNextUrl={onSavedAlbumsNextUrlChanged}
+        cachedItems={savedAlbums}
+        updatedCachedItems={onSavedAlbumsChanged}
         initialUrl={getSpotifyUrl('me/albums?limit=50')}
         mapResponseToDisplayItems={mapResponseToDisplayItems}
       />

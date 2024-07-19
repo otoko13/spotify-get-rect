@@ -7,23 +7,35 @@ import DualModeAlbumsDisplay from '../dualModeAlbumsDisplay/DualModeAlbumsDispla
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
 
 export interface LoadMoreDisplayItemsProps<T extends BaseDisplayItem> {
+  updatedCachedItems: (items: T[]) => void;
+  cachedItems: T[];
   customFetchMore?: () => Promise<any>;
   initialUrl?: string;
   isAlbums?: boolean;
   mapResponseToDisplayItems: (items: any, existingItems?: T[]) => T[];
+  cachedNextUrl?: string | null;
+  updatedCachedNextUrl: (url?: string | null) => void;
 }
 
 export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
+  cachedItems,
   customFetchMore,
   initialUrl,
   isAlbums = true,
   mapResponseToDisplayItems,
+  updatedCachedItems,
+  cachedNextUrl,
+  updatedCachedNextUrl,
 }: LoadMoreDisplayItemsProps<T>) {
-  const [fetchUrl, setFetchUrl] = useState<string | undefined>();
-  const [loading, setLoading] = useState(true);
+  const [fetchUrl, setFetchUrl] = useState<string | undefined | null>(
+    cachedNextUrl,
+  );
+  const [loading, setLoading] = useState<boolean>(!cachedItems.length);
   const [urlsFetched, setUrlsFetched] = useState<string[]>([]);
-  const [items, setItems] = useState<T[]>([]);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [items, setItems] = useState<T[]>(cachedItems ?? []);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(
+    cachedItems.length > 0,
+  );
 
   const authToken = useGetAuthToken();
 
@@ -77,7 +89,7 @@ export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
 
   useEffect(() => {
     async function initialLoad() {
-      if (!initialUrl) {
+      if (!initialUrl || initialLoadComplete) {
         return;
       }
       await fetchMoreItems(initialUrl).then(() => {
@@ -86,7 +98,17 @@ export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
     }
 
     initialLoad();
-  }, [fetchMoreItems, initialUrl]);
+  }, [fetchMoreItems, initialLoadComplete, initialUrl]);
+
+  useEffect(() => {
+    if (items.length) {
+      updatedCachedItems(items);
+    }
+  }, [items, updatedCachedItems]);
+
+  useEffect(() => {
+    updatedCachedNextUrl(fetchUrl);
+  }, [fetchUrl, updatedCachedNextUrl]);
 
   const fetchMoreForCanvas = useCallback(async () => {
     if (fetchUrl) {

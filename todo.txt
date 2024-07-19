@@ -1,5 +1,4 @@
 Custom recommendations paging
 
-Local caching of files
-
 Display titles when hovering
+
