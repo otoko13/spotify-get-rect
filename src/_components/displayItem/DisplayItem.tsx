@@ -15,6 +15,7 @@ import {
   flip,
   shift,
   useFocus,
+  inline,
 } from '@floating-ui/react';
 import { SpotifyAlbum } from '@/types';
 import classNames from 'classnames';
@@ -70,7 +71,7 @@ export default function DisplayItem<T extends BaseDisplayItem>({
     whileElementsMounted: autoUpdate,
     open: tooltipOpen,
     onOpenChange: setTooltipOpen,
-    middleware: [offset(4), flip(), shift()],
+    middleware: [offset(-80), flip(), shift()],
   });
 
   const hover = useHover(context);
@@ -114,7 +115,7 @@ export default function DisplayItem<T extends BaseDisplayItem>({
   }, [item]);
 
   return (
-    <button onClick={() => handleClicked(item.uri)}>
+    <button className="relative" onClick={() => handleClicked(item.uri)}>
       {item.images?.[0]?.url && (
         <>
           <Image
@@ -130,21 +131,23 @@ export default function DisplayItem<T extends BaseDisplayItem>({
             style={{ width: '100%', height: 'auto' }}
             {...getReferenceProps()}
           />
-          {tooltipOpen && (
+          {true && (
             <div
-              className="z-50 animate-fast-fade-in"
+              className="z-50 animate-fast-fade-in bg-slate-900 bg-opacity-80 w-full h-20"
               ref={refs.setFloating}
               style={floatingStyles}
               {...getFloatingProps()}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col h-full items-start justify-center px-4 overflow-hidden">
                 {!!artistInfo.length && (
-                  <div className="text-slate-400 text-lg">{artistInfo}</div>
+                  <div className="text-slate-400 text-lg whitespace-nowrap text-ellipsis w-full">
+                    {artistInfo}
+                  </div>
                 )}
                 <div
-                  className={classNames('text-slate-300', {
-                    'relative top-2': !artistInfo,
-                  })}
+                  className={classNames(
+                    'text-slate-300 whitespace-nowrap text-ellipsis w-full',
+                  )}
                 >
                   {item.name}
                 </div>
