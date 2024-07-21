@@ -6,19 +6,9 @@ import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  useFloating,
-  autoUpdate,
-  useHover,
-  useInteractions,
-  offset,
-  flip,
-  shift,
-  useFocus,
-  inline,
-} from '@floating-ui/react';
 import { SpotifyAlbum } from '@/types';
 import classNames from 'classnames';
+import styles from './displayItem.module.scss';
 
 function isAlbum(
   toBeDetermined: BaseDisplayItem,
@@ -67,21 +57,6 @@ export default function DisplayItem<T extends BaseDisplayItem>({
   const { player, deviceId: thisDeviceId } = usePlayerContext();
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  const { refs, floatingStyles, context } = useFloating({
-    whileElementsMounted: autoUpdate,
-    open: tooltipOpen,
-    onOpenChange: setTooltipOpen,
-    middleware: [offset(-80), flip(), shift()],
-  });
-
-  const hover = useHover(context);
-  const focus = useFocus(context);
-
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    hover,
-    focus,
-  ]);
-
   const handleClicked = useCallback(
     async (spotifyId: string) => {
       const targetDeviceId = await getTargetDevice();
@@ -115,13 +90,16 @@ export default function DisplayItem<T extends BaseDisplayItem>({
   }, [item]);
 
   return (
-    <button className="relative" onClick={() => handleClicked(item.uri)}>
+    <button
+      onClick={() => handleClicked(item.uri)}
+      onMouseOver={() => setTooltipOpen(true)}
+      onMouseOut={() => setTooltipOpen(false)}
+    >
       {item.images?.[0]?.url && (
-        <>
+        <div className="relative">
           <Image
             className="shadow-lg animate-fast-fade-in -z-10"
             key={item.images[0].url}
-            ref={refs.setReference}
             src={item.images[0].url}
             alt={item.name}
             width={0}
@@ -129,32 +107,35 @@ export default function DisplayItem<T extends BaseDisplayItem>({
             priority
             sizes="100vw"
             style={{ width: '100%', height: 'auto' }}
-            {...getReferenceProps()}
           />
-          {true && (
+          <div className="z-50 w-full h-20 absolute bottom-0 overflow-hidden">
             <div
-              className="z-50 animate-fast-fade-in bg-slate-900 bg-opacity-80 w-full h-20"
-              ref={refs.setFloating}
-              style={floatingStyles}
-              {...getFloatingProps()}
+              className={classNames(
+                'flex flex-col h-full w-full items-start justify-center px-4 overflow-hidden absolute transition-all z-20 text-left',
+                { 'bottom-0': tooltipOpen, '-bottom-20': !tooltipOpen },
+              )}
             >
-              <div className="flex flex-col h-full items-start justify-center px-4 overflow-hidden">
-                {!!artistInfo.length && (
-                  <div className="text-slate-400 text-lg whitespace-nowrap text-ellipsis w-full">
-                    {artistInfo}
-                  </div>
+              <div
+                className={classNames(
+                  'absolute top-0 left-0 w-full h-full -z-10',
+                  styles['blurred-bg'],
                 )}
-                <div
-                  className={classNames(
-                    'text-slate-300 whitespace-nowrap text-ellipsis w-full',
-                  )}
-                >
-                  {item.name}
+              />
+              {!!artistInfo.length && (
+                <div className="text-slate-400 text-lg whitespace-nowrap text-ellipsis w-full overflow-hidden">
+                  {artistInfo}
                 </div>
+              )}
+              <div
+                className={classNames(
+                  'text-slate-300 whitespace-nowrap text-ellipsis w-full overflow-hidden',
+                )}
+              >
+                {item.name}
               </div>
             </div>
-          )}
-        </>
+          </div>
+        </div>
       )}
     </button>
   );
