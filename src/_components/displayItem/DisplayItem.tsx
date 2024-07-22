@@ -109,7 +109,7 @@ export default function DisplayItem<T extends BaseDisplayItem>({
             style={{ width: '100%', height: 'auto' }}
           />
           {!process.env.DISABLE_TOOLTIPS && (
-            <div className="z-50 w-full h-20 absolute bottom-0 overflow-hidden">
+            <div className="w-full h-20 absolute bottom-0 overflow-hidden">
               <div
                 className={classNames(
                   'flex flex-col h-full w-full items-start justify-center px-4 overflow-hidden absolute transition-all z-20 text-left',

@@ -12,7 +12,7 @@ import Script from 'next/script';
 import { useCallback, useMemo } from 'react';
 import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
 import { SpotifyDeviceSimple } from './CurrentlyPlaying';
-import styles from './currentlyPlaying.module.scss';
+import styles from './nowPlayingBar.module.scss';
 
 interface NowPlayingBarProps {
   authToken: string;
@@ -113,7 +113,7 @@ export default function NowPlayingBar({
     <>
       <div
         className={classNames(
-          'border-solid border-t-1 border-gray-600 px-4 py-1',
+          'border-solid border-t-1 border-gray-600 px-4 py-1 z-50',
           styles['now-playing-bar'],
           {
             [styles.visible]: !!track,

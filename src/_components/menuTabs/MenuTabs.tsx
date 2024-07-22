@@ -43,7 +43,7 @@ export default function MenuTabs({
   }, []);
 
   return (
-    <div className="flex flex-col flex-grow fixed top-0 left-0 w-full z-20">
+    <div className="flex flex-col flex-grow fixed top-0 left-0 w-full z-30">
       <div
         className={classNames(
           'absolute top-0 left-0 w-full h-full -z-10',
@@ -66,7 +66,11 @@ export default function MenuTabs({
           })}
         >
           <DesktopLinks className="max-lg:hidden visible" tabs={tabs} />
-          <MobileLinks className="md:visible lg:hidden" tabs={tabs} />
+          <MobileLinks
+            className="md:visible lg:hidden"
+            tabs={tabs}
+            scrolled={scrolled}
+          />
         </div>
         <div className="flex-grow flex items-center justify-end">
           <Toggle label="Go 3D!" on={use3d} onChange={onUse3dChanged} />
