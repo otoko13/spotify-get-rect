@@ -1,6 +1,6 @@
 'use-client';
 
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import {
   Color4,
   Engine,
@@ -27,7 +27,7 @@ interface BabylonCanvasProps extends Record<string, any> {
   ) => void;
 }
 
-export default function BabylonCanvas({
+const BabylonCanvas = ({
   antialias,
   engineOptions = {},
   adaptToDeviceRatio = true,
@@ -37,7 +37,7 @@ export default function BabylonCanvas({
   onSceneReady,
   onPointerObservable,
   ...rest
-}: BabylonCanvasProps) {
+}: BabylonCanvasProps) => {
   const reactCanvas = useRef(null);
   const [dimensions, setDimensions] = useState<Dimensions>({
     width: 0,
@@ -70,10 +70,17 @@ export default function BabylonCanvas({
       scene.onReadyObservable.addOnce((scene) => onSceneReady(scene));
     }
 
+    onRender?.(scene);
+    scene.render();
+
     engine.runRenderLoop(() => {
       onRender?.(scene);
       scene.render();
     });
+
+    return () => {
+      engine.dispose();
+    };
   }, [
     antialias,
     engineOptions,
@@ -110,4 +117,7 @@ export default function BabylonCanvas({
       {...rest}
     />
   );
-}
+};
+
+const MemoizedBabylonCanvas = memo(BabylonCanvas);
+export default MemoizedBabylonCanvas;

@@ -122,13 +122,13 @@ export default function DisplayItem<T extends BaseDisplayItem>({
                 )}
               />
               {!!artistInfo.length && (
-                <div className="text-slate-400 text-lg whitespace-nowrap text-ellipsis w-full overflow-hidden">
+                <div className="text-slate-300 text-lg whitespace-nowrap text-ellipsis w-full overflow-hidden">
                   {artistInfo}
                 </div>
               )}
               <div
                 className={classNames(
-                  'text-slate-300 whitespace-nowrap text-ellipsis w-full overflow-hidden',
+                  'text-slate-200 whitespace-nowrap text-ellipsis w-full overflow-hidden',
                 )}
               >
                 {item.name}
