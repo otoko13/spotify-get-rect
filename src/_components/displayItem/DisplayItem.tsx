@@ -108,33 +108,35 @@ export default function DisplayItem<T extends BaseDisplayItem>({
             sizes="100vw"
             style={{ width: '100%', height: 'auto' }}
           />
-          <div className="z-50 w-full h-20 absolute bottom-0 overflow-hidden">
-            <div
-              className={classNames(
-                'flex flex-col h-full w-full items-start justify-center px-4 overflow-hidden absolute transition-all z-20 text-left',
-                { 'bottom-0': tooltipOpen, '-bottom-20': !tooltipOpen },
-              )}
-            >
+          {!process.env.DISABLE_TOOLTIPS && (
+            <div className="z-50 w-full h-20 absolute bottom-0 overflow-hidden">
               <div
                 className={classNames(
-                  'absolute top-0 left-0 w-full h-full -z-10',
-                  styles['blurred-bg'],
-                )}
-              />
-              {!!artistInfo.length && (
-                <div className="text-slate-300 text-lg whitespace-nowrap text-ellipsis w-full overflow-hidden">
-                  {artistInfo}
-                </div>
-              )}
-              <div
-                className={classNames(
-                  'text-slate-200 whitespace-nowrap text-ellipsis w-full overflow-hidden',
+                  'flex flex-col h-full w-full items-start justify-center px-4 overflow-hidden absolute transition-all z-20 text-left',
+                  { 'bottom-0': tooltipOpen, '-bottom-20': !tooltipOpen },
                 )}
               >
-                {item.name}
+                <div
+                  className={classNames(
+                    'absolute top-0 left-0 w-full h-full -z-10',
+                    styles['blurred-bg'],
+                  )}
+                />
+                {!!artistInfo.length && (
+                  <div className="text-slate-300 text-lg whitespace-nowrap text-ellipsis w-full overflow-hidden">
+                    {artistInfo}
+                  </div>
+                )}
+                <div
+                  className={classNames(
+                    'text-slate-200 whitespace-nowrap text-ellipsis w-full overflow-hidden',
+                  )}
+                >
+                  {item.name}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </button>

@@ -3,23 +3,18 @@
 import { THIS_DEVICE_NAME } from '@/_context/playerContext/PlayerContext';
 import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
-import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
-import pauseButton from '@/_images/pause.svg';
-import playButton from '@/_images/play.svg';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import { SpotifyImage, SpotifyPlayerTrack } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import TransferPlaybackDropdown from '../transferPlaybackDropdown/TransferPlaybackDropdown';
-import styles from './currentlyPlaying.module.scss';
-import Link from 'next/link';
-import Script from 'next/script';
-import 'overlayscrollbars/overlayscrollbars.css';
-import { OverlayScrollbars } from 'overlayscrollbars';
-import { usePathname } from 'next/navigation';
 
-interface SpotifyDeviceSimple {
+import { usePathname } from 'next/navigation';
+import { OverlayScrollbars } from 'overlayscrollbars';
+import 'overlayscrollbars/overlayscrollbars.css';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import NowPlayingBar from './NowPlayingBar';
+
+export interface SpotifyDeviceSimple {
   id: string | null | undefined;
   name: string | null | undefined;
 }
@@ -124,13 +119,7 @@ const CurrentlyPlaying = ({
     }
   }, [scrollbar, path, onScrollbarInitialised]);
 
-  const {
-    player,
-    deviceId: thisDeviceId,
-    initialisationFailed: playerInitialisationFailed,
-  } = usePlayerContext();
-
-  const getTargetDevice = useGetTargetDevice();
+  const { player, deviceId: thisDeviceId } = usePlayerContext();
 
   const updateTracks = useCallback(
     (newTrack: SpotifyPlayerTrack, oldTrack?: SpotifyPlayerTrack | null) => {
@@ -215,53 +204,6 @@ const CurrentlyPlaying = ({
     return Promise.resolve();
   }, [authToken, currentDevice?.id, thisDeviceId, track, updateTracks]);
 
-  const handlePlay = useCallback(async () => {
-    if (!trackStopped) {
-      return;
-    }
-    const targetDeviceId = await getTargetDevice();
-
-    const deviceToUse = currentDevice?.id ?? targetDeviceId;
-
-    player?.activateElement();
-
-    await clientSpotifyFetch(
-      `me/player/play${deviceToUse ? `?device_id=${deviceToUse}` : ''}`,
-      {
-        headers: {
-          Authorization: authToken,
-        },
-        method: 'PUT',
-      },
-    );
-    if (deviceToUse !== thisDeviceId) {
-      await getPlayData();
-    }
-  }, [
-    authToken,
-    currentDevice?.id,
-    getPlayData,
-    getTargetDevice,
-    player,
-    thisDeviceId,
-    trackStopped,
-  ]);
-
-  const handlePause = useCallback(async () => {
-    if (trackStopped) {
-      return;
-    }
-    await clientSpotifyFetch('me/player/pause', {
-      headers: {
-        Authorization: authToken,
-      },
-      method: 'PUT',
-    });
-    if (currentDevice?.id !== thisDeviceId) {
-      await getPlayData();
-    }
-  }, [authToken, currentDevice?.id, getPlayData, thisDeviceId, trackStopped]);
-
   // set up polling for data
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -329,13 +271,6 @@ const CurrentlyPlaying = ({
     onTrackChange(track);
   }, [onTrackChange, track]);
 
-  const handlePlayTransferred = useCallback(() => {
-    setCurrentDevice({
-      id: thisDeviceId,
-      name: THIS_DEVICE_NAME,
-    });
-  }, [thisDeviceId]);
-
   const currentTrackImageToUse = useMemo(() => {
     if (!track) {
       return '';
@@ -355,28 +290,6 @@ const CurrentlyPlaying = ({
       ? lastTrack.item.images[0].url
       : lastTrack.item.album.images[0].url;
   }, [lastTrack]);
-
-  const trackContext = useMemo(() => {
-    if (!track) {
-      return '';
-    }
-    return track?.currently_playing_type === 'track'
-      ? track?.item.artists.map((artist) => artist.name).join(', ')
-      : track?.item?.show?.name;
-  }, [track]);
-
-  const nowPlayingBarImage = useMemo(
-    () => (
-      <Image
-        alt="currently playing album art blurred"
-        key={currentTrackImageToUse}
-        src={currentTrackImageToUse}
-        width={64}
-        height={64}
-      />
-    ),
-    [currentTrackImageToUse],
-  );
 
   return (
     <>
@@ -416,56 +329,17 @@ const CurrentlyPlaying = ({
           { 'opacity-100': trackStopped },
         )}
       />
-      <div
-        className={classNames(
-          'border-solid border-t-1 border-gray-600 px-4 py-1',
-          styles['now-playing-bar'],
-          {
-            [styles.visible]: !!track,
-          },
-        )}
-      >
-        <div className="flex flex-grow overflow-hidden">
-          <div className="flex-none">
-            {track &&
-              (track.currently_playing_type === 'track' ? (
-                <Link href="/library/ai">{nowPlayingBarImage}</Link>
-              ) : (
-                nowPlayingBarImage
-              ))}
-          </div>
-          <div className="flex flex-col max-md:ml-2 ml-4 justify-center basis-1/2 overflow-hidden">
-            <div className="lg:text-xl md:text-lg whitespace-nowrap text-ellipsis overflow-hidden">
-              {track?.item.name}
-            </div>
-            <div className="text-sm text-slate-300 whitespace-nowrap text-ellipsis overflow-hidden">
-              {trackContext}
-            </div>
-          </div>
-        </div>
-        <div className="controls flex items-center flex-none">
-          {currentDevice?.name && currentDevice.name !== THIS_DEVICE_NAME && (
-            <TransferPlaybackDropdown onPlayTransferred={handlePlayTransferred}>
-              <div className="text-sm text-primary mr-4 ">
-                <span className="max-lg:hidden visible">Playing on </span>
-                {currentDevice?.name}
-              </div>
-            </TransferPlaybackDropdown>
-          )}
-          {!player && !playerInitialisationFailed ? (
-            <div className="loading loading-dots loading-md"></div>
-          ) : trackStopped ? (
-            <button onClick={handlePlay}>
-              <Image alt="play" src={playButton} width={48} height={48} />
-            </button>
-          ) : (
-            <button onClick={handlePause}>
-              <Image alt="pause" src={pauseButton} width={48} height={48} />
-            </button>
-          )}
-        </div>
-      </div>
-      <Script src="https://sdk.scdn.co/spotify-player.js" />
+      <NowPlayingBar
+        authToken={authToken}
+        currentTrackImageToUse={currentTrackImageToUse}
+        getPlayData={getPlayData}
+        onPlayTransferredToThisDevice={() =>
+          setCurrentDevice({ id: thisDeviceId, name: THIS_DEVICE_NAME })
+        }
+        trackStopped={trackStopped}
+        currentDevice={currentDevice}
+        track={track}
+      />
     </>
   );
 };

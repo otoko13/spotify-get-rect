@@ -4,6 +4,8 @@ Text size on mobile for header based on text length
 
 Caret dropdown when on mobile
 
-Highlight in babylon 
-
 Try moving the ai and profile routes into the individual pages to prevent reloads of the data
+
+Babylon iniitial render flicker
+
+Tooltip based on environment variable
