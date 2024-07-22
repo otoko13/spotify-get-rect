@@ -3,7 +3,7 @@ import CurrentTrackContext, {
   CurrentTrackContextType,
 } from './CurrentTrackContext';
 
-const usePlayerContext: () => CurrentTrackContextType = () =>
+const useCurrentTrackContext: () => CurrentTrackContextType = () =>
   useContext(CurrentTrackContext);
 
-export default usePlayerContext;
+export default useCurrentTrackContext;

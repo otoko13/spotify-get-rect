@@ -49,6 +49,7 @@ export interface SpotifyChapter {
   show: {
     id: string;
     name: string;
+    uri: string;
   };
   images: SpotifyImage[];
   uri: string;

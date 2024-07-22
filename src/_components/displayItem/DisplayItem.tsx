@@ -5,7 +5,16 @@ import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SpotifyAlbum } from '@/types';
+import classNames from 'classnames';
+import styles from './displayItem.module.scss';
+
+function isAlbum(
+  toBeDetermined: BaseDisplayItem,
+): toBeDetermined is SpotifyAlbum {
+  return !!(toBeDetermined as SpotifyAlbum).artists;
+}
 
 export interface BaseDisplayItem {
   id: string;
@@ -46,6 +55,7 @@ export default function DisplayItem<T extends BaseDisplayItem>({
   const getTargetDevice = useGetTargetDevice();
   const [queuedItem, setQueuedItem] = useState<string>();
   const { player, deviceId: thisDeviceId } = usePlayerContext();
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const handleClicked = useCallback(
     async (spotifyId: string) => {
@@ -75,19 +85,59 @@ export default function DisplayItem<T extends BaseDisplayItem>({
     }
   }, [authToken, player, queuedItem, thisDeviceId]);
 
+  const artistInfo = useMemo(() => {
+    return isAlbum(item) ? item.artists[0].name : '';
+  }, [item]);
+
   return (
-    <button onClick={() => handleClicked(item.uri)}>
+    <button
+      onClick={() => handleClicked(item.uri)}
+      onMouseOver={() => setTooltipOpen(true)}
+      onMouseOut={() => setTooltipOpen(false)}
+    >
       {item.images?.[0]?.url && (
-        <Image
-          className="shadow-lg"
-          src={item.images[0].url}
-          alt={item.name}
-          width={0}
-          height={0}
-          priority
-          sizes="100vw"
-          style={{ width: '100%', height: 'auto' }}
-        />
+        <div className="relative">
+          <Image
+            className="shadow-lg animate-fast-fade-in -z-10"
+            key={item.images[0].url}
+            src={item.images[0].url}
+            alt={item.name}
+            width={0}
+            height={0}
+            priority
+            sizes="100vw"
+            style={{ width: '100%', height: 'auto' }}
+          />
+          {!process.env.DISABLE_TOOLTIPS && (
+            <div className="w-full h-20 absolute bottom-0 overflow-hidden">
+              <div
+                className={classNames(
+                  'flex flex-col h-full w-full items-start justify-center px-4 overflow-hidden absolute transition-all z-20 text-left',
+                  { 'bottom-0': tooltipOpen, '-bottom-20': !tooltipOpen },
+                )}
+              >
+                <div
+                  className={classNames(
+                    'absolute top-0 left-0 w-full h-full -z-10',
+                    styles['blurred-bg'],
+                  )}
+                />
+                {!!artistInfo.length && (
+                  <div className="text-slate-300 text-lg whitespace-nowrap text-ellipsis w-full overflow-hidden">
+                    {artistInfo}
+                  </div>
+                )}
+                <div
+                  className={classNames(
+                    'text-slate-200 whitespace-nowrap text-ellipsis w-full overflow-hidden',
+                  )}
+                >
+                  {item.name}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </button>
   );

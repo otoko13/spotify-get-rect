@@ -1,4 +1,3 @@
-Custom recommendations paging
+Try moving the ai and profile routes into the individual pages to prevent reloads of the data
 
-Display titles when hovering
-
+Babylon iniitial render flicker

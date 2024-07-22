@@ -1,7 +1,9 @@
+import useCurrentTrackContext from '@/_context/currentTrackContext/useCurrentTrackContext';
+import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 import useGetAuthToken from '@/_hooks/useGetAuthToken';
 import useGetTargetDevice from '@/_hooks/useGetTargetDevice';
 import { clientSpotifyFetch } from '@/_utils/clientUtils';
-import { SpotifyPlayerSongTrack } from '@/types';
+import { SpotifyPlayerTrack } from '@/types';
 import {
   AbstractMesh,
   ActionManager,
@@ -21,12 +23,11 @@ import {
   Vector3,
   Vector4,
 } from '@babylonjs/core';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import BabylonCanvas from '../babylonCanvas/BabylonCanvas';
 import CanvasLoadMoreButton from '../canvasLoadMoreButton/CanvasLoadMoreButton';
 import { BaseDisplayItem } from '../displayItem/DisplayItem';
 import FullPageSpinner from '../fullPageSpinner/FullPageSpinner';
-import usePlayerContext from '@/_context/playerContext/usePlayerContext';
 
 interface BabylonAlbumsDisplayProps {
   albums?: BaseDisplayItem[];
@@ -192,6 +193,21 @@ const shineSpotlight = ({ albumIndex, spotifyId }: ShineSpotlightArgs) => {
   mirrorMesh.material = mirrorMaterial;
 };
 
+const removeSpotlight = () => {
+  const existingLight = scene.getLightByName('spot');
+
+  if (existingLight) {
+    scene.removeLight(existingLight);
+    existingLight.dispose();
+  }
+
+  const existing = scene.getMeshByName('mirrorMesh');
+  if (existing) {
+    scene.removeMesh(existing);
+    existing.dispose();
+  }
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createFloor = (scene: Scene, albumCount: number) => {
   const rows = Math.ceil(albumCount / ALBUMS_PER_ROW);
@@ -354,58 +370,50 @@ const addAlbums = ({ albums, authToken, playAlbum }: AddAlbumsArgs) => {
   });
 };
 
-interface TriggerSpotlightArgs {
-  albums: BaseDisplayItem[];
-  authToken: string;
-}
-
-const triggerSpotlight = async ({
-  albums,
-  authToken,
-}: TriggerSpotlightArgs) => {
-  const response = await clientSpotifyFetch('me/player', {
-    headers: {
-      Authorization: authToken,
-    },
-  });
-
-  // ignore too many requests responses
-  if (response.status === 429) {
+const triggerSpotlight = (
+  currentTrack: SpotifyPlayerTrack | undefined,
+  items: { id: string }[],
+) => {
+  if (!currentTrack) {
     return;
   }
 
-  if (response.status !== 200 && response.status !== 429) {
-    return;
-  }
+  if (currentTrack.currently_playing_type === 'track') {
+    const albumId = currentTrack.item.album.id;
+    const indexOfPlaying = items.findIndex((item) => item.id === albumId);
 
-  const data: SpotifyPlayerSongTrack = await response?.json();
+    if (indexOfPlaying > -1) {
+      shineSpotlight({
+        albumIndex: indexOfPlaying,
+        spotifyId: currentTrack.item.album.uri,
+      });
+    }
+  } else if (currentTrack.currently_playing_type === 'episode') {
+    const albumId = currentTrack.item.show.id;
+    const indexOfPlaying = items.findIndex((item) => item.id === albumId);
 
-  if (!data.is_playing) {
-    return;
-  }
-
-  const albumId = data.item.album.id;
-  const indexOfPlaying = albums.findIndex((album) => album.id === albumId);
-  if (indexOfPlaying > -1) {
-    shineSpotlight({
-      albumIndex: indexOfPlaying,
-      spotifyId: data.item.album.uri,
-    });
+    if (indexOfPlaying > -1) {
+      shineSpotlight({
+        albumIndex: indexOfPlaying,
+        spotifyId: currentTrack.item.show.uri,
+      });
+    }
   }
 };
 
 let displayedAlbums: BaseDisplayItem[] = [];
 
-export default function BabylonAlbumsDisplay({
+const BabylonAlbumsDisplay = ({
   albums = [],
   loading,
   noMoreAlbums,
   onLoadMoreButtonClicked,
-}: BabylonAlbumsDisplayProps) {
+}: BabylonAlbumsDisplayProps) => {
   const authToken = useGetAuthToken();
   const [ready, setReady] = useState(false);
   const getTargetDevice = useGetTargetDevice();
   const { player } = usePlayerContext();
+  const { track: currentTrack } = useCurrentTrackContext();
 
   const playAlbum = useCallback(
     async ({ authToken, spotifyId, albumIndex }: PlayAlbumsArgs) => {
@@ -431,13 +439,22 @@ export default function BabylonAlbumsDisplay({
     [getTargetDevice, player],
   );
 
+  const handleLoadMoreClicked = useCallback(() => {
+    scene.dispose();
+    onLoadMoreButtonClicked();
+  }, [onLoadMoreButtonClicked]);
+
+  useEffect(() => {
+    console.log('\n\nCHANGED\n\n');
+  }, [albums]);
+
   const handleSceneReady = useCallback(
     (newScene: Scene) => {
       setReady(true);
       scene = newScene;
       createScene(scene, albums.length);
       addAlbums({ albums, authToken, playAlbum });
-      triggerSpotlight({ albums, authToken });
+      // triggerSpotlight(currentTrack, albums);
       displayedAlbums = albums;
       // createFloor(scene, albums.length);
     },
@@ -450,20 +467,40 @@ export default function BabylonAlbumsDisplay({
     // setCameraTarget(albums.length);
   }, [albums, authToken, playAlbum]);
 
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+
+    if (!currentTrack) {
+      removeSpotlight();
+      return;
+    }
+
+    triggerSpotlight(currentTrack, albums);
+  }, [albums, currentTrack, ready]);
+
   return (
     <div className="overflow-hidden h-screen">
       {(!ready || loading) && <FullPageSpinner />}
-      <BabylonCanvas
-        hideCanvas={loading}
-        onSceneReady={handleSceneReady}
-        id="my-canvas"
-        adaptToDeviceRatio={false}
-        antialias
-      />
-      <CanvasLoadMoreButton
-        onClick={onLoadMoreButtonClicked}
-        disabled={loading || !ready || noMoreAlbums}
-      />
+      {!loading && (
+        <>
+          <BabylonCanvas
+            hideCanvas={loading}
+            onSceneReady={handleSceneReady}
+            id="my-canvas"
+            adaptToDeviceRatio={false}
+            antialias
+          />
+          <CanvasLoadMoreButton
+            onClick={handleLoadMoreClicked}
+            disabled={loading || !ready || noMoreAlbums}
+          />
+        </>
+      )}
     </div>
   );
-}
+};
+
+const MemoizedBabylonAlbumsDisplay = memo(BabylonAlbumsDisplay);
+export default MemoizedBabylonAlbumsDisplay;

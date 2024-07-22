@@ -10,7 +10,7 @@
   backdrop-filter: blur(8px);
   transition: bottom 300ms ease-in-out;
   background-color: rgba(0, 0, 0, 0.4);
-  z-index: 20;
+  z-index: 60;
 
   &.visible {
     bottom: 0;

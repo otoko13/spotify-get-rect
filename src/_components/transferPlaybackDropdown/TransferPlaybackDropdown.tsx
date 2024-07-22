@@ -44,20 +44,23 @@ export default function TransferPlaybackDropdown({
   }, [authToken, deviceId, onPlayTransferred, player]);
 
   return (
-    <div className="dropdown dropdown-top dropdown-end">
-      <div tabIndex={0} role="button">
+    <details className="dropdown dropdown-top dropdown-end">
+      <summary tabIndex={0} role="button" className="no-marker">
         {children}
-      </div>
+      </summary>
       {deviceId && (
         <ul
           tabIndex={0}
-          className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+          className="dropdown-content menu bg-base-100 rounded-none z-[1] w-52 p-2 shadow w-auto"
+          style={{ bottom: '150%' }}
         >
           <li>
-            <button onClick={handleClick}>Transfer here</button>
+            <button className="justify-end text-nowrap" onClick={handleClick}>
+              Play here
+            </button>
           </li>
         </ul>
       )}
-    </div>
+    </details>
   );
 }
