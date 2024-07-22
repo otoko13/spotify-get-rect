@@ -4,13 +4,17 @@
 
 ![Screenshot 2](./readme/screenshot2.png)
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with
+![Screenshot 3](./readme/screenshot3.png)
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with Create Next App.
 
 Currently deployed at eighthsamurai.com.
 
 Navigate your library and click on album/audiobook/playlist covers to start playback, which can be in the browser or on another device if you already have Spotify active there.
 
 Toggle 3D view to see a different visualisation of your library.
+
+Click on the album art in the Now Playing bar at the bottom of the screen to open the AI playground.
 
 ## Getting Started
 
@@ -36,6 +40,7 @@ This was a quick training project over a couple of weeks to learn and experiment
 - Tailwind CSS
 - Daisy UI
 - Babylon JS
+- Open AI API
 - CD/CI using vercel
 - 3rd party authentication (via Spotify auth tokens)
 
@@ -55,4 +60,4 @@ I've wanted to experiment with browser 3D rendering for a long time and Babylon 
 
 ## Open Issues
 
-- I've cleared quite a few issues. Will definitely add more here as soon as they're undoubtedly discovered!
+- Disabling of the "no any" typescript linting rule needs to be addressed.
