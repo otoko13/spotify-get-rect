@@ -11,6 +11,8 @@ const REQUESTED_PERMISSIONS = [
   'user-top-read',
   'streaming',
   'playlist-read-private',
+  'playlist-modify-public',
+  'playlist-modify-private',
 ];
 
 const scope = REQUESTED_PERMISSIONS.join(' ');
