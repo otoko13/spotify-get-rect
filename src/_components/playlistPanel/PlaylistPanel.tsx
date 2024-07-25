@@ -103,7 +103,16 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
 
   return (
     <>
-      <div className="bg-slate-800 mb-4 rounded-md w-full p-4 flex justify-between items-center">
+      <div className="bg-slate-800 mb-4 rounded-md w-full p-4 flex justify-between items-center relative overflow-hidden">
+        <Image
+          alt="playlist cover image"
+          className="absolute top-1/2 left-0 blur-3xl opacity-20"
+          src={updatedPlaylist.images[0].url}
+          width={0}
+          height={0}
+          sizes="100vw"
+          style={{ width: '100vw', height: 'auto' }}
+        />
         <div className="flex items-center">
           <Image
             src={updatedPlaylist.images[0].url}
