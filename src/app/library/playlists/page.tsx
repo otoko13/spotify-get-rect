@@ -6,14 +6,11 @@ import LoadMoreDisplayItems from '@/_components/loadMoreDisplayItems/LoadMoreDis
 import useDisplayedItemCacheContext from '@/_context/displayedItemCacheContext/useDisplayedItemCacheContext';
 import { getSpotifyUrl } from '@/_utils/clientUtils';
 
-// export const metadata: Metadata = {
-//   title: 'Playlists',
-//   description: 'Your Spotify playlists',
-// };
-
-const mapResponseToDisplayItems = (data: {
-  items: BaseDisplayItem[];
-}): BaseDisplayItem[] => data.items;
+function mapResponseToDisplayItems<T extends BaseDisplayItem>(data: {
+  items: T[];
+}): T[] {
+  return data.items;
+}
 
 export default function PlaylistsPage() {
   const {
