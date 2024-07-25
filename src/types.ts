@@ -42,6 +42,9 @@ export interface SpotifyPlaylist {
     total: number;
   };
   snapshot_id: string;
+  owner: {
+    id: string;
+  };
 }
 
 export interface Album extends SpotifyAlbum {
