@@ -1,5 +1,5 @@
-import AlbumsLoading from '@/_components/albumsLoading/AlbumsLoading';
+import FullPageSpinner from '@/_components/fullPageSpinner/FullPageSpinner';
 
 export default function Loading() {
-  return <AlbumsLoading />;
+  return <FullPageSpinner />;
 }

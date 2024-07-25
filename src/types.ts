@@ -37,6 +37,10 @@ export interface SpotifyPlaylist {
   name: string;
   uri: string;
   id: string;
+  tracks: {
+    href: string;
+    total: number;
+  };
 }
 
 export interface Album extends SpotifyAlbum {

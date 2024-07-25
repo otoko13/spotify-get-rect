@@ -12,7 +12,8 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const userData = await userResponse.json();
 
   return (
-    <div>
+    <>
+      <div className="fixed top-0 left-0 w-full h-full bg-gradient-to-br from-black to-slate-800 -z-20" />
       <SimpleHeader
         avatarUrl={userData?.images?.[0].url}
         tabs={[
@@ -24,6 +25,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
       />
 
       {children}
-    </div>
+    </>
   );
 }
