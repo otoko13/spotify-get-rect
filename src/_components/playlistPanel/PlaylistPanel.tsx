@@ -6,7 +6,7 @@ import { SpotifyPlaylist } from '@/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import FullPageSpinner from '../fullPageSpinner/FullPageSpinner';
 
 interface PlaylistPanelProps {
@@ -24,6 +24,8 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
   const [showSuccessToast, setShowSuccessToast] = useState(
     !!params.get('success'),
   );
+  const confirmationCode = useRef<number>(Math.floor(Math.random() * 1000));
+
   const authToken = useGetAuthToken();
 
   const handleFirstConfirmClicked = () => {
@@ -161,7 +163,8 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
         <div className="modal-box">
           <h3 className="font-bold text-lg">Hello!</h3>
           <p className="py-4">
-            Are you definitely sure??!! Type 1234 into the box below
+            Are you definitely sure??!! Type {confirmationCode.current} into the
+            box below
           </p>
           <p className="py-4">
             <input
@@ -177,7 +180,9 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
                 Cancel
               </button>
               <button
-                disabled={confirmationInput !== '1234'}
+                disabled={
+                  confirmationInput !== confirmationCode.current.toString()
+                }
                 className="btn btn-error"
                 onClick={handleClearConfirmed}
               >
