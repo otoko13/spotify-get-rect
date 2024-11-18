@@ -17,7 +17,7 @@ export default async function Playlists() {
   }
 
   return (
-    <div className="pb-4 pt-20 px-4">
+    <div className="pb-4 pt-20 px-4 w-3/4 mx-auto">
       <HtmlTitle pageTitle="Clear playlists" />
       {data.items.map((playlist: SpotifyPlaylist, index: number) => (
         <PlaylistPanel key={index} playlist={playlist} />

@@ -2,7 +2,13 @@ import SimpleHeader from '@/_components/simpleHeader/SimpleHeader';
 import { getAuthToken, serverSpotifyFetch } from '@/_utils/serverUtils';
 import { ReactNode } from 'react';
 
-export default async function Layout({ children }: { children: ReactNode }) {
+export default async function Layout({
+  children,
+  modal,
+}: {
+  children: ReactNode;
+  modal: ReactNode;
+}) {
   const userResponse = await serverSpotifyFetch('me', {
     headers: {
       Authorization: getAuthToken(),
@@ -25,6 +31,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       />
 
       {children}
+      {modal}
     </>
   );
 }
