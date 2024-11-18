@@ -11,6 +11,7 @@ import styles from './aiModal.module.scss';
 import AiTrackImage from './AiTrackImage';
 import 'overlayscrollbars/overlayscrollbars.css';
 import { OverlayScrollbars } from 'overlayscrollbars';
+import { SpotifyPlayerSongTrack } from '@/types';
 
 interface AiModalProps {
   open?: boolean;
@@ -72,8 +73,11 @@ export default function AiModal({ open }: AiModalProps) {
         >
           <div className="flex items-center h-full">
             <div className="flex max-lg:flex-col flex-row justify-evenly items-center w-full max-lg:h-full h-5/6 max-lg:pb-64">
-              <AiTrackImage track={track} />
-              <AiArtistInfo track={track} />
+              <AiTrackImage key={track?.item.id} track={track} />
+              <AiArtistInfo
+                artist={(track as SpotifyPlayerSongTrack)?.item.artists[0].name}
+                isTrack={track?.currently_playing_type === 'track'}
+              />
             </div>
           </div>
         </div>

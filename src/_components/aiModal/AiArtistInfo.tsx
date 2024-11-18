@@ -1,37 +1,40 @@
 'use client';
 
-import { SpotifyPlayerSongTrack, SpotifyPlayerTrack } from '@/types';
 import OpenAI from 'openai';
 import { useCallback, useEffect, useState } from 'react';
 import Typewriter from 'typewriter-effect';
 
 interface AiTrackImageProps {
-  track: SpotifyPlayerTrack | undefined;
+  artist?: string;
+  isTrack?: boolean;
 }
 
-export default function AiTrackImage({ track }: AiTrackImageProps) {
+export default function AiTrackImage({ artist, isTrack }: AiTrackImageProps) {
   const [generateArtistInfo, setGenerateArtistInfo] = useState(false);
   const [artistResponse, setArtistResponse] = useState<string | null>();
 
   const fetchArtistInfo = useCallback(async () => {
-    const response = await fetch(
-      `/api/artist-summary?artist=${
-        (track as SpotifyPlayerSongTrack)?.item.artists[0].name
-      }`,
-    );
+    const response = await fetch(`/api/artist-summary?artist=${artist}`);
     if (response.status !== 200) {
       return;
     }
 
     const data: OpenAI.ChatCompletion = await response.json();
     setArtistResponse(data.choices[0]?.message?.content);
-  }, [track]);
+  }, [artist]);
 
   useEffect(() => {
-    if (generateArtistInfo && track?.currently_playing_type === 'track') {
+    if (isTrack && generateArtistInfo && artist && !artistResponse) {
       fetchArtistInfo();
     }
-  }, [generateArtistInfo, track, fetchArtistInfo]);
+  }, [artist, artistResponse, fetchArtistInfo, generateArtistInfo, isTrack]);
+
+  useEffect(() => {
+    if (artist) {
+      setGenerateArtistInfo(false);
+      setArtistResponse(null);
+    }
+  }, [artist]);
 
   return (
     <div className="artist-info-section max-lg:flex-grow max-lg:w-full w-1/2 flex flex-col items-center justify-center p-4 max-lg:pb-32">
