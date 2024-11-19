@@ -26,9 +26,12 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
       return null;
     }
 
+    const remainingTabs = [...tabs];
+    remainingTabs.splice(currentTabIndex, 1);
+
     return {
       currentTab: tabs[currentTabIndex],
-      remainingTabs: tabs.toSpliced(currentTabIndex, 1),
+      remainingTabs,
     };
   }, [path, tabs]);
 
