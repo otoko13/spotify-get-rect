@@ -36,7 +36,7 @@ export default function AiTrackImage({ artist, isTrack }: AiTrackImageProps) {
     }
   }, [artist]);
 
-  return (
+  return isTrack ? (
     <div className="artist-info-section max-lg:flex-grow max-lg:w-full w-1/2 flex flex-col items-center justify-center p-4 max-lg:pb-32">
       {!generateArtistInfo ? (
         <button
@@ -60,5 +60,5 @@ export default function AiTrackImage({ artist, isTrack }: AiTrackImageProps) {
         <div className="loading loading-bars loading-lg text-primary" />
       )}
     </div>
-  );
+  ) : null;
 }

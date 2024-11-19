@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import ArtStyleOptions, { ArtStyle } from './ArtStyleOptions';
-import { SpotifyPlayerSongTrack, SpotifyPlayerTrack } from '@/types';
+import { SpotifyPlayerSongTrack } from '@/types';
 import Image from 'next/image';
 import classNames from 'classnames';
 
 interface AiTrackImageProps {
-  track: SpotifyPlayerTrack | undefined;
+  track?: SpotifyPlayerSongTrack;
 }
 
 export default function AiTrackImage({ track }: AiTrackImageProps) {
@@ -17,9 +17,7 @@ export default function AiTrackImage({ track }: AiTrackImageProps) {
 
   const fetchTrackImage = useCallback(async () => {
     const response = await fetch(
-      `/api/track-image?style=${selectedStyle}&artist=${
-        (track as SpotifyPlayerSongTrack)?.item.artists[0].name
-      }&song=${(track as SpotifyPlayerSongTrack)?.item.name}`,
+      `/api/track-image?style=${selectedStyle}&artist=${track?.item.artists[0].name}&song=${track?.item.name}`,
     );
     if (response.status !== 200) {
       return;
@@ -51,7 +49,7 @@ export default function AiTrackImage({ track }: AiTrackImageProps) {
           key={imageUrl}
           onLoad={() => setImageLoaded(true)}
           src={imageUrl}
-          alt="ai generate track image"
+          alt="ai generated track image"
           width={0}
           height={0}
         />
