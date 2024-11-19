@@ -20,11 +20,10 @@ export async function GET(request: NextRequest) {
   const authTokenRequestPayload = {
     body: new URLSearchParams({
       code: code ?? '',
-      redirect_uri: `${process.env.HOST}${process.env.AUTH_REDIRECT_URI}`,
       grant_type: 'authorization_code',
+      redirect_uri: `${process.env.HOST}${process.env.AUTH_REDIRECT_URI}`,
     }),
     headers: {
-      'content-type': 'application/x-www-form-urlencoded',
       Authorization:
         'Basic ' +
         Buffer.from(
@@ -32,6 +31,7 @@ export async function GET(request: NextRequest) {
             ':' +
             process.env.SPOTIFY_CLIENT_SECRET,
         ).toString('base64'),
+      'content-type': 'application/x-www-form-urlencoded',
     },
     json: true,
     method: 'POST',

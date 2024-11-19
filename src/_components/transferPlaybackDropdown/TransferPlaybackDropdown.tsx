@@ -30,13 +30,13 @@ export default function TransferPlaybackDropdown({
     player.activateElement();
 
     const response = await clientSpotifyFetch(`me/player`, {
-      method: 'PUT',
       body: JSON.stringify({
         device_ids: [deviceId],
       }),
       headers: {
         Authorization: authToken,
       },
+      method: 'PUT',
     });
     if (response.status === 200 || response.status === 204) {
       onPlayTransferred();
@@ -50,8 +50,7 @@ export default function TransferPlaybackDropdown({
       </summary>
       {deviceId && (
         <ul
-          tabIndex={0}
-          className="dropdown-content menu bg-base-100 rounded-none z-[1] w-52 p-2 shadow w-auto"
+          className="dropdown-content menu bg-base-100 rounded-none z-[1] w-52 p-2 shadow"
           style={{ bottom: '150%' }}
         >
           <li>

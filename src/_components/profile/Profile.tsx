@@ -34,7 +34,7 @@ const Profile = async ({ fullWidth = true }: ProfileProps) => {
           objectFit="cover"
           quality={100}
           sizes="100vw"
-          style={{ width: '100%', height: 'auto' }}
+          style={{ height: 'auto', width: '100%' }}
           width={0}
           height={0}
         />

@@ -14,8 +14,8 @@ function mapResponseToDisplayItems<T extends BaseDisplayItem>(data: {
 
 export default function PlaylistsPage() {
   const {
-    playLists,
-    onPlayListsChanged,
+    playlists: playLists,
+    onPlaylistsChanged: onPlayListsChanged,
     playlistsNextUrl,
     onPlaylistsNextUrlChanged,
   } = useDisplayedItemCacheContext();

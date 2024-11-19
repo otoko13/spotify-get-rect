@@ -22,10 +22,10 @@ export default function SpotifyAuthForwarder() {
   return redirect(
     'https://accounts.spotify.com/authorize?' +
       querystring.stringify({
-        response_type: 'code',
         client_id: process.env.SPOTIFY_CLIENT_ID,
-        scope,
         redirect_uri: `${process.env.HOST}${process.env.AUTH_REDIRECT_URI}`,
+        response_type: 'code',
+        scope,
         state,
       }),
   );

@@ -17,10 +17,10 @@ const useInitialiseSpotifySdkPlayer = ({
   useEffect(() => {
     (window as any).onSpotifyWebPlaybackSDKReady = async () => {
       const player = new Spotify.Player({
-        name: THIS_DEVICE_NAME,
         getOAuthToken: (cb: any) => {
           cb(cookies.get(AppCookies.SPOTIFY_AUTH_TOKEN));
         },
+        name: THIS_DEVICE_NAME,
         volume: 0.5,
       });
 

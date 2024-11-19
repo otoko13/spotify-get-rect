@@ -83,8 +83,8 @@ export default function LoadMoreDisplayItems<T extends BaseDisplayItem>({
   useAlbumDisplayScrollHandler({
     disabled: !initialLoadComplete || loading,
     fetchUrl,
-    urlsFetched,
     onBottom: fetchMoreItems,
+    urlsFetched,
   });
 
   useEffect(() => {

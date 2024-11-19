@@ -10,8 +10,8 @@ export default function AppTitle() {
         src={logoPic}
         style={{
           height: '80px',
-          width: 'auto',
           objectFit: 'contain',
+          width: 'auto',
         }}
       />
       <div className="text-5xl self-center pl-4 pt-3 whitespace-nowrap">

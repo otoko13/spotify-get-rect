@@ -6,13 +6,13 @@ export type DisplayedItemCacheContextType = {
   mostPlayedAlbums: SpotifyAlbum[];
   recommendations: SpotifyAlbum[];
   newReleases: SpotifyAlbum[];
-  playLists: SpotifyPlaylist[];
+  playlists: SpotifyPlaylist[];
   audiobooks: SpotifyChapter[];
   onSavedAlbumsChanged: (items: SpotifyAlbum[]) => void;
   onMostPlayedAlbumsChanged: (items: SpotifyAlbum[]) => void;
   onRecommendationsChanged: (items: SpotifyAlbum[]) => void;
   onNewReleasesChanged: (items: SpotifyAlbum[]) => void;
-  onPlayListsChanged: (items: SpotifyPlaylist[]) => void;
+  onPlaylistsChanged: (items: SpotifyPlaylist[]) => void;
   onAudiobooksChanged: (items: SpotifyChapter[]) => void;
   savedAlbumsNextUrl?: string | null;
   onSavedAlbumsNextUrlChanged: (url?: string | null) => void;
@@ -29,30 +29,30 @@ export type DisplayedItemCacheContextType = {
 };
 
 const DisplayedItemCacheContext = createContext<DisplayedItemCacheContextType>({
-  savedAlbums: [],
   audiobooks: [],
-  mostPlayedAlbums: [],
-  newReleases: [],
-  playLists: [],
-  recommendations: [],
-  onSavedAlbumsChanged: () => undefined,
-  onMostPlayedAlbumsChanged: () => undefined,
-  onRecommendationsChanged: () => undefined,
-  onNewReleasesChanged: () => undefined,
-  onPlayListsChanged: () => undefined,
-  onAudiobooksChanged: () => undefined,
-  savedAlbumsNextUrl: undefined,
-  onSavedAlbumsNextUrlChanged: () => undefined,
-  mostPlayedAlbumsNextUrl: undefined,
-  onMostPlayedAlbumsNextUrlChanged: () => undefined,
-  recommendationsNextUrl: undefined,
-  onRecommendationsNextUrlChanged: () => undefined,
-  newReleasesNextUrl: undefined,
-  onNewReleasesNextUrlChanged: () => undefined,
-  playlistsNextUrl: undefined,
-  onPlaylistsNextUrlChanged: () => undefined,
   audiobooksNextUrl: undefined,
+  mostPlayedAlbums: [],
+  mostPlayedAlbumsNextUrl: undefined,
+  newReleases: [],
+  newReleasesNextUrl: undefined,
+  onAudiobooksChanged: () => undefined,
   onAudiobooksNextUrlChanged: () => undefined,
+  onMostPlayedAlbumsChanged: () => undefined,
+  onMostPlayedAlbumsNextUrlChanged: () => undefined,
+  onNewReleasesChanged: () => undefined,
+  onNewReleasesNextUrlChanged: () => undefined,
+  onPlaylistsChanged: () => undefined,
+  onPlaylistsNextUrlChanged: () => undefined,
+  onRecommendationsChanged: () => undefined,
+  onRecommendationsNextUrlChanged: () => undefined,
+  onSavedAlbumsChanged: () => undefined,
+  onSavedAlbumsNextUrlChanged: () => undefined,
+  playlists: [],
+  playlistsNextUrl: undefined,
+  recommendations: [],
+  recommendationsNextUrl: undefined,
+  savedAlbums: [],
+  savedAlbumsNextUrl: undefined,
 });
 
 export default DisplayedItemCacheContext;

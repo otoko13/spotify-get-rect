@@ -6,7 +6,7 @@ const useDisplayItemsCache = () => {
   const [mostPlayedAlbums, setMostPlayedAlbums] = useState<SpotifyAlbum[]>([]);
   const [recommendations, setRecommendations] = useState<SpotifyAlbum[]>([]);
   const [newReleases, setNewReleases] = useState<SpotifyAlbum[]>([]);
-  const [playLists, setPlayLists] = useState<SpotifyPlaylist[]>([]);
+  const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [audiobooks, setAudiobooks] = useState<SpotifyChapter[]>([]);
 
   const [savedAlbumsUrl, setSavedAlbumsUrl] = useState<string | null>();
@@ -15,34 +15,34 @@ const useDisplayItemsCache = () => {
   >();
   const [recommendationsUrl, setRecommendationsUrl] = useState<string | null>();
   const [newReleasesUrl, setNewReleasesUrl] = useState<string | null>();
-  const [playListsUrl, setPlayListsUrl] = useState<string | null>();
+  const [playlistsUrl, setPlaylistsUrl] = useState<string | null>();
   const [audiobooksUrl, setAudiobooksUrl] = useState<string | null>();
 
   return {
-    savedAlbums,
-    setSavedAlbums,
-    mostPlayedAlbums,
-    setMostPlayedAlbums,
-    recommendations,
-    setRecommendations,
     audiobooks,
-    setAudiobooks,
-    newReleases,
-    setNewReleases,
-    playLists,
-    setPlayLists,
-    savedAlbumsUrl,
-    setSavedAlbumsUrl,
-    mostPlayedAlbumsUrl,
-    setMostPlayedAlbumsUrl,
-    recommendationsUrl,
-    setRecommendationsUrl,
-    newReleasesUrl,
-    setNewReleasesUrl,
-    playListsUrl,
-    setPlayListsUrl,
     audiobooksUrl,
+    mostPlayedAlbums,
+    mostPlayedAlbumsUrl,
+    newReleases,
+    newReleasesUrl,
+    playlists,
+    playlistsUrl,
+    recommendations,
+    recommendationsUrl,
+    savedAlbums,
+    savedAlbumsUrl,
+    setAudiobooks,
     setAudiobooksUrl,
+    setMostPlayedAlbums,
+    setMostPlayedAlbumsUrl,
+    setNewReleases,
+    setNewReleasesUrl,
+    setPlaylists,
+    setPlaylistsUrl,
+    setRecommendations,
+    setRecommendationsUrl,
+    setSavedAlbums,
+    setSavedAlbumsUrl,
   };
 };
 

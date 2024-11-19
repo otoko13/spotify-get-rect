@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
       refresh_token: refreshToken,
     }),
     headers: {
-      'content-type': 'application/x-www-form-urlencoded',
       Authorization:
         'Basic ' +
         Buffer.from(
@@ -25,6 +24,7 @@ export async function GET(request: NextRequest) {
             ':' +
             process.env.SPOTIFY_CLIENT_SECRET,
         ).toString('base64'),
+      'content-type': 'application/x-www-form-urlencoded',
     },
     json: true,
     method: 'POST',

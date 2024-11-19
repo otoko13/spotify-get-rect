@@ -66,15 +66,15 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
         const urisToDelete = trackUris.slice(i * 100, i * 100 + 100);
 
         return clientSpotifyFetch(`playlists/${playlist.id}/tracks`, {
-          headers: {
-            Authorization: authToken,
-          },
           body: JSON.stringify({
+            snapshot_id: playlist.snapshot_id,
             tracks: urisToDelete.map((uri) => ({
               uri,
             })),
-            snapshot_id: playlist.snapshot_id,
           }),
+          headers: {
+            Authorization: authToken,
+          },
           method: 'DELETE',
         });
       });
@@ -113,7 +113,7 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
           width={0}
           height={0}
           sizes="100vw"
-          style={{ width: '100vw', height: 'auto' }}
+          style={{ height: 'auto', width: '100vw' }}
         />
         <div className="flex items-center">
           <Image
@@ -121,7 +121,7 @@ export default function PlaylistPanel({ playlist }: PlaylistPanelProps) {
             alt={updatedPlaylist.name}
             width={0}
             height={0}
-            style={{ width: '64px', height: 'auto' }}
+            style={{ height: 'auto', width: '64px' }}
           />
           <div className="ml-8">
             {updatedPlaylist.name}{' '}

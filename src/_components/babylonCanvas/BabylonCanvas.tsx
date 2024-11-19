@@ -40,8 +40,8 @@ const BabylonCanvas = ({
 }: BabylonCanvasProps) => {
   const reactCanvas = useRef(null);
   const [dimensions, setDimensions] = useState<Dimensions>({
-    width: 0,
     height: 0,
+    width: 0,
   });
 
   // set up basic engine and scene
@@ -94,8 +94,8 @@ const BabylonCanvas = ({
   useEffect(() => {
     const handleResize = () => {
       setDimensions({
-        width: window.innerWidth,
         height: window.innerHeight,
+        width: window.innerWidth,
       });
     };
 

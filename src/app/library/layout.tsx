@@ -58,8 +58,8 @@ export default function LibraryLayout({
   );
 
   useInitialiseSpotifySdkPlayer({
-    onInitialised: handleInitialisation,
     onInitialisationFailed: () => setPlayerInitFailed(true),
+    onInitialised: handleInitialisation,
   });
 
   const {
@@ -73,8 +73,8 @@ export default function LibraryLayout({
     setAudiobooks,
     newReleases,
     setNewReleases,
-    playLists,
-    setPlayLists,
+    playlists,
+    setPlaylists,
     savedAlbumsUrl,
     setSavedAlbumsUrl,
     mostPlayedAlbumsUrl,
@@ -83,8 +83,8 @@ export default function LibraryLayout({
     setRecommendationsUrl,
     newReleasesUrl,
     setNewReleasesUrl,
-    playListsUrl,
-    setPlayListsUrl,
+    playlistsUrl,
+    setPlaylistsUrl,
     audiobooksUrl,
     setAudiobooksUrl,
   } = useDisplayItemsCache();
@@ -107,38 +107,38 @@ export default function LibraryLayout({
   return (
     <PlayerContext.Provider
       value={{
-        player: sdkPlayer,
         deviceId: thisDeviceId,
         initialisationFailed: playerInitFailed,
+        player: sdkPlayer,
       }}
     >
       <BodyScrollerContext.Provider value={{ scroller }}>
         <DisplayedItemCacheContext.Provider
           value={{
-            savedAlbums,
-            onSavedAlbumsChanged: setSavedAlbums,
-            mostPlayedAlbums,
-            onMostPlayedAlbumsChanged: setMostPlayedAlbums,
-            recommendations,
-            onRecommendationsChanged: setRecommendations,
             audiobooks,
-            onAudiobooksChanged: setAudiobooks,
-            newReleases,
-            onNewReleasesChanged: setNewReleases,
-            playLists,
-            onPlayListsChanged: setPlayLists,
-            savedAlbumsNextUrl: savedAlbumsUrl,
-            onSavedAlbumsNextUrlChanged: setSavedAlbumsUrl,
-            mostPlayedAlbumsNextUrl: mostPlayedAlbumsUrl,
-            onMostPlayedAlbumsNextUrlChanged: setMostPlayedAlbumsUrl,
-            recommendationsNextUrl: recommendationsUrl,
-            onRecommendationsNextUrlChanged: setRecommendationsUrl,
-            newReleasesNextUrl: newReleasesUrl,
-            onNewReleasesNextUrlChanged: setNewReleasesUrl,
-            playlistsNextUrl: playListsUrl,
-            onPlaylistsNextUrlChanged: setPlayListsUrl,
             audiobooksNextUrl: audiobooksUrl,
+            mostPlayedAlbums,
+            mostPlayedAlbumsNextUrl: mostPlayedAlbumsUrl,
+            newReleases,
+            newReleasesNextUrl: newReleasesUrl,
+            onAudiobooksChanged: setAudiobooks,
             onAudiobooksNextUrlChanged: setAudiobooksUrl,
+            onMostPlayedAlbumsChanged: setMostPlayedAlbums,
+            onMostPlayedAlbumsNextUrlChanged: setMostPlayedAlbumsUrl,
+            onNewReleasesChanged: setNewReleases,
+            onNewReleasesNextUrlChanged: setNewReleasesUrl,
+            onPlaylistsChanged: setPlaylists,
+            onPlaylistsNextUrlChanged: setPlaylistsUrl,
+            onRecommendationsChanged: setRecommendations,
+            onRecommendationsNextUrlChanged: setRecommendationsUrl,
+            onSavedAlbumsChanged: setSavedAlbums,
+            onSavedAlbumsNextUrlChanged: setSavedAlbumsUrl,
+            playlists,
+            playlistsNextUrl: playlistsUrl,
+            recommendations,
+            recommendationsNextUrl: recommendationsUrl,
+            savedAlbums,
+            savedAlbumsNextUrl: savedAlbumsUrl,
           }}
         >
           <CurrentTrackContext.Provider value={{ track: currentTrack }}>

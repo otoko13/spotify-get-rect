@@ -57,8 +57,8 @@ const convertSdkTrackToApiTrack = (
       item: {
         album: sdkTrack.album,
         artists: sdkTrack.artists.map((sdkArtist) => ({
-          uri: sdkArtist.uri,
           name: sdkArtist.name,
+          uri: sdkArtist.uri,
         })),
         ...commonProperties,
       },
@@ -67,11 +67,11 @@ const convertSdkTrackToApiTrack = (
     return {
       currently_playing_type: 'episode',
       item: {
+        images: sdkTrack.album.images as SpotifyImage[],
         show: {
           id: sdkTrack.album.uri as string,
           name: sdkTrack.album.name,
         },
-        images: sdkTrack.album.images as SpotifyImage[],
         ...commonProperties,
       },
     } as unknown as SpotifyPlayerTrack;
@@ -111,8 +111,8 @@ const CurrentlyPlaying = ({
     } else {
       const osScrollbar = OverlayScrollbars(document.body, {
         scrollbars: {
-          visibility: 'auto',
           autoHideDelay: 2000,
+          visibility: 'auto',
         },
       });
       onScrollbarInitialised(osScrollbar);
@@ -305,7 +305,7 @@ const CurrentlyPlaying = ({
             width={0}
             height={0}
             sizes="100vw"
-            style={{ width: '100vw', height: '100vh' }}
+            style={{ height: '100vh', width: '100vw' }}
           />
         </div>
       )}
@@ -319,7 +319,7 @@ const CurrentlyPlaying = ({
             width={0}
             height={0}
             sizes="100vw"
-            style={{ width: '100vw', height: '100vh' }}
+            style={{ height: '100vh', width: '100vw' }}
           />
         </div>
       )}

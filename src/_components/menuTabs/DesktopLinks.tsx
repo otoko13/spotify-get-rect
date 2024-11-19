@@ -15,7 +15,7 @@ export default function DesktopLinks({ className, tabs }: DesktopLinksProps) {
   const path = usePathname();
 
   return tabs.map((tab) => (
-    <a
+    <button
       key={tab.label}
       role="tab"
       className={classNames(
@@ -31,6 +31,6 @@ export default function DesktopLinks({ className, tabs }: DesktopLinksProps) {
         })}
       />
       {tab.label}
-    </a>
+    </button>
   ));
 }

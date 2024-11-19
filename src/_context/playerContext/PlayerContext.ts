@@ -9,9 +9,9 @@ export type PlayerContextType = {
 };
 
 const PlayerContext = createContext<PlayerContextType>({
-  player: undefined,
   deviceId: undefined,
   initialisationFailed: false,
+  player: undefined,
 });
 
 export default PlayerContext;

@@ -37,13 +37,13 @@ const playItem = async ({ spotifyId, deviceId, authToken }: PlayItemArgs) => {
   return clientSpotifyFetch(
     `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
     {
-      method: 'PUT',
       body: JSON.stringify({
         context_uri: spotifyId,
       }),
       headers: {
         Authorization: authToken,
       },
+      method: 'PUT',
     },
   );
 };
@@ -80,7 +80,7 @@ export default function DisplayItem<T extends BaseDisplayItem>({
   useEffect(() => {
     if (queuedItem && thisDeviceId && player) {
       player.activateElement();
-      playItem({ spotifyId: queuedItem, authToken, deviceId: thisDeviceId });
+      playItem({ authToken, deviceId: thisDeviceId, spotifyId: queuedItem });
       setQueuedItem(undefined);
     }
   }, [authToken, player, queuedItem, thisDeviceId]);
@@ -94,6 +94,8 @@ export default function DisplayItem<T extends BaseDisplayItem>({
       onClick={() => handleClicked(item.uri)}
       onMouseOver={() => setTooltipOpen(true)}
       onMouseOut={() => setTooltipOpen(false)}
+      onBlur={() => setTooltipOpen(false)}
+      onFocus={() => setTooltipOpen(true)}
     >
       {item.images?.[0]?.url && (
         <div className="relative">
@@ -106,14 +108,14 @@ export default function DisplayItem<T extends BaseDisplayItem>({
             height={0}
             priority
             sizes="100vw"
-            style={{ width: '100%', height: 'auto' }}
+            style={{ height: 'auto', width: '100%' }}
           />
           {!process.env.DISABLE_TOOLTIPS && (
             <div className="w-full h-20 absolute bottom-0 overflow-hidden">
               <div
                 className={classNames(
                   'flex flex-col h-full w-full items-start justify-center px-4 overflow-hidden absolute transition-all z-20 text-left',
-                  { 'bottom-0': tooltipOpen, '-bottom-20': !tooltipOpen },
+                  { '-bottom-20': !tooltipOpen, 'bottom-0': tooltipOpen },
                 )}
               >
                 <div

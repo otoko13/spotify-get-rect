@@ -159,7 +159,7 @@ const shineSpotlight = ({ albumIndex, spotifyId }: ShineSpotlightArgs) => {
   // add reflection under playing album
   const mirrorMesh = MeshBuilder.CreateBox(
     `mirrorMesh`,
-    { width: BOX_SIZE, height: 0.01, depth: BOX_SIZE },
+    { depth: BOX_SIZE, height: 0.01, width: BOX_SIZE },
     scene,
   );
 
@@ -217,9 +217,9 @@ const createFloor = (scene: Scene, albumCount: number) => {
     const mirror = MeshBuilder.CreateBox(
       `floor-row${row}`,
       {
-        width: ALBUMS_PER_ROW * BOX_WIDTH - BOX_GAP,
-        height: 0.001,
         depth: BOX_SIZE,
+        height: 0.001,
+        width: ALBUMS_PER_ROW * BOX_WIDTH - BOX_GAP,
       },
       scene,
     );
@@ -294,7 +294,7 @@ const addAlbums = ({ albums, authToken, playAlbum }: AddAlbumsArgs) => {
     // Our built-in 'box' shape.
     const box = MeshBuilder.CreateBox(
       album.uri, // name property
-      { width: 3, height: 3, depth: 0.1, faceUV },
+      { depth: 0.1, faceUV, height: 3, width: 3 },
       scene,
     );
     const row = Math.floor(i / ALBUMS_PER_ROW);
@@ -316,9 +316,9 @@ const addAlbums = ({ albums, authToken, playAlbum }: AddAlbumsArgs) => {
         },
         async () => {
           await playAlbum({
-            spotifyId: box.name,
             albumIndex: i,
             authToken,
+            spotifyId: box.name,
           });
         },
       ),
@@ -424,13 +424,13 @@ const BabylonAlbumsDisplay = ({
       await clientSpotifyFetch(
         `me/player/play${deviceId ? `?device_id=${deviceId}` : ''}`,
         {
-          method: 'PUT',
           body: JSON.stringify({
             context_uri: spotifyId,
           }),
           headers: {
             Authorization: authToken,
           },
+          method: 'PUT',
         },
       );
 

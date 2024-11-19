@@ -31,8 +31,8 @@ export default function AiModal({ open }: AiModalProps) {
       modalWindow,
       {
         scrollbars: {
-          visibility: 'auto',
           autoHideDelay: 2000,
+          visibility: 'auto',
         },
       },
       {

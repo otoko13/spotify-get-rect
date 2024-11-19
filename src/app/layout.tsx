@@ -13,11 +13,11 @@ const spotifyCircularFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: {
-    template: 'Spotify Get Rect | %s',
-    default: 'Spotify Get Rect',
-  },
   description: 'Browse and play your Spotify library',
+  title: {
+    default: 'Spotify Get Rect',
+    template: 'Spotify Get Rect | %s',
+  },
 };
 
 export default async function RootLayout({

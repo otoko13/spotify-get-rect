@@ -57,6 +57,7 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
         role="button"
         className="m-1 no-marker"
         onClick={handleLabelClicked}
+        onKeyDown={handleLabelClicked}
       >
         <div
           key={selectedTabs?.currentTab.label}
@@ -83,7 +84,6 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
         </div>
       </summary>
       <ul
-        tabIndex={0}
         className="dropdown-content menu rounded-none w-52 p-2 shadow z-50 relative"
         style={{ top: 'calc(72px - 0.5rem)' }}
         ref={(e) => setElement(e)}
@@ -99,7 +99,7 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
         />
         {selectedTabs?.remainingTabs.map((tab, index) => (
           <li key={index}>
-            <a
+            <button
               key={tab.label}
               role="tab"
               className={classNames(
@@ -110,7 +110,7 @@ export default function MobileLinks({ className, tabs }: MobileLinksProps) {
               onClick={() => handleClick(tab)}
             >
               {tab.label}
-            </a>
+            </button>
           </li>
         ))}
       </ul>
