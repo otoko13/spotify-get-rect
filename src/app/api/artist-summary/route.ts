@@ -1,11 +1,7 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: 'org-s63ZpSumEt4Yd88NqZhK3vSi',
-  project: 'proj_gddFkp48WXYWLJu9dY3xbiip',
-});
+const openai = new OpenAI();
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;

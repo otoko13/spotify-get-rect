@@ -30,7 +30,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000) with your browser to see the result. You cannot use localhost as Spotify has changed the allowed redirect URIs to disallow localhost. 127.0.0.1 is still allowed.
 
 ## Purpose
 

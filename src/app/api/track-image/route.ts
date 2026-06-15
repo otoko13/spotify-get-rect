@@ -3,30 +3,31 @@ import OpenAI from 'openai';
 
 export const maxDuration = 60;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: 'org-s63ZpSumEt4Yd88NqZhK3vSi',
-  project: 'proj_gddFkp48WXYWLJu9dY3xbiip',
-});
+const client = new OpenAI();
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
 
-  const response = await openai.images.generate({
-    model: 'dall-e-3',
-    n: 1,
-    prompt: `Create a ${
-      params.get('style') ?? ''
-    } painting representing the lyrics to the song "${params.get(
-      'song',
-    )}" by ${params.get('artist')}.`,
-    quality: 'standard',
-    response_format: 'url',
-    size: '1024x1024',
-    style: 'natural',
-  });
-  const image_url = response.data[0].url;
-  console.log('IMAGE GENERATED', image_url);
+  try {
+    const response = await client.images.generate({
+      model: 'gpt-image-2',
+      moderation: 'low',
+      n: 1,
+      output_format: 'png',
+      prompt: `Create a ${
+        params.get('style') ?? ''
+      } painting representing the lyrics to the song "${params.get(
+        'song',
+      )}" by ${params.get('artist')}.`,
+      quality: 'medium',
+      size: '1024x1024',
+    });
+    const imageB64 = response?.data?.[0].b64_json;
+    console.log('IMAGE GENERATED', imageB64);
+    const imageUrl = `data:image/png;base64, ${imageB64}`;
 
-  return Response.json({ url: image_url });
+    return Response.json({ url: imageUrl ?? '' });
+  } catch (e) {
+    console.log(e);
+  }
 }
