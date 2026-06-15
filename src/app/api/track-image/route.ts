@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       size: '1024x1024',
     });
     const imageB64 = response?.data?.[0].b64_json;
-    console.log('IMAGE GENERATED', imageB64);
+    console.log('IMAGE GENERATED');
     const imageUrl = `data:image/png;base64, ${imageB64}`;
 
     return Response.json({ url: imageUrl ?? '' });
