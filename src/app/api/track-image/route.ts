@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         params.get('style') ?? ''
       } painting representing the lyrics to the song "${params.get(
         'song',
-      )}" by ${params.get('artist')}.`,
+      )}" by ${params.get('artist')}, but don't include the words of the lyrics in the image.`,
       quality: 'medium',
       size: '1024x1024',
     });
