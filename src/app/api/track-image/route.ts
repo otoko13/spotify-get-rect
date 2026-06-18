@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await client.images.generate({
-      model: 'gpt-image-2',
+      // can't use gpt-image-2 just yet as it takes too long
+      model: 'gpt-image-1-mini',
       moderation: 'low',
       n: 1,
       output_format: 'png',
