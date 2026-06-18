@@ -61,3 +61,7 @@ I've wanted to experiment with browser 3D rendering for a long time and Babylon 
 ## Open Issues
 
 - Disabling of the "no any" typescript linting rule needs to be addressed.
+
+## Notes to self
+
+- If there are production server errors, check the server logs in Vercel
