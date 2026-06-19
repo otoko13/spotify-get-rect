@@ -145,7 +145,7 @@ export default function LibraryLayout({
             <ThreeDOptionsContext.Provider value={{ use3d }}>
               <div>
                 <MenuTabs
-                  avatarUrl={user?.images?.[0].url}
+                  avatarUrl={user?.images?.[0]?.url}
                   use3d={use3d}
                   onUse3dChanged={handleUse3dChanged}
                   tabs={[
